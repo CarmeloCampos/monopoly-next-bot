@@ -1,0 +1,9 @@
+{
+  "project": ["src/**/*.ts"],
+  "ignore": ["**/*.test.ts", "**/node_modules/**", "**/dist/**"],
+  "ignoreDependencies": ["husky"],
+  "ignoreIssues": {
+    "src/types/index.ts": ["types"],
+    "src/utils/logger.ts": ["exports", "types"]
+  }
+}

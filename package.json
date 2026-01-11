@@ -1,0 +1,38 @@
+{
+  "name": "monopoly-next-bot",
+  "version": "1.0.0",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "bun src/index.ts",
+    "build": "bun build src/index.ts --outdir ./dist",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "knip": "knip",
+    "check-duplication": "jscpd ./src",
+    "check": "bun run format:check && bun run lint && bun run knip && bun run check-duplication"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "husky": "^9.1.7",
+    "jscpd": "^4.0.7",
+    "knip": "^5.80.2",
+    "lint-staged": "^16.2.7",
+    "oxlint": "^1.38.0",
+    "prettier": "3.7.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown",
+    "**/*.{ts,js}": "oxlint --fix"
+  }
+}

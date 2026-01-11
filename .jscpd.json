@@ -1,0 +1,13 @@
+{
+  "min-tokens": 50,
+  "mode": "mild",
+  "threshold": 10,
+  "reporters": ["console", "json"],
+  "ignore": [
+    "**/*.test.ts",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/build/**"
+  ]
+}
