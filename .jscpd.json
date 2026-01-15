@@ -8,6 +8,7 @@
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
-    "**/build/**"
+    "**/build/**",
+    "src/db/migrations"
   ]
 }

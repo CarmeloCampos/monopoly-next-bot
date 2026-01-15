@@ -53,7 +53,7 @@
     "prefer-promise-reject-errors": "error",
     "prefer-rest-params": "error",
     "prefer-spread": "error",
-    "prefer-template": "error",
+    "prefer-template": "off",
     "eqeqeq": "error",
     "no-eq-null": "error",
     "no-eval": "error",

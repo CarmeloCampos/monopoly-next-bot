@@ -6,3 +6,4 @@ node_modules
 .next
 .git
 report
+src/db/migrations
