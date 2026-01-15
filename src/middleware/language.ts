@@ -8,13 +8,7 @@ import {
   LANGUAGE_CALLBACK_PATTERN,
 } from "@/i18n";
 import type { InlineKeyboardMarkup } from "telegraf/types";
-
-const languageEmojis: Record<string, string> = {
-  ru: "🇷🇺",
-  en: "🇬🇧",
-  es: "🇪🇸",
-  pt: "🇧🇷",
-};
+import { LANGUAGE_EMOJIS } from "@/constants";
 
 const isLanguageSelection = (ctx: BotContext): boolean => {
   if (
@@ -39,8 +33,8 @@ export const languageMiddleware: Middleware<BotContext> = async (ctx, next) => {
   const inlineKeyboard: InlineKeyboardMarkup = {
     inline_keyboard: getSupportedLanguages().map((lang) => [
       {
-        text: languageEmojis[lang] + " " + getLanguageName(lang),
-        callback_data: "lang_" + lang,
+        text: LANGUAGE_EMOJIS[lang] + " " + getLanguageName(lang),
+        callback_data: `lang_${lang}`,
       },
     ]),
   };
