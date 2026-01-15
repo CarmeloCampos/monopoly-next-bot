@@ -4,6 +4,8 @@
   "ignoreDependencies": ["husky"],
   "ignoreIssues": {
     "src/types/index.ts": ["types"],
+    "src/types/utils.ts": ["types"],
+    "src/types/branded.ts": ["types"],
     "src/utils/logger.ts": ["exports", "types"]
   }
 }
