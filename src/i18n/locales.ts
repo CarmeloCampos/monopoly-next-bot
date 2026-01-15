@@ -1,14 +1,6 @@
-/**
- * Translation locales for multi-language support
- * Main language: Russian (ru)
- * Supported languages: Russian, English, Spanish, Portuguese
- */
-
-import type { Language, MaybeOptional } from "@/types/utils";
+import type { Language, MaybeOptional } from "@/types";
 import { warn } from "@/utils/logger";
-import { LANGUAGE_NAMES } from "@/constants";
-
-export const LANGUAGE_CALLBACK_PATTERN = /^lang_(ru|en|es|pt)$/;
+import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from "@/constants";
 
 interface Locales {
   ru: Record<string, string>;
@@ -202,22 +194,11 @@ const locales: Locales = {
   },
 };
 
-/**
- * Type guard to check if a value is a valid Language
- */
-export function isLanguage(value: MaybeOptional<string>): value is Language {
-  return value === "ru" || value === "en" || value === "es" || value === "pt";
-}
-
-/**
- * Get a text translation by key and language
- * Falls back to Russian if key not found in target language
- */
 export function getText(
   language: MaybeOptional<Language>,
   key: string,
 ): string {
-  const lang = isLanguage(language) ? language : "ru";
+  const lang = language ?? "ru";
   const translation = locales[lang][key];
 
   if (!translation) {
@@ -228,15 +209,8 @@ export function getText(
   return translation;
 }
 
-/**
- * Check if a user has a language set
- */
-export function hasLanguage(language: MaybeOptional<Language>): boolean {
-  return language !== null && language !== undefined && isLanguage(language);
-}
-
-export function getSupportedLanguages(): readonly ["ru", "en", "es", "pt"] {
-  return ["ru", "en", "es", "pt"];
+export function getSupportedLanguages(): readonly Language[] {
+  return SUPPORTED_LANGUAGES;
 }
 
 export function getLanguageName(lang: Language): string {

@@ -43,5 +43,5 @@ export function buildReferralCodeMessage(
     "{code}",
     code,
   );
-  return `${codeText}${linkText}`;
+  return `${codeText}\n${linkText.trim()}`;
 }
