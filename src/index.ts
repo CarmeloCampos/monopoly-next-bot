@@ -7,10 +7,6 @@ import { registerCallbacks } from "@/handlers/callbacks";
 import { autoUserMiddleware } from "@/middleware/auto-user";
 import { languageMiddleware } from "@/middleware/language";
 
-const isError = (value: unknown): value is Error => {
-  return value instanceof Error;
-};
-
 setLogLevel(config.logLevel);
 
 info("Initializing bot...", { logLevel: config.logLevel });
@@ -32,8 +28,8 @@ registerCommands(bot);
 registerCallbacks(bot);
 
 bot.catch((err, ctx) => {
-  const errorMessage = isError(err) ? err.message : String(err);
-  const errorStack = isError(err) ? err.stack : undefined;
+  const errorMessage = err instanceof Error ? err.message : String(err);
+  const errorStack = err instanceof Error ? err.stack : undefined;
   error("Error handling update", {
     error: errorMessage,
     stack: errorStack,
@@ -59,7 +55,7 @@ bot
     info("Bot started successfully");
   })
   .catch((err) => {
-    const errorMessage = isError(err) ? err.message : String(err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
     error("Failed to start bot", { error: errorMessage });
     process.exit(1);
   });
