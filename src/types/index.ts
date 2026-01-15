@@ -1,57 +1,45 @@
 import type { Context } from "telegraf";
 import type { SelectUser } from "./db";
-import type { MonopolyCoins, Language } from "./utils";
-
-interface BotState {}
+import type { MonopolyCoins, Language, MaybeOptional } from "./utils";
 
 /**
- * Base BotContext with optional dbUser (before middleware)
+ * SelectUser with language guaranteed to be non-null.
+ * Used for contexts where user has already selected a language.
  */
+interface SelectUserWithLanguage extends SelectUser {
+  language: Language;
+}
+
 interface BotContext extends Context {
-  session?: BotState;
-  dbUser?: SelectUser;
+  dbUser: MaybeOptional<SelectUser>;
   isNewUser?: boolean;
   referralBonusReceived?: MonopolyCoins;
 }
 
-/**
- * BotContext after auto-user middleware with guaranteed dbUser
- */
 interface BotContextWithUser extends BotContext {
   dbUser: SelectUser;
 }
 
-/**
- * BotContext with user and confirmed language selection
- */
 interface BotContextWithLanguage extends BotContextWithUser {
-  dbUser: SelectUser & { language: Language };
+  dbUser: SelectUserWithLanguage;
 }
 
-/**
- * Type guard to check if context has dbUser
- */
 function hasDbUser(ctx: BotContext): ctx is BotContextWithUser {
-  return ctx.dbUser !== undefined;
+  return ctx.dbUser !== null && ctx.dbUser !== undefined;
 }
 
-/**
- * Type guard to check if context has dbUser with language
- */
 function hasLanguage(ctx: BotContext): ctx is BotContextWithLanguage {
-  return (
-    ctx.dbUser !== undefined &&
-    ctx.dbUser.language !== null &&
-    ctx.dbUser.language !== undefined
-  );
+  if (!hasDbUser(ctx)) return false;
+  return ctx.dbUser.language !== null && ctx.dbUser.language !== undefined;
 }
 
 export type {
-  BotState,
   BotContext,
   BotContextWithUser,
   BotContextWithLanguage,
+  SelectUserWithLanguage,
 };
 export { hasDbUser, hasLanguage };
 export * from "./utils";
 export * from "./db";
+export * from "@/utils/guards";

@@ -1,51 +1,48 @@
 /**
- * Utility types for Monopoly Bot project
+ * Utility types and converter functions.
+ * Re-exports branded types and adds validation converter functions.
  */
 
-export type MaybeOptional<T> = T | null | undefined;
+import {
+  isTelegramId as validateTelegramId,
+  isMonopolyCoins as validateMonopolyCoins,
+} from "@/utils/guards";
 
-export type NonEmptyArray<T> = [T, ...T[]];
+// Re-export all branded types
+export type {
+  MaybeOptional,
+  NonEmptyArray,
+  TelegramId,
+  MonopolyCoins,
+  ReferralLevel,
+  Language,
+  Success,
+  Failure,
+  Result,
+} from "./branded";
 
-export type TelegramId = number & { readonly __brand: unique symbol };
+export { MAX_REFERRAL_LEVEL, success, failure } from "./branded";
 
-export type MonopolyCoins = number & { readonly __brand: unique symbol };
-
-export type ReferralLevel = 1 | 2 | 3 | 4 | 5;
-
-export type Language = "ru" | "en" | "es" | "pt";
-
-export interface Success<T> {
-  success: true;
-  data: T;
+/**
+ * Validates and converts an unknown value to TelegramId.
+ * @throws Error if value is not a valid Telegram ID
+ */
+export function asTelegramId(id: unknown): import("./branded").TelegramId {
+  if (!validateTelegramId(id)) {
+    throw new Error(`Invalid Telegram ID: ${String(id)}`);
+  }
+  return id;
 }
 
-export interface Failure<E = string> {
-  success: false;
-  error: E;
-}
-
-export type Result<T, E = string> = Success<T> | Failure<E>;
-
-export function success<T>(data: T): Success<T> {
-  return { success: true, data };
-}
-
-export function failure<E = string>(error: E): Failure<E> {
-  return { success: false, error };
-}
-
-export function isNonEmptyArray<T>(arr: T[]): arr is NonEmptyArray<T> {
-  return arr.length > 0;
-}
-
-export function isReferralLevel(value: number): value is ReferralLevel {
-  return value >= 1 && value <= 5 && Number.isInteger(value);
-}
-
-export function asTelegramId(id: number): TelegramId {
-  return id as TelegramId;
-}
-
-export function asMonopolyCoins(amount: number): MonopolyCoins {
-  return amount as MonopolyCoins;
+/**
+ * Validates and converts an unknown value to MonopolyCoins.
+ * @throws Error if value is not a valid MonopolyCoins amount
+ */
+export function asMonopolyCoins(
+  amount: unknown,
+): import("./branded").MonopolyCoins {
+  if (!validateMonopolyCoins(amount)) {
+    throw new Error(`Invalid MonopolyCoins amount: ${String(amount)}`);
+  }
+  return amount;
 }
