@@ -77,23 +77,28 @@ export function getChannelsKeyboard(
     inline_keyboard: [
       [
         {
-          text: "📢 " + getText(language, "channel_official"),
+          text: `📢 ${getText(language, "channel_official")}`,
           url: CHANNEL_URLS.official,
         },
       ],
       [
         {
-          text: "💬 " + getText(language, "channel_community"),
+          text: `💬 ${getText(language, "channel_community")}`,
           url: CHANNEL_URLS.community,
         },
       ],
       [
         {
-          text: "📰 " + getText(language, "channel_news"),
+          text: `📰 ${getText(language, "channel_news")}`,
           url: CHANNEL_URLS.news,
         },
       ],
-      [{ text: getText(language, "btn_back"), callback_data: "settings_back" }],
+      [
+        {
+          text: getText(language, "btn_back"),
+          callback_data: "settings_back",
+        },
+      ],
     ],
   };
 }
