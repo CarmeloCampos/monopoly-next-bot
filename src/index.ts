@@ -3,6 +3,9 @@ import config from "@/config";
 import { setLogLevel, info, error } from "@/utils/logger";
 import type { BotContext } from "@/types";
 import { registerCommands } from "@/handlers/commands";
+import { registerCallbacks } from "@/handlers/callbacks";
+import { autoUserMiddleware } from "@/middleware/auto-user";
+import { languageMiddleware } from "@/middleware/language";
 
 const isError = (value: unknown): value is Error => {
   return value instanceof Error;
@@ -22,7 +25,11 @@ bot.use(async (ctx, next) => {
   await next();
 });
 
+bot.use(autoUserMiddleware);
+bot.use(languageMiddleware);
+
 registerCommands(bot);
+registerCallbacks(bot);
 
 bot.catch((err, ctx) => {
   const errorMessage = isError(err) ? err.message : String(err);
