@@ -1,6 +1,6 @@
-type LogLevel = "debug" | "info" | "warn" | "error";
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
-const logLevels: Record<LogLevel, number> = {
+const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
   info: 1,
   warn: 2,
@@ -9,12 +9,12 @@ const logLevels: Record<LogLevel, number> = {
 
 let currentLogLevel: LogLevel = "info";
 
-const setLogLevel = (level: LogLevel): void => {
+export const setLogLevel = (level: LogLevel): void => {
   currentLogLevel = level;
 };
 
 const shouldLog = (level: LogLevel): boolean => {
-  return logLevels[level] >= logLevels[currentLogLevel];
+  return LOG_LEVELS[level] >= LOG_LEVELS[currentLogLevel];
 };
 
 const formatMessage = (
@@ -27,29 +27,22 @@ const formatMessage = (
   return `[${timestamp}] [${level.toUpperCase()}] ${message}${dataStr}`;
 };
 
-const debug = (message: string, data?: unknown): void => {
-  if (shouldLog("debug")) {
-    console.log(formatMessage("debug", message, data));
-  }
+export const debug = (message: string, data?: unknown): void => {
+  if (!shouldLog("debug")) return;
+  console.log(formatMessage("debug", message, data));
 };
 
-const info = (message: string, data?: unknown): void => {
-  if (shouldLog("info")) {
-    console.log(formatMessage("info", message, data));
-  }
+export const info = (message: string, data?: unknown): void => {
+  if (!shouldLog("info")) return;
+  console.log(formatMessage("info", message, data));
 };
 
-const warn = (message: string, data?: unknown): void => {
-  if (shouldLog("warn")) {
-    console.warn(formatMessage("warn", message, data));
-  }
+export const warn = (message: string, data?: unknown): void => {
+  if (!shouldLog("warn")) return;
+  console.warn(formatMessage("warn", message, data));
 };
 
-const error = (message: string, data?: unknown): void => {
-  if (shouldLog("error")) {
-    console.error(formatMessage("error", message, data));
-  }
+export const error = (message: string, data?: unknown): void => {
+  if (!shouldLog("error")) return;
+  console.error(formatMessage("error", message, data));
 };
-
-export type { LogLevel };
-export { setLogLevel, debug, info, warn, error };
