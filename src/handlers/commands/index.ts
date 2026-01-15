@@ -1,34 +1,131 @@
 import { Telegraf } from "telegraf";
-import type { BotContext } from "@/types";
+import {
+  type BotContext,
+  type BotContextWithLanguage,
+  hasDbUser,
+  hasLanguage,
+} from "@/types";
 import { info } from "@/utils/logger";
-import { buildWelcomeMessage, buildHelpMessage } from "@/i18n";
+import {
+  buildReferralBonusMessage,
+  buildBalanceMessage,
+  buildReferralCodeMessage,
+  getText,
+} from "@/i18n";
+import {
+  getMainMenuKeyboard,
+  getMenuButtonTexts,
+  getSettingsKeyboard,
+} from "@/keyboards";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
     info("Start command received", { userId: ctx.from?.id });
 
-    const { dbUser } = ctx;
-
-    if (!dbUser) {
-      await ctx.reply("❌ Error: User not found. Please try again.");
+    if (!hasDbUser(ctx)) {
+      await ctx.reply(getText("en", "error_user_not_found"));
       return;
     }
 
-    const message = buildWelcomeMessage(dbUser.language, dbUser.referral_code);
-    await ctx.reply(message, { parse_mode: "Markdown" });
+    if (!hasLanguage(ctx)) return;
+
+    const { dbUser, referralBonusReceived } = ctx;
+
+    let message = getText(dbUser.language, "welcome_new_user");
+
+    if (referralBonusReceived) {
+      message +=
+        "\n\n" +
+        buildReferralBonusMessage(dbUser.language, referralBonusReceived);
+    }
+
+    await ctx.reply(message, {
+      parse_mode: "Markdown",
+      reply_markup: getMainMenuKeyboard(dbUser.language),
+    });
   });
 
   bot.command("help", async (ctx: BotContext): Promise<void> => {
     info("Help command received", { userId: ctx.from?.id });
 
-    const { dbUser } = ctx;
-
-    if (!dbUser) {
-      await ctx.reply("❌ Error: User not found. Please try again.");
+    if (!hasDbUser(ctx)) {
+      await ctx.reply(getText("en", "error_user_not_found"));
       return;
     }
 
-    const message = buildHelpMessage(dbUser.language);
-    await ctx.reply(message, { parse_mode: "Markdown" });
+    await ctx.reply(getText(ctx.dbUser.language, "help_title"));
   });
+
+  registerMenuHandlers(bot);
 };
+
+function registerMenuHandlers(bot: Telegraf<BotContext>): void {
+  bot.on("text", async (ctx: BotContext): Promise<void> => {
+    if (!hasLanguage(ctx)) return;
+
+    if (!ctx.message || !("text" in ctx.message)) return;
+
+    const { dbUser } = ctx;
+    const { text } = ctx.message;
+    const menuTexts = getMenuButtonTexts(dbUser.language);
+
+    switch (text) {
+      case menuTexts.properties:
+        await handleProperties(ctx);
+        break;
+      case menuTexts.balance:
+        await handleBalance(ctx);
+        break;
+      case menuTexts.advance:
+        await handleAdvance(ctx);
+        break;
+      case menuTexts.referral:
+        await handleReferral(ctx);
+        break;
+      case menuTexts.minigames:
+        await handleMinigames(ctx);
+        break;
+      case menuTexts.settings:
+        await handleSettings(ctx);
+        break;
+      default:
+        await ctx.reply(getText(dbUser.language, "invalid_message"), {
+          reply_markup: getMainMenuKeyboard(dbUser.language),
+        });
+    }
+  });
+}
+
+async function handleProperties(ctx: BotContextWithLanguage): Promise<void> {
+  await ctx.reply(getText(ctx.dbUser.language, "menu_properties_coming_soon"));
+}
+
+async function handleBalance(ctx: BotContextWithLanguage): Promise<void> {
+  const { dbUser } = ctx;
+  await ctx.reply(buildBalanceMessage(dbUser.language, dbUser.balance));
+}
+
+async function handleAdvance(ctx: BotContextWithLanguage): Promise<void> {
+  await ctx.reply(getText(ctx.dbUser.language, "menu_advance_coming_soon"));
+}
+
+async function handleReferral(ctx: BotContextWithLanguage): Promise<void> {
+  const { dbUser } = ctx;
+  await ctx.reply(
+    buildReferralCodeMessage(dbUser.language, dbUser.referral_code),
+    {
+      parse_mode: "Markdown",
+    },
+  );
+}
+
+async function handleMinigames(ctx: BotContextWithLanguage): Promise<void> {
+  await ctx.reply(getText(ctx.dbUser.language, "menu_minigames_coming_soon"));
+}
+
+async function handleSettings(ctx: BotContextWithLanguage): Promise<void> {
+  const { dbUser } = ctx;
+  await ctx.reply(getText(dbUser.language, "menu_settings"), {
+    reply_markup: getSettingsKeyboard(dbUser.language),
+  });
+}
