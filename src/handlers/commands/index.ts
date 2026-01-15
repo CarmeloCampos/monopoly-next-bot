@@ -31,13 +31,10 @@ export const registerCommands = (bot: Telegraf<BotContext>): void => {
     if (!hasLanguage(ctx)) return;
 
     const { dbUser, referralBonusReceived } = ctx;
-
     let message = getText(dbUser.language, "welcome_new_user");
 
     if (referralBonusReceived) {
-      message +=
-        "\n\n" +
-        buildReferralBonusMessage(dbUser.language, referralBonusReceived);
+      message += `\n\n${buildReferralBonusMessage(dbUser.language, referralBonusReceived)}`;
     }
 
     await ctx.reply(message, {
@@ -53,6 +50,8 @@ export const registerCommands = (bot: Telegraf<BotContext>): void => {
       await ctx.reply(getText("en", "error_user_not_found"));
       return;
     }
+
+    if (!hasLanguage(ctx)) return;
 
     await ctx.reply(getText(ctx.dbUser.language, "help_title"));
   });
@@ -100,8 +99,7 @@ async function handleProperties(ctx: BotContextWithLanguage): Promise<void> {
 }
 
 async function handleBalance(ctx: BotContextWithLanguage): Promise<void> {
-  const { dbUser } = ctx;
-  await ctx.reply(buildBalanceMessage(dbUser.language, dbUser.balance));
+  await ctx.reply(buildBalanceMessage(ctx.dbUser.language, ctx.dbUser.balance));
 }
 
 async function handleAdvance(ctx: BotContextWithLanguage): Promise<void> {
@@ -109,9 +107,8 @@ async function handleAdvance(ctx: BotContextWithLanguage): Promise<void> {
 }
 
 async function handleReferral(ctx: BotContextWithLanguage): Promise<void> {
-  const { dbUser } = ctx;
   await ctx.reply(
-    buildReferralCodeMessage(dbUser.language, dbUser.referral_code),
+    buildReferralCodeMessage(ctx.dbUser.language, ctx.dbUser.referral_code),
     {
       parse_mode: "Markdown",
     },
@@ -123,8 +120,7 @@ async function handleMinigames(ctx: BotContextWithLanguage): Promise<void> {
 }
 
 async function handleSettings(ctx: BotContextWithLanguage): Promise<void> {
-  const { dbUser } = ctx;
-  await ctx.reply(getText(dbUser.language, "menu_settings"), {
-    reply_markup: getSettingsKeyboard(dbUser.language),
+  await ctx.reply(getText(ctx.dbUser.language, "menu_settings"), {
+    reply_markup: getSettingsKeyboard(ctx.dbUser.language),
   });
 }

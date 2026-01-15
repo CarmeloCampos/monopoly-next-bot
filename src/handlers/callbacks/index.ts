@@ -1,9 +1,9 @@
 import { Telegraf } from "telegraf";
-import { type BotContext, hasDbUser } from "@/types";
+import { type BotContext, hasDbUser, isLanguage } from "@/types";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getText, isLanguage, LANGUAGE_CALLBACK_PATTERN } from "@/i18n";
+import { getText } from "@/i18n";
 import {
   getMainMenuKeyboard,
   getLanguageKeyboard,
@@ -15,9 +15,10 @@ import {
   answerUserNotFound,
   answerInvalidCallback,
 } from "@/utils/callback-helpers";
+import { CALLBACK_PATTERNS, CALLBACK_DATA } from "@/constants";
 
 export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
-  bot.action(/^lang_(.+)$/, async (ctx: BotContext) => {
+  bot.action(CALLBACK_PATTERNS.LANGUAGE, async (ctx: BotContext) => {
     const { callbackQuery } = ctx;
 
     if (!callbackQuery || !("data" in callbackQuery) || !callbackQuery.data) {
@@ -25,7 +26,7 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       return;
     }
 
-    const langMatch = callbackQuery.data.match(LANGUAGE_CALLBACK_PATTERN);
+    const langMatch = callbackQuery.data.match(CALLBACK_PATTERNS.LANGUAGE);
     if (!langMatch) {
       await answerInvalidCallback(ctx);
       return;
@@ -78,35 +79,37 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
     }
   });
 
-  bot.action("settings_language", async (ctx: BotContext) => {
+  bot.action(CALLBACK_DATA.SETTINGS_LANGUAGE, async (ctx: BotContext) => {
     if (!hasDbUser(ctx)) {
       await answerUserNotFound(ctx);
       return;
     }
 
-    const { dbUser } = ctx;
-
     await ctx.answerCbQuery();
-    await ctx.editMessageText(getText(dbUser.language, "language_selection"), {
-      reply_markup: getLanguageKeyboard(),
-    });
+    await ctx.editMessageText(
+      getText(ctx.dbUser.language, "language_selection"),
+      {
+        reply_markup: getLanguageKeyboard(),
+      },
+    );
   });
 
-  bot.action("settings_channels", async (ctx: BotContext) => {
+  bot.action(CALLBACK_DATA.SETTINGS_CHANNELS, async (ctx: BotContext) => {
     if (!hasDbUser(ctx)) {
       await answerUserNotFound(ctx);
       return;
     }
 
-    const { dbUser } = ctx;
-
     await ctx.answerCbQuery();
-    await ctx.editMessageText(getText(dbUser.language, "settings_channels"), {
-      reply_markup: getChannelsKeyboard(dbUser.language),
-    });
+    await ctx.editMessageText(
+      getText(ctx.dbUser.language, "settings_channels"),
+      {
+        reply_markup: getChannelsKeyboard(ctx.dbUser.language),
+      },
+    );
   });
 
-  bot.action("settings_support", async (ctx: BotContext) => {
+  bot.action(CALLBACK_DATA.SETTINGS_SUPPORT, async (ctx: BotContext) => {
     if (!hasDbUser(ctx)) {
       await answerUserNotFound(ctx);
       return;
@@ -116,21 +119,19 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
     await ctx.reply(getText(ctx.dbUser.language, "settings_support_message"));
   });
 
-  bot.action("settings_back", async (ctx: BotContext) => {
+  bot.action(CALLBACK_DATA.SETTINGS_BACK, async (ctx: BotContext) => {
     if (!hasDbUser(ctx)) {
       await answerUserNotFound(ctx);
       return;
     }
 
-    const { dbUser } = ctx;
-
     await ctx.answerCbQuery();
-    await ctx.editMessageText(getText(dbUser.language, "menu_settings"), {
-      reply_markup: getSettingsKeyboard(dbUser.language),
+    await ctx.editMessageText(getText(ctx.dbUser.language, "menu_settings"), {
+      reply_markup: getSettingsKeyboard(ctx.dbUser.language),
     });
   });
 
-  bot.action("settings_close", async (ctx: BotContext) => {
+  bot.action(CALLBACK_DATA.SETTINGS_CLOSE, async (ctx: BotContext) => {
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
   });
