@@ -1,0 +1,126 @@
+import { db } from "@/db";
+import { userProperties, users, userServices } from "@/db/schema";
+import { getPropertyByIndex } from "@/data/properties";
+import { getServiceByIndex } from "@/data/services";
+import {
+  type PropertyColor,
+  type PropertyLevel,
+  COLOR_COMPLETION_BOOSTS,
+  PROPERTY_COUNT_BY_COLOR,
+  getPropertyHourlyIncome,
+} from "@/constants/properties";
+import { getTrainBoost } from "@/constants/services";
+import { eq } from "drizzle-orm";
+import { type TelegramId, asMonopolyCoins } from "@/types/utils";
+
+export async function generateEarningsForAllUsers(): Promise<void> {
+  const allUserProperties = await db.select().from(userProperties);
+
+  for (const userProperty of allUserProperties) {
+    const propertyData = getPropertyByIndex(userProperty.property_index);
+    if (!propertyData || propertyData.color === "starter") continue;
+
+    const now = new Date();
+    const lastGenerated = userProperty.last_generated_at;
+    const minutesSinceLastGeneration =
+      (now.getTime() - lastGenerated.getTime()) / (1000 * 60);
+
+    if (minutesSinceLastGeneration < 1) continue;
+
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.telegram_id, userProperty.user_id))
+      .limit(1);
+    if (!user[0]) continue;
+
+    const level = userProperty.level as PropertyLevel;
+    const color = propertyData.color as PropertyColor;
+
+    const totalBoost = await calculateTotalBoost(userProperty.user_id, color);
+    const hourlyIncome = getPropertyHourlyIncome(color, level);
+    const minuteIncome = (hourlyIncome * totalBoost) / 60;
+    const earnings = minuteIncome * minutesSinceLastGeneration;
+
+    await db
+      .update(userProperties)
+      .set({
+        accumulated_unclaimed: asMonopolyCoins(
+          userProperty.accumulated_unclaimed + earnings,
+        ),
+        last_generated_at: now,
+        updated_at: now,
+      })
+      .where(eq(userProperties.id, userProperty.id));
+  }
+}
+
+async function calculateTotalBoost(
+  userId: TelegramId,
+  color: PropertyColor,
+): Promise<number> {
+  const servicesBoost = await calculateServicesBoost(userId);
+  const colorCompletionBoost = await calculateColorCompletionBoost(
+    userId,
+    color,
+  );
+
+  return (1 + servicesBoost) * (1 + colorCompletionBoost);
+}
+
+async function calculateServicesBoost(userId: TelegramId): Promise<number> {
+  const userServicesList = await db
+    .select()
+    .from(userServices)
+    .where(eq(userServices.user_id, userId));
+
+  let totalBoost = 0;
+  let trainCount = 0;
+
+  for (const userService of userServicesList) {
+    const service = getServiceByIndex(userService.service_index);
+    if (!service) continue;
+
+    if (service.type === "train") {
+      trainCount++;
+    } else {
+      totalBoost += service.boost_percentage;
+    }
+  }
+
+  totalBoost += getTrainBoost(trainCount);
+
+  return totalBoost;
+}
+
+async function calculateColorCompletionBoost(
+  userId: TelegramId,
+  color: PropertyColor,
+): Promise<number> {
+  const userPropertiesList = await db
+    .select()
+    .from(userProperties)
+    .where(eq(userProperties.user_id, userId));
+
+  const colorProperties = userPropertiesList.filter((up) => {
+    const prop = getPropertyByIndex(up.property_index);
+    return prop?.color === color;
+  });
+
+  const requiredCount = PROPERTY_COUNT_BY_COLOR[color];
+
+  if (colorProperties.length < requiredCount) {
+    return 0;
+  }
+
+  const allLevel3 = colorProperties.every((up) => up.level >= 3);
+  const allLevel4 = colorProperties.every((up) => up.level >= 4);
+
+  if (allLevel4) {
+    return COLOR_COMPLETION_BOOSTS[color].level4;
+  } else if (allLevel3) {
+    return COLOR_COMPLETION_BOOSTS[color].level3;
+  }
+
+  return 0;
+}
