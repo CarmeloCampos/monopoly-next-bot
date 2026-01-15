@@ -1,25 +1,34 @@
 import { Telegraf } from "telegraf";
 import type { BotContext } from "@/types";
 import { info } from "@/utils/logger";
+import { buildWelcomeMessage, buildHelpMessage } from "@/i18n";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
-  bot.command("start", (ctx: BotContext) => {
+  bot.command("start", async (ctx: BotContext): Promise<void> => {
     info("Start command received", { userId: ctx.from?.id });
-    ctx.reply(
-      "👋 Welcome to Monopoly Bot!\n\n" +
-        "This bot helps you play Monopoly games with your friends.\n\n" +
-        "Use /help to see available commands.",
-    );
+
+    const { dbUser } = ctx;
+
+    if (!dbUser) {
+      await ctx.reply("❌ Error: User not found. Please try again.");
+      return;
+    }
+
+    const message = buildWelcomeMessage(dbUser.language, dbUser.referral_code);
+    await ctx.reply(message, { parse_mode: "Markdown" });
   });
 
-  bot.command("help", (ctx: BotContext) => {
+  bot.command("help", async (ctx: BotContext): Promise<void> => {
     info("Help command received", { userId: ctx.from?.id });
-    ctx.reply(
-      "📚 *Available Commands:*\n\n" +
-        "/start - Start bot\n" +
-        "/help - Show this help message\n\n" +
-        "More commands coming soon!",
-      { parse_mode: "Markdown" },
-    );
+
+    const { dbUser } = ctx;
+
+    if (!dbUser) {
+      await ctx.reply("❌ Error: User not found. Please try again.");
+      return;
+    }
+
+    const message = buildHelpMessage(dbUser.language);
+    await ctx.reply(message, { parse_mode: "Markdown" });
   });
 };
