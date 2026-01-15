@@ -1,4 +1,5 @@
 import { Telegraf } from "telegraf";
+import { message } from "telegraf/filters";
 import {
   type BotContext,
   type BotContextWithLanguage,
@@ -60,10 +61,8 @@ export const registerCommands = (bot: Telegraf<BotContext>): void => {
 };
 
 function registerMenuHandlers(bot: Telegraf<BotContext>): void {
-  bot.on("text", async (ctx: BotContext): Promise<void> => {
+  bot.on(message("text"), async (ctx) => {
     if (!hasLanguage(ctx)) return;
-
-    if (!ctx.message || !("text" in ctx.message)) return;
 
     const { dbUser } = ctx;
     const { text } = ctx.message;
