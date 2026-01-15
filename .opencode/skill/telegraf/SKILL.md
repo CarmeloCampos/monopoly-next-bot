@@ -9,6 +9,8 @@ metadata:
   version: "4.16.0"
 ---
 
+Up-to-date documentation: mcp zread_ai id: /telegraf/telegraf
+
 ## What I Do
 
 I provide complete patterns and conventions for building Telegram bots using Telegraf with Bun, including:
