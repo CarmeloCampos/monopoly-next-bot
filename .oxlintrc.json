@@ -1,4 +1,5 @@
 {
+  "$schema": "node_modules/oxlint/configuration_schema.json",
   "rules": {
     "no-unused-vars": "error",
     "no-console": "off",
@@ -67,6 +68,7 @@
     "no-useless-catch": "error",
     "no-warning-comments": "warn",
     "require-await": "error",
-    "valid-typeof": "error"
+    "valid-typeof": "error",
+    "no-deprecated": "error"
   }
 }

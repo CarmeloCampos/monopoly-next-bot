@@ -9,6 +9,6 @@
     "**/dist/**",
     "**/coverage/**",
     "**/build/**",
-    "src/db/migrations"
+    "src/db"
   ]
 }
