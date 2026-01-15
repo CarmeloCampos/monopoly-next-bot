@@ -6,7 +6,6 @@ import {
   index,
 } from "drizzle-orm/sqlite-core";
 import type { PropertyLevel } from "@/constants/properties";
-import type { TransactionType, ItemType, GameType } from "@/constants/game";
 import type {
   TelegramId,
   MonopolyCoins,
@@ -64,9 +63,6 @@ export const userProperties = sqliteTable(
   },
   (table) => ({
     userIdIdx: index("user_properties_user_id_idx").on(table.user_id),
-    propertyIndexIdx: index("user_properties_property_index_idx").on(
-      table.property_index,
-    ),
   }),
 );
 
@@ -88,9 +84,6 @@ export const userServices = sqliteTable(
   },
   (table) => ({
     userIdIdx: index("user_services_user_id_idx").on(table.user_id),
-    serviceIndexIdx: index("user_services_service_index_idx").on(
-      table.service_index,
-    ),
   }),
 );
 
@@ -156,7 +149,7 @@ export const transactions = sqliteTable(
       .notNull()
       .references(() => users.telegram_id, { onDelete: "cascade" })
       .$type<TelegramId>(),
-    type: text("type").notNull().$type<TransactionType>(),
+    type: text("type").notNull(),
     amount: real("amount").notNull().$type<MonopolyCoins>(),
     description: text("description"),
     metadata: text("metadata", { mode: "json" }).$type<
@@ -166,7 +159,6 @@ export const transactions = sqliteTable(
   },
   (table) => ({
     userIdIdx: index("transactions_user_id_idx").on(table.user_id),
-    typeIdx: index("transactions_type_idx").on(table.type),
   }),
 );
 
@@ -182,7 +174,7 @@ export const diceUnlocks = sqliteTable(
       .notNull()
       .references(() => users.telegram_id, { onDelete: "cascade" })
       .$type<TelegramId>(),
-    item_type: text("item_type").notNull().$type<ItemType>(),
+    item_type: text("item_type").notNull(),
     item_index: integer("item_index").notNull(),
     is_purchased: integer("is_purchased", { mode: "boolean" })
       .notNull()
@@ -211,9 +203,7 @@ export const gameStates = sqliteTable(
     can_roll_dice: integer("can_roll_dice", { mode: "boolean" })
       .notNull()
       .default(true),
-    current_unlock_item_type: text(
-      "current_unlock_item_type",
-    ).$type<ItemType>(),
+    current_unlock_item_type: text("current_unlock_item_type"),
     current_unlock_item_index: integer("current_unlock_item_index"),
     updated_at: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
@@ -234,7 +224,7 @@ export const miniGameLogs = sqliteTable(
       .notNull()
       .references(() => users.telegram_id, { onDelete: "cascade" })
       .$type<TelegramId>(),
-    game_type: text("game_type").notNull().$type<GameType>(),
+    game_type: text("game_type").notNull(),
     cost: real("cost").notNull().$type<MonopolyCoins>(),
     result: text("result"),
     winnings: real("winnings").notNull().$type<MonopolyCoins>(),
@@ -242,6 +232,5 @@ export const miniGameLogs = sqliteTable(
   },
   (table) => ({
     userIdIdx: index("mini_game_logs_user_id_idx").on(table.user_id),
-    gameTypeIdx: index("mini_game_logs_game_type_idx").on(table.game_type),
   }),
 );
