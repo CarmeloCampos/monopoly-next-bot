@@ -1,38 +1,19 @@
-type LogLevel = "debug" | "info" | "warn" | "error";
+import { env } from "./env";
+import type { LogLevel } from "@/utils/logger";
 
 interface Config {
   botToken: string;
   logLevel: LogLevel;
 }
 
-const isLogLevel = (value: string | undefined): value is LogLevel => {
-  return (
-    value === "debug" ||
-    value === "info" ||
-    value === "warn" ||
-    value === "error"
-  );
-};
-
-const getEnv = (key: string): string => {
-  const value = process.env[key];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-};
-
-const getLogLevel = (key: string): LogLevel => {
-  const value = process.env[key];
-  if (value && isLogLevel(value)) {
-    return value;
-  }
-  return "info";
-};
-
+/**
+ * Application configuration derived from Zod-validated environment variables.
+ * All validation is handled by env.ts using Zod schema.
+ */
 const config: Config = {
-  botToken: getEnv("BOT_TOKEN"),
-  logLevel: getLogLevel("LOG_LEVEL"),
+  botToken: env.BOT_TOKEN,
+  logLevel: env.LOG_LEVEL,
 };
 
 export default config;
+export { env };
