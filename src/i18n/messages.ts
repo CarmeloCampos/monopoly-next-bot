@@ -1,47 +1,47 @@
-/**
- * Pre-built message templates for common bot responses
- */
-
 import { getText } from "./locales";
-import type { Language, MaybeOptional } from "@/types/utils";
+import type { Language, MaybeOptional } from "@/types";
 
-/**
- * Build the welcome message with referral code
- */
-export function buildWelcomeMessage(
+export function buildReferralBonusMessage(
   language: MaybeOptional<Language>,
-  referralCode: string,
+  amount: number,
 ): string {
-  return (
-    getText(language, "welcome") +
-    "\n\n" +
-    getText(language, "referral_code") +
-    " `" +
-    referralCode +
-    "`\n\n" +
-    getText(language, "share_referral") +
-    "\n\n" +
-    getText(language, "help_title") +
-    "\n" +
-    getText(language, "cmd_start") +
-    "\n" +
-    getText(language, "cmd_help") +
-    "\n\n" +
-    getText(language, "more_commands")
+  return getText(language, "referral_bonus_received").replace(
+    "{amount}",
+    String(amount),
   );
 }
 
-/**
- * Build the help message with available commands
- */
-export function buildHelpMessage(language: MaybeOptional<Language>): string {
-  return (
-    getText(language, "help_title") +
-    "\n\n" +
-    getText(language, "cmd_start") +
-    "\n" +
-    getText(language, "cmd_help") +
-    "\n\n" +
-    getText(language, "more_commands")
+export function buildReferralLevelMessage(
+  language: MaybeOptional<Language>,
+  level: number,
+): string {
+  return getText(language, "referral_level_n").replace(
+    "{level}",
+    String(level),
   );
+}
+
+export function buildBalanceMessage(
+  language: MaybeOptional<Language>,
+  balance: number,
+): string {
+  return getText(language, "menu_balance_message").replace(
+    "{balance}",
+    String(balance),
+  );
+}
+
+export function buildReferralCodeMessage(
+  language: MaybeOptional<Language>,
+  code: string,
+): string {
+  const codeText = getText(language, "menu_referral_code").replace(
+    "{code}",
+    code,
+  );
+  const linkText = getText(language, "menu_referral_share_link").replace(
+    "{code}",
+    code,
+  );
+  return `${codeText}${linkText}`;
 }
