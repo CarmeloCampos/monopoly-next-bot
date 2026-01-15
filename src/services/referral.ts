@@ -1,20 +1,21 @@
 import { db } from "@/db";
 import { users, referrals, referralEarnings, transactions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import type {
-  TelegramId,
-  ReferralLevel,
-  MonopolyCoins,
-  Result,
-  Language,
+import {
+  isReferralLevel,
+  type TelegramId,
+  type ReferralLevel,
+  type MonopolyCoins,
+  type Result,
+  type Language,
 } from "@/types";
 import {
   asMonopolyCoins,
   success,
   failure,
-  isReferralLevel,
+  MAX_REFERRAL_LEVEL,
 } from "@/types/utils";
-import { REFERRAL_BONUS_BY_LEVEL, REFERRAL_BONUSES } from "@/constants/game";
+import { REFERRAL_BONUS, getReferralBonusByLevel } from "@/constants/game";
 import { info } from "@/utils/logger";
 import { buildReferralLevelMessage } from "@/i18n";
 
@@ -24,7 +25,6 @@ interface ReferralProcessResult {
 }
 
 const LEVEL_ONE: ReferralLevel = 1;
-const MAX_REFERRAL_DEPTH = 5;
 
 async function findUserByReferralCode(
   code: string,
@@ -52,9 +52,8 @@ async function getReferralChain(
   const chain: { userId: TelegramId; level: ReferralLevel }[] = [];
   let currentId = userId;
 
-  for (let level = 1; level <= MAX_REFERRAL_DEPTH; level++) {
+  for (let level = LEVEL_ONE; level <= MAX_REFERRAL_LEVEL; level++) {
     const referral = await findReferralByReferredId(currentId);
-
     if (!referral) break;
 
     if (isReferralLevel(level)) {
@@ -86,7 +85,7 @@ export async function processReferral(
 
   await addBalanceAndTransaction(
     newUserId,
-    asMonopolyCoins(REFERRAL_BONUSES.INVITED),
+    asMonopolyCoins(REFERRAL_BONUS.INVITED),
     "referral",
     buildReferralLevelMessage(language, 0),
   );
@@ -95,7 +94,7 @@ export async function processReferral(
   chain.unshift({ userId: referrerId, level: LEVEL_ONE });
 
   for (const { userId, level } of chain) {
-    const bonus = REFERRAL_BONUS_BY_LEVEL[level];
+    const bonus = getReferralBonusByLevel(level);
     await addBalanceAndTransaction(
       userId,
       asMonopolyCoins(bonus),
@@ -118,7 +117,7 @@ export async function processReferral(
   });
 
   return success({
-    bonusGiven: asMonopolyCoins(REFERRAL_BONUSES.INVITED),
+    bonusGiven: asMonopolyCoins(REFERRAL_BONUS.INVITED),
     referrersRewarded: chain.length,
   });
 }
