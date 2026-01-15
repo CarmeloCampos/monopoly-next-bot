@@ -1,29 +1,24 @@
 import type { Middleware } from "telegraf";
-import type {
-  BotContext,
-  InsertUser,
-  SelectUser,
-  TelegramId,
-  Language,
+import {
+  isNonEmptyArray,
+  isLanguage,
+  type BotContext,
+  type InsertUser,
+  type SelectUser,
+  type TelegramId,
+  type Language,
 } from "@/types";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { generateReferralCode } from "@/utils/referral";
-import {
-  asTelegramId,
-  asMonopolyCoins,
-  isNonEmptyArray,
-  type MaybeOptional,
-} from "@/types/utils";
+import { asTelegramId, asMonopolyCoins } from "@/types/utils";
 import { info } from "@/utils/logger";
 import { processReferral } from "@/services/referral";
 import { giveStarterProperty } from "@/services/user";
-import { isLanguage } from "@/i18n";
-import { DEFAULT_LANGUAGE, REFERRAL_CODE_REGEX } from "@/constants";
+import { DEFAULT_LANGUAGE, CALLBACK_PATTERNS } from "@/constants";
 
 export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
   const { from } = ctx;
-
   if (!from) return next();
 
   const telegramId = asTelegramId(from.id);
@@ -35,15 +30,7 @@ export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
       return next();
     }
 
-    let referralCode: string | undefined;
-    if (ctx.message && "text" in ctx.message) {
-      const match = ctx.message.text.match(REFERRAL_CODE_REGEX);
-      if (match) {
-        const [, code] = match;
-        referralCode = code;
-      }
-    }
-
+    const referralCode = extractReferralCode(ctx);
     const newUser = await createUser(from);
     if (!newUser) return next();
 
@@ -52,19 +39,20 @@ export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
 
     await giveStarterProperty(newUser.telegram_id);
 
-    if (referralCode) {
-      const referrerLang = await getReferrerLanguage(referralCode);
-      const finalLang = isLanguage(referrerLang)
+    if (!referralCode) return next();
+
+    const referrerLang = await getReferrerLanguage(referralCode);
+    const finalLang =
+      referrerLang && isLanguage(referrerLang)
         ? referrerLang
         : DEFAULT_LANGUAGE;
-      const result = await processReferral(
-        newUser.telegram_id,
-        referralCode,
-        finalLang,
-      );
-      if (result.success) {
-        ctx.referralBonusReceived = result.data.bonusGiven;
-      }
+    const result = await processReferral(
+      newUser.telegram_id,
+      referralCode,
+      finalLang,
+    );
+    if (result.success) {
+      ctx.referralBonusReceived = result.data.bonusGiven;
     }
   } catch (error) {
     info("Error in auto-user middleware", { telegramId, error });
@@ -73,18 +61,23 @@ export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
   return next();
 };
 
+function extractReferralCode(ctx: BotContext): string | undefined {
+  if (!ctx.message || !("text" in ctx.message)) return undefined;
+  const match = ctx.message.text.match(CALLBACK_PATTERNS.START_REFERRAL);
+  return match?.[1];
+}
+
 async function findUserByTelegramId(
   telegramId: TelegramId,
-): Promise<MaybeOptional<SelectUser>> {
-  const user = await db.query.users.findFirst({
+): Promise<SelectUser | undefined> {
+  return await db.query.users.findFirst({
     where: (fields, { eq }) => eq(fields.telegram_id, telegramId),
   });
-  return user;
 }
 
 async function createUser(
   from: NonNullable<BotContext["from"]>,
-): Promise<MaybeOptional<SelectUser>> {
+): Promise<SelectUser | undefined> {
   const now = new Date();
 
   const newUser: InsertUser = {
@@ -112,7 +105,7 @@ async function createUser(
 
 async function getReferrerLanguage(
   referralCode: string,
-): Promise<MaybeOptional<Language | null>> {
+): Promise<Language | null | undefined> {
   const referrer = await db.query.users.findFirst({
     where: (fields, { eq }) => eq(fields.referral_code, referralCode),
     columns: { language: true },
