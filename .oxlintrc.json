@@ -1,5 +1,5 @@
 {
-  "$schema": "node_modules/oxlint/configuration_schema.json",
+  "$schema": "https://cdn.jsdelivr.net/npm/oxlint/configuration_schema.json",
   "rules": {
     "no-unused-vars": "error",
     "no-console": "off",
@@ -54,7 +54,7 @@
     "prefer-promise-reject-errors": "error",
     "prefer-rest-params": "error",
     "prefer-spread": "error",
-    "prefer-template": "off",
+    "prefer-template": "error",
     "eqeqeq": "error",
     "no-eq-null": "error",
     "no-eval": "error",

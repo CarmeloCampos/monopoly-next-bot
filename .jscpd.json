@@ -1,5 +1,6 @@
 {
-  "min-tokens": 50,
+  "$schema": "https://www.schemastore.org/jscpd.json",
+  "minTokens": 50,
   "mode": "mild",
   "threshold": 10,
   "reporters": ["console", "json"],
