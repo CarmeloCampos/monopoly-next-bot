@@ -1,9 +1,17 @@
 import { Telegraf } from "telegraf";
-import { type BotContext, hasDbUser, isLanguage } from "@/types";
+import {
+  type BotContext,
+  hasDbUser,
+  hasLanguage,
+  isLanguage,
+  isPropertyIndex,
+  asMonopolyCoins,
+  type BotContextWithLanguage,
+} from "@/types";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getText } from "@/i18n";
+import { getText, buildWelcomeExistingUserMessage } from "@/i18n";
 import {
   getMainMenuKeyboard,
   getLanguageKeyboard,
@@ -14,8 +22,19 @@ import { info, error as logError } from "@/utils/logger";
 import {
   answerUserNotFound,
   answerInvalidCallback,
+  extractCallbackMatch,
 } from "@/utils/callback-helpers";
 import { CALLBACK_PATTERNS, CALLBACK_DATA } from "@/constants";
+import {
+  buyProperty,
+  userHasProperty,
+  claimPropertyEarnings,
+} from "@/services/property";
+import {
+  STARTER_PROPERTY_INDEX,
+  DEFAULT_PROPERTY_LEVEL,
+} from "@/constants/game";
+import { sendPropertyCard } from "@/handlers/shared/property-display";
 
 export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   bot.action(CALLBACK_PATTERNS.LANGUAGE, async (ctx: BotContext) => {
@@ -64,8 +83,27 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       await ctx.answerCbQuery();
       await ctx.reply(getText(langValue, "language_selected"));
 
-      const message = getText(langValue, "welcome_new_user");
-      await ctx.reply(message, {
+      const hasStarterProperty = await userHasProperty(
+        dbUser.telegram_id,
+        STARTER_PROPERTY_INDEX,
+      );
+
+      if (!hasStarterProperty) {
+        // Safe cast: language was just validated with isLanguage() and assigned to dbUser.language
+        const ctxWithLang = ctx as BotContextWithLanguage;
+        await buyProperty({
+          userId: dbUser.telegram_id,
+          propertyIndex: STARTER_PROPERTY_INDEX,
+          level: DEFAULT_PROPERTY_LEVEL,
+          cost: asMonopolyCoins(0),
+          ctx: ctxWithLang,
+        });
+      }
+
+      const welcomeMsg = hasStarterProperty
+        ? buildWelcomeExistingUserMessage(langValue)
+        : getText(langValue, "welcome_new_user");
+      await ctx.reply(welcomeMsg, {
         parse_mode: "Markdown",
         reply_markup: getMainMenuKeyboard(langValue),
       });
@@ -134,5 +172,100 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   bot.action(CALLBACK_DATA.SETTINGS_CLOSE, async (ctx: BotContext) => {
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
+  });
+
+  bot.action(CALLBACK_PATTERNS.PROPERTY_NAV, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    if (!hasLanguage(ctx)) return;
+
+    const result = extractCallbackMatch(ctx, CALLBACK_PATTERNS.PROPERTY_NAV);
+    if (!result) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const [, navIndexStr] = result.match;
+    if (!navIndexStr) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const index = Number.parseInt(navIndexStr, 10);
+
+    await sendPropertyCard({
+      ctx,
+      propertyIndex: index,
+      isNavigation: true,
+    });
+  });
+
+  bot.action(CALLBACK_PATTERNS.PROPERTY_CLAIM, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    if (!hasLanguage(ctx)) return;
+
+    const result = extractCallbackMatch(ctx, CALLBACK_PATTERNS.PROPERTY_CLAIM);
+    if (!result) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const [, propertyIndexStr] = result.match;
+    if (!propertyIndexStr) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const parsedIndex = Number.parseInt(propertyIndexStr, 10);
+    if (!isPropertyIndex(parsedIndex)) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const { dbUser } = ctx;
+
+    const earnings = await claimPropertyEarnings({
+      userId: dbUser.telegram_id,
+      propertyIndex: parsedIndex,
+      ctx,
+    });
+
+    if (earnings !== null) {
+      await ctx.answerCbQuery(
+        getText(dbUser.language, "property_claim_success").replace(
+          "{amount}",
+          String(earnings),
+        ),
+      );
+    } else {
+      await ctx.answerCbQuery();
+    }
+  });
+
+  bot.action(CALLBACK_DATA.PROPERTY_CLOSE, async (ctx: BotContext) => {
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
+  });
+
+  bot.action(CALLBACK_DATA.PROPERTY_BACK, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    if (!hasLanguage(ctx)) return;
+
+    await sendPropertyCard({
+      ctx,
+      propertyIndex: 0,
+      isNavigation: true,
+    });
   });
 };

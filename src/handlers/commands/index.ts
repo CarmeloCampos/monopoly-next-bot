@@ -11,6 +11,7 @@ import {
   buildReferralBonusMessage,
   buildBalanceMessage,
   buildReferralCodeMessage,
+  buildWelcomeExistingUserMessage,
   getText,
 } from "@/i18n";
 import {
@@ -18,6 +19,9 @@ import {
   getMenuButtonTexts,
   getSettingsKeyboard,
 } from "@/keyboards";
+import { userHasProperty } from "@/services/property";
+import { STARTER_PROPERTY_INDEX } from "@/constants/game";
+import { sendPropertyCard } from "@/handlers/shared/property-display";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -31,13 +35,24 @@ export const registerCommands = (bot: Telegraf<BotContext>): void => {
     if (!hasLanguage(ctx)) return;
 
     const { dbUser, referralBonusReceived } = ctx;
-    let message = getText(dbUser.language, "welcome_new_user");
+    const hasStarterProperty = await userHasProperty(
+      dbUser.telegram_id,
+      STARTER_PROPERTY_INDEX,
+    );
 
-    if (referralBonusReceived) {
-      message += `\n\n${buildReferralBonusMessage(dbUser.language, referralBonusReceived)}`;
+    let startMessage: string;
+
+    if (hasStarterProperty) {
+      startMessage = buildWelcomeExistingUserMessage(dbUser.language);
+    } else {
+      startMessage = getText(dbUser.language, "welcome_new_user");
     }
 
-    await ctx.reply(message, {
+    if (referralBonusReceived) {
+      startMessage += `\n\n${buildReferralBonusMessage(dbUser.language, referralBonusReceived)}`;
+    }
+
+    await ctx.reply(startMessage, {
       parse_mode: "Markdown",
       reply_markup: getMainMenuKeyboard(dbUser.language),
     });
@@ -64,10 +79,10 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
     if (!hasLanguage(ctx)) return;
 
     const { dbUser } = ctx;
-    const { text } = ctx.message;
+    const messageText = ctx.message.text;
     const menuTexts = getMenuButtonTexts(dbUser.language);
 
-    switch (text) {
+    switch (messageText) {
       case menuTexts.properties:
         await handleProperties(ctx);
         break;
@@ -95,7 +110,11 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
 }
 
 async function handleProperties(ctx: BotContextWithLanguage): Promise<void> {
-  await ctx.reply(getText(ctx.dbUser.language, "menu_properties_coming_soon"));
+  await sendPropertyCard({
+    ctx,
+    propertyIndex: 0,
+    isNavigation: false,
+  });
 }
 
 async function handleBalance(ctx: BotContextWithLanguage): Promise<void> {
