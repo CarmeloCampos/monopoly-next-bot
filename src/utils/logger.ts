@@ -27,11 +27,6 @@ const formatMessage = (
   return `[${timestamp}] [${level.toUpperCase()}] ${message}${dataStr}`;
 };
 
-export const debug = (message: string, data?: unknown): void => {
-  if (!shouldLog("debug")) return;
-  console.log(formatMessage("debug", message, data));
-};
-
 export const info = (message: string, data?: unknown): void => {
   if (!shouldLog("info")) return;
   console.log(formatMessage("info", message, data));

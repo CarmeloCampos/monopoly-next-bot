@@ -15,7 +15,6 @@ import { generateReferralCode } from "@/utils/referral";
 import { asTelegramId, asMonopolyCoins } from "@/types/utils";
 import { info } from "@/utils/logger";
 import { processReferral } from "@/services/referral";
-import { giveStarterProperty } from "@/services/user";
 import { DEFAULT_LANGUAGE, CALLBACK_PATTERNS } from "@/constants";
 import { sendReferralNotification } from "@/utils/notifications";
 
@@ -38,8 +37,6 @@ export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
 
     ctx.dbUser = newUser;
     ctx.isNewUser = true;
-
-    await giveStarterProperty(newUser.telegram_id);
 
     if (!referralCode) return next();
 
