@@ -6,6 +6,7 @@ import { registerCommands } from "@/handlers/commands";
 import { registerCallbacks } from "@/handlers/callbacks";
 import { autoUserMiddleware } from "@/middleware/auto-user";
 import { languageMiddleware } from "@/middleware/language";
+import { startPolling, startWebhook } from "@/bot/launcher";
 
 setLogLevel(config.logLevel);
 
@@ -38,24 +39,15 @@ bot.catch((err, ctx) => {
   ctx.reply("❌ An error occurred. Please try again.");
 });
 
-const gracefulShutdown = async (signal: string): Promise<void> => {
-  info(`Received ${signal}, shutting down gracefully...`);
-  await bot.stop();
-  info("Bot stopped");
-  process.exit(0);
-};
-
-process.once("SIGINT", () => gracefulShutdown("SIGINT"));
-process.once("SIGTERM", () => gracefulShutdown("SIGTERM"));
-
-info("Starting bot in polling mode...");
-bot
-  .launch()
-  .then(() => {
-    info("Bot started successfully");
-  })
-  .catch((err) => {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    error("Failed to start bot", { error: errorMessage });
-    process.exit(1);
+if (config.executionMode === "webhook") {
+  if (!config.webhookUrl) {
+    throw new Error("WEBHOOK_URL is required when EXECUTION_MODE=webhook");
+  }
+  startWebhook({
+    bot,
+    webhookUrl: config.webhookUrl,
+    port: config.port,
   });
+} else {
+  startPolling({ bot });
+}

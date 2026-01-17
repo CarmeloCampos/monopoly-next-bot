@@ -4,6 +4,9 @@ import type { LogLevel } from "@/utils/logger";
 interface Config {
   botToken: string;
   logLevel: LogLevel;
+  executionMode: "polling" | "webhook";
+  webhookUrl?: string;
+  port: number;
 }
 
 /**
@@ -13,6 +16,9 @@ interface Config {
 const config: Config = {
   botToken: env.BOT_TOKEN,
   logLevel: env.LOG_LEVEL,
+  executionMode: env.EXECUTION_MODE,
+  webhookUrl: env.WEBHOOK_URL,
+  port: env.PORT,
 };
 
 export default config;

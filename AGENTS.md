@@ -28,8 +28,31 @@ Monopoly Next Bot is a Telegram bot built for managing Monopoly games. The proje
 
 - All Telegram bot functionality must use the `telegraf` package
 - Configure with environment variable `BOT_TOKEN`
-- Use polling mode for receiving updates (no webhooks)
 - Bot instance is initialized in `src/index.ts`
+
+### Execution Modes
+
+The bot supports two execution modes configured via `EXECUTION_MODE`:
+
+**Polling Mode (default)**
+
+- Set `EXECUTION_MODE=polling`
+- Bot actively fetches updates from Telegram API
+- Simpler setup, no public URL required
+- Good for development and low-traffic scenarios
+- Started via `startPolling()` in `src/bot/launcher.ts`
+
+**Webhook Mode**
+
+- Set `EXECUTION_MODE=webhook`
+- Set `WEBHOOK_URL=https://your-domain.com/webhook`
+- Set `PORT` (default: 3000)
+- Telegram pushes updates to your bot server
+- Required for production with high traffic
+- More efficient, no polling overhead
+- Started via `startWebhook()` in `src/bot/launcher.ts`
+
+Both modes use graceful shutdown (SIGINT, SIGTERM) via `src/bot/launcher.ts`.
 
 ### Custom Logger
 
@@ -106,6 +129,9 @@ All checks must pass before committing code. Pre-commit hooks automatically run 
 Required variables (see `.env.example`):
 
 - `BOT_TOKEN` - Telegram bot token (required)
+- `EXECUTION_MODE` - Bot execution mode: 'polling' | 'webhook' (default: 'polling')
+- `WEBHOOK_URL` - Webhook URL for webhook mode (required when EXECUTION_MODE=webhook)
+- `PORT` - Port for webhook server (default: 3000)
 - `LOG_LEVEL` - Logging level: 'debug' | 'info' | 'warn' | 'error' (default: 'info')
 
 ## Code Standards
@@ -120,6 +146,7 @@ Required variables (see `.env.example`):
 - **Error Handling**: Log errors using the custom logger, provide user-friendly responses
 - **Logging**: Always log important events and errors with context data
 - **Type Guards**: Use type guards (type predicates) instead of type assertions for runtime type checking
+- **Stateless Design**: The bot is stateless - all persistent state is stored in Turso DB. No in-memory storage (Maps, Sets, etc.) is allowed. Context properties (`ctx.dbUser`, `ctx.isNewUser`, etc.) are temporary and only valid for a single request.
 
 ## Bot Context
 

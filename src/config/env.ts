@@ -13,6 +13,12 @@ const envSchema = z.object({
   // Telegram Bot
   BOT_TOKEN: z.string(),
 
+  // Bot execution mode (polling or webhook)
+  EXECUTION_MODE: z.enum(["polling", "webhook"]).default("polling"),
+
+  // Webhook URL (required when EXECUTION_MODE=webhook)
+  WEBHOOK_URL: z.string().url().optional(),
+
   // Debug logs
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 });
@@ -25,6 +31,11 @@ if (!_env.success) {
   throw new Error(
     "Las variables de entorno no son válidas. Revisa el archivo .env",
   );
+}
+
+if (_env.data.EXECUTION_MODE === "webhook" && !_env.data.WEBHOOK_URL) {
+  console.error("❌ WEBHOOK_URL es obligatorio cuando EXECUTION_MODE=webhook");
+  throw new Error("WEBHOOK_URL es obligatorio cuando EXECUTION_MODE=webhook");
 }
 
 export const env = _env.data;
