@@ -11,13 +11,10 @@ import {
 // Re-export all branded types
 export type {
   MaybeOptional,
-  NonEmptyArray,
   TelegramId,
   MonopolyCoins,
   ReferralLevel,
   Language,
-  Success,
-  Failure,
   Result,
 } from "./branded";
 

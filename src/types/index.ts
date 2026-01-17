@@ -10,6 +10,17 @@ interface SelectUserWithLanguage extends SelectUser {
   language: Language;
 }
 
+/**
+ * User property data returned from database queries.
+ * Uses raw number types as returned by Drizzle ORM.
+ */
+export interface UserPropertyData {
+  property_index: number;
+  level: number;
+  accumulated_unclaimed: number;
+  last_generated_at: Date;
+}
+
 interface BotContext extends Context {
   dbUser: MaybeOptional<SelectUser>;
   isNewUser?: boolean;
@@ -33,13 +44,13 @@ function hasLanguage(ctx: BotContext): ctx is BotContextWithLanguage {
   return ctx.dbUser.language !== null && ctx.dbUser.language !== undefined;
 }
 
-export type {
-  BotContext,
-  BotContextWithUser,
-  BotContextWithLanguage,
-  SelectUserWithLanguage,
-};
+export type { BotContext, BotContextWithLanguage };
 export { hasDbUser, hasLanguage };
 export * from "./utils";
 export * from "./db";
 export * from "@/utils/guards";
+
+export interface CallbackMatchResult {
+  match: RegExpMatchArray;
+  data: string;
+}
