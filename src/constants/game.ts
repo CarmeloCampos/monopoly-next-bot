@@ -1,6 +1,11 @@
 import type { ReferralLevel } from "@/types";
+import type { PropertyLevel, PropertyIndex } from "@/constants/properties";
 
-export const STARTER_PROPERTY_INDEX = 12;
+/** Index of the starter property given to new users */
+export const STARTER_PROPERTY_INDEX: PropertyIndex = 12;
+
+/** Default level for newly purchased properties */
+export const DEFAULT_PROPERTY_LEVEL: PropertyLevel = 1;
 
 const REFERRAL_BONUS_LEVELS = [100, 75, 50, 25, 10] as const;
 
