@@ -28,7 +28,7 @@ export const languageMiddleware: Middleware<BotContext> = async (ctx, next) => {
     ]),
   };
 
-  await ctx.reply(getText(null, "language_selection"), {
+  await ctx.reply(getText(undefined, "language_selection"), {
     reply_markup: inlineKeyboard,
   });
 };

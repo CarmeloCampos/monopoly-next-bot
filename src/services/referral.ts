@@ -3,11 +3,13 @@ import { users, referrals, referralEarnings, transactions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import {
   isReferralLevel,
+  isLanguage,
   type TelegramId,
   type ReferralLevel,
   type MonopolyCoins,
   type Result,
   type Language,
+  type MaybeOptional,
 } from "@/types";
 import {
   asMonopolyCoins,
@@ -16,12 +18,22 @@ import {
   MAX_REFERRAL_LEVEL,
 } from "@/types/utils";
 import { REFERRAL_BONUS, getReferralBonusByLevel } from "@/constants/game";
+import { DEFAULT_LANGUAGE } from "@/constants";
 import { info } from "@/utils/logger";
 import { buildReferralLevelMessage } from "@/i18n";
+
+/** Represents a single referrer in the chain who received a bonus */
+interface ReferrerReward {
+  userId: TelegramId;
+  level: ReferralLevel;
+  bonus: MonopolyCoins;
+  language: MaybeOptional<Language>;
+}
 
 interface ReferralProcessResult {
   bonusGiven: MonopolyCoins;
   referrersRewarded: number;
+  referrers: ReferrerReward[];
 }
 
 const LEVEL_ONE: ReferralLevel = 1;
@@ -41,8 +53,7 @@ async function findReferralByReferredId(
   referredId: TelegramId,
 ): Promise<{ referrer_id: TelegramId } | undefined> {
   return await db.query.referrals.findFirst({
-    where: (fields, { eq, and }) =>
-      and(eq(fields.referred_id, referredId), eq(fields.level, LEVEL_ONE)),
+    where: (fields, { eq }) => eq(fields.referred_id, referredId),
   });
 }
 
@@ -51,14 +62,16 @@ async function getReferralChain(
 ): Promise<{ userId: TelegramId; level: ReferralLevel }[]> {
   const chain: { userId: TelegramId; level: ReferralLevel }[] = [];
   let currentId = userId;
+  let level = LEVEL_ONE;
 
-  for (let level = LEVEL_ONE; level <= MAX_REFERRAL_LEVEL; level++) {
+  while (level <= MAX_REFERRAL_LEVEL) {
     const referral = await findReferralByReferredId(currentId);
     if (!referral) break;
 
     if (isReferralLevel(level)) {
       chain.push({ userId: referral.referrer_id, level });
       currentId = referral.referrer_id;
+      level++;
     }
   }
 
@@ -79,7 +92,6 @@ export async function processReferral(
   await db.insert(referrals).values({
     referrer_id: referrerId,
     referred_id: newUserId,
-    level: LEVEL_ONE,
     created_at: now,
   });
 
@@ -90,16 +102,26 @@ export async function processReferral(
     buildReferralLevelMessage(language, 0),
   );
 
-  const chain = await getReferralChain(referrerId);
-  chain.unshift({ userId: referrerId, level: LEVEL_ONE });
+  const chain = await getReferralChain(newUserId);
+
+  const referrers: ReferrerReward[] = [];
 
   for (const { userId, level } of chain) {
+    const user = await db.query.users.findFirst({
+      where: (fields, { eq }) => eq(fields.telegram_id, userId),
+      columns: { language: true },
+    });
+    const referrerLanguage: Language =
+      user?.language && isLanguage(user.language)
+        ? user.language
+        : DEFAULT_LANGUAGE;
+
     const bonus = getReferralBonusByLevel(level);
     await addBalanceAndTransaction(
       userId,
       asMonopolyCoins(bonus),
       "referral",
-      buildReferralLevelMessage(language, level),
+      buildReferralLevelMessage(referrerLanguage, level),
     );
     await db.insert(referralEarnings).values({
       user_id: userId,
@@ -107,6 +129,13 @@ export async function processReferral(
       level,
       amount: asMonopolyCoins(bonus),
       created_at: now,
+    });
+
+    referrers.push({
+      userId,
+      level,
+      bonus: asMonopolyCoins(bonus),
+      language: user?.language ?? null,
     });
   }
 
@@ -119,6 +148,7 @@ export async function processReferral(
   return success({
     bonusGiven: asMonopolyCoins(REFERRAL_BONUS.INVITED),
     referrersRewarded: chain.length,
+    referrers,
   });
 }
 

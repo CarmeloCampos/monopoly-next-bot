@@ -7,6 +7,7 @@ import {
   type SelectUser,
   type TelegramId,
   type Language,
+  type MaybeOptional,
 } from "@/types";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -16,6 +17,7 @@ import { info } from "@/utils/logger";
 import { processReferral } from "@/services/referral";
 import { giveStarterProperty } from "@/services/user";
 import { DEFAULT_LANGUAGE, CALLBACK_PATTERNS } from "@/constants";
+import { sendReferralNotification } from "@/utils/notifications";
 
 export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
   const { from } = ctx;
@@ -53,6 +55,15 @@ export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
     );
     if (result.success) {
       ctx.referralBonusReceived = result.data.bonusGiven;
+      for (const referrer of result.data.referrers) {
+        await sendReferralNotification(
+          ctx.telegram,
+          referrer.userId,
+          referrer.bonus,
+          referrer.level,
+          referrer.language,
+        );
+      }
     }
   } catch (error) {
     info("Error in auto-user middleware", { telegramId, error });
@@ -61,7 +72,7 @@ export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
   return next();
 };
 
-function extractReferralCode(ctx: BotContext): string | undefined {
+function extractReferralCode(ctx: BotContext): MaybeOptional<string> {
   if (!ctx.message || !("text" in ctx.message)) return undefined;
   const match = ctx.message.text.match(CALLBACK_PATTERNS.START_REFERRAL);
   return match?.[1];
@@ -69,7 +80,7 @@ function extractReferralCode(ctx: BotContext): string | undefined {
 
 async function findUserByTelegramId(
   telegramId: TelegramId,
-): Promise<SelectUser | undefined> {
+): Promise<MaybeOptional<SelectUser>> {
   return await db.query.users.findFirst({
     where: (fields, { eq }) => eq(fields.telegram_id, telegramId),
   });
@@ -77,7 +88,7 @@ async function findUserByTelegramId(
 
 async function createUser(
   from: NonNullable<BotContext["from"]>,
-): Promise<SelectUser | undefined> {
+): Promise<MaybeOptional<SelectUser>> {
   const now = new Date();
 
   const newUser: InsertUser = {
@@ -105,7 +116,7 @@ async function createUser(
 
 async function getReferrerLanguage(
   referralCode: string,
-): Promise<Language | null | undefined> {
+): Promise<MaybeOptional<Language>> {
   const referrer = await db.query.users.findFirst({
     where: (fields, { eq }) => eq(fields.referral_code, referralCode),
     columns: { language: true },

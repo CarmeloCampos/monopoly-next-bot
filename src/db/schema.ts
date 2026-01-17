@@ -103,7 +103,6 @@ export const referrals = sqliteTable(
       .notNull()
       .references(() => users.telegram_id, { onDelete: "cascade" })
       .$type<TelegramId>(),
-    level: integer("level").notNull().$type<ReferralLevel>(),
     created_at: integer("created_at", { mode: "timestamp" }).notNull(),
   },
   (table) => ({

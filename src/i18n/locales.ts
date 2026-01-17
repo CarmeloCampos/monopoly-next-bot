@@ -1,6 +1,10 @@
 import type { Language, MaybeOptional } from "@/types";
 import { warn } from "@/utils/logger";
-import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from "@/constants";
+import {
+  LANGUAGE_NAMES,
+  SUPPORTED_LANGUAGES,
+  DEFAULT_LANGUAGE,
+} from "@/constants";
 
 interface Locales {
   ru: Record<string, string>;
@@ -37,6 +41,8 @@ const locales: Locales = {
       "🎉 Добро пожаловать в Monopoly Bot!\n\nВы получили свою первую недвижимость: *Стартовая Квартира*\n\nНачните строить свою империю!",
     referral_bonus_received:
       "🎁 Вы получили {amount} MC за использование реферального кода!",
+    referral_notification:
+      "🎉 Вы получили {amount} MC от реферала (Уровень {level})!",
     invalid_message: "❓ Я не понимаю это сообщение. Используйте меню ниже.",
     error_user_not_found:
       "❌ Ошибка: Пользователь не найден. Попробуйте снова.",
@@ -83,6 +89,8 @@ const locales: Locales = {
       "🎉 Welcome to Monopoly Bot!\n\nYou received your first property: *Startup Apartment*\n\nStart building your empire!",
     referral_bonus_received:
       "🎁 You received {amount} MC for using a referral code!",
+    referral_notification:
+      "🎉 You received {amount} MC from a referral (Level {level})!",
     invalid_message: "❓ I don't understand that message. Use the menu below.",
     error_user_not_found: "❌ Error: User not found. Please try again.",
     error_referral_code_not_found: "Referral code not found",
@@ -127,6 +135,8 @@ const locales: Locales = {
       "🎉 ¡Bienvenido a Monopoly Bot!\n\nHas recibido tu primera propiedad: *Apartamento Emprender*\n\n¡Empieza a construir tu imperio!",
     referral_bonus_received:
       "🎁 ¡Has recibido {amount} MC por usar un código de referido!",
+    referral_notification:
+      "🎉 ¡Has recibido {amount} MC de un referido (Nivel {level})!",
     invalid_message: "❓ No entiendo ese mensaje. Usa el menú de abajo.",
     error_user_not_found:
       "❌ Error: Usuario no encontrado. Por favor intenta de nuevo.",
@@ -173,6 +183,8 @@ const locales: Locales = {
       "🎉 Bem-vindo ao Monopoly Bot!\n\nVocê recebeu sua primeira propriedade: *Apartamento Empreender*\n\nComece a construir seu império!",
     referral_bonus_received:
       "🎁 Você recebeu {amount} MC por usar um código de indicação!",
+    referral_notification:
+      "🎉 Você recebeu {amount} MC de uma indicação (Nível {level})!",
     invalid_message: "❓ Não entendo essa mensagem. Use o menu abaixo.",
     error_user_not_found:
       "❌ Erro: Usuário não encontrado. Por favor tente novamente.",
@@ -198,7 +210,7 @@ export function getText(
   language: MaybeOptional<Language>,
   key: string,
 ): string {
-  const lang = language ?? "ru";
+  const lang = language ?? DEFAULT_LANGUAGE;
   const translation = locales[lang][key];
 
   if (!translation) {
@@ -213,6 +225,11 @@ export function getSupportedLanguages(): readonly Language[] {
   return SUPPORTED_LANGUAGES;
 }
 
+/**
+ * Get localized language name for display.
+ * @param lang - Language code
+ * @returns Language name in its native script
+ */
 export function getLanguageName(lang: Language): string {
   return LANGUAGE_NAMES[lang];
 }

@@ -15,6 +15,20 @@
       "when": 1768438487426,
       "tag": "0001_easy_riptide",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1768616431292,
+      "tag": "0002_robust_gauntlet",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1768616627516,
+      "tag": "0003_windy_misty_knight",
+      "breakpoints": true
     }
   ]
 }
