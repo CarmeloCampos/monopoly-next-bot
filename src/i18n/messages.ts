@@ -45,3 +45,9 @@ export function buildReferralCodeMessage(
   );
   return `${codeText}\n${linkText.trim()}`;
 }
+
+export function buildWelcomeExistingUserMessage(
+  language: MaybeOptional<Language>,
+): string {
+  return getText(language, "welcome_existing_user");
+}
