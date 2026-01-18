@@ -22,6 +22,7 @@ import {
 import { userHasProperty } from "@/services/property";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
 import { sendPropertyCard } from "@/handlers/shared/property-display";
+import { handleBoard, handleRollDice, handleViewCurrent } from "./board-menu";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -89,8 +90,8 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
       case menuTexts.balance:
         await handleBalance(ctx);
         break;
-      case menuTexts.advance:
-        await handleAdvance(ctx);
+      case menuTexts.board:
+        await handleBoard(ctx);
         break;
       case menuTexts.referral:
         await handleReferral(ctx);
@@ -100,6 +101,12 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
         break;
       case menuTexts.settings:
         await handleSettings(ctx);
+        break;
+      case getText(dbUser.language, "board_roll_dice"):
+        await handleRollDice(ctx);
+        break;
+      case getText(dbUser.language, "board_view_current"):
+        await handleViewCurrent(ctx);
         break;
       default:
         await ctx.reply(getText(dbUser.language, "invalid_message"), {
@@ -119,10 +126,6 @@ async function handleProperties(ctx: BotContextWithLanguage): Promise<void> {
 
 async function handleBalance(ctx: BotContextWithLanguage): Promise<void> {
   await ctx.reply(buildBalanceMessage(ctx.dbUser.language, ctx.dbUser.balance));
-}
-
-async function handleAdvance(ctx: BotContextWithLanguage): Promise<void> {
-  await ctx.reply(getText(ctx.dbUser.language, "menu_advance_coming_soon"));
 }
 
 async function handleReferral(ctx: BotContextWithLanguage): Promise<void> {

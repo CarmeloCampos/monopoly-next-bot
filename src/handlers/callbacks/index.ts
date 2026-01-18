@@ -6,7 +6,6 @@ import {
   isLanguage,
   isPropertyIndex,
   asMonopolyCoins,
-  type BotContextWithLanguage,
 } from "@/types";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -35,6 +34,7 @@ import {
   DEFAULT_PROPERTY_LEVEL,
 } from "@/constants/game";
 import { sendPropertyCard } from "@/handlers/shared/property-display";
+import { registerBoardCallbacks } from "./board";
 
 export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   bot.action(CALLBACK_PATTERNS.LANGUAGE, async (ctx: BotContext) => {
@@ -89,14 +89,11 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       );
 
       if (!hasStarterProperty) {
-        // Safe cast: language was just validated with isLanguage() and assigned to dbUser.language
-        const ctxWithLang = ctx as BotContextWithLanguage;
         await buyProperty({
           userId: dbUser.telegram_id,
           propertyIndex: STARTER_PROPERTY_INDEX,
           level: DEFAULT_PROPERTY_LEVEL,
           cost: asMonopolyCoins(0),
-          ctx: ctxWithLang,
         });
       }
 
@@ -268,4 +265,6 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       isNavigation: true,
     });
   });
+
+  registerBoardCallbacks(bot);
 };

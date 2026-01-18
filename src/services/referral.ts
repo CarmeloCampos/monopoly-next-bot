@@ -10,6 +10,7 @@ import {
   type Result,
   type Language,
   type MaybeOptional,
+  type MaybeUndefined,
 } from "@/types";
 import {
   asMonopolyCoins,
@@ -51,7 +52,7 @@ async function findUserByReferralCode(
 
 async function findReferralByReferredId(
   referredId: TelegramId,
-): Promise<{ referrer_id: TelegramId } | undefined> {
+): Promise<MaybeUndefined<{ referrer_id: TelegramId }>> {
   return await db.query.referrals.findFirst({
     where: (fields, { eq }) => eq(fields.referred_id, referredId),
   });
