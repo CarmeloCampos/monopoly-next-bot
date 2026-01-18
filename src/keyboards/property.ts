@@ -1,12 +1,15 @@
 import type { InlineKeyboardMarkup } from "telegraf/types";
 import { getText } from "@/i18n";
-import type { Language } from "@/types";
+import { type Language, type UserPropertyData, isPropertyIndex } from "@/types";
+import { getUpgradeCost } from "@/services/upgrade";
+import { STARTER_PROPERTY_INDEX } from "@/constants/game";
 
 export function getPropertyNavigationKeyboard(
   currentIndex: number,
   totalProperties: number,
   propertyIndex: number,
   language: Language,
+  propertyData: UserPropertyData,
 ): InlineKeyboardMarkup {
   const keyboard: InlineKeyboardMarkup["inline_keyboard"] = [];
 
@@ -36,6 +39,28 @@ export function getPropertyNavigationKeyboard(
       callback_data: `property_claim_${propertyIndex}`,
     },
   ]);
+
+  if (propertyIndex !== STARTER_PROPERTY_INDEX && propertyData.level < 4) {
+    if (!isPropertyIndex(propertyIndex)) {
+      return { inline_keyboard: keyboard };
+    }
+
+    const upgradeCost = getUpgradeCost(
+      propertyIndex,
+      propertyData.level as 1 | 2 | 3,
+    );
+    const nextLevel = propertyData.level + 1;
+    const upgradeText = getText(language, "property_upgrade_button")
+      .replace("{level}", String(nextLevel))
+      .replace("{cost}", String(upgradeCost));
+
+    keyboard.push([
+      {
+        text: upgradeText,
+        callback_data: `property_upgrade_${propertyIndex}`,
+      },
+    ]);
+  }
 
   keyboard.push([
     {

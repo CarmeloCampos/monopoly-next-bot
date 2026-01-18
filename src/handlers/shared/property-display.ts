@@ -94,6 +94,7 @@ export async function sendPropertyCard(
     properties.length,
     validPropertyIndex,
     dbUser.language,
+    property,
   );
 
   if (isNavigation) {
