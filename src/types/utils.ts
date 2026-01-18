@@ -3,10 +3,7 @@
  * Re-exports branded types and adds validation converter functions.
  */
 
-import {
-  isTelegramId as validateTelegramId,
-  isMonopolyCoins as validateMonopolyCoins,
-} from "@/utils/guards";
+import { isTelegramId, isMonopolyCoins } from "@/utils/guards";
 
 // Re-export all branded types
 export type {
@@ -29,7 +26,7 @@ export { MAX_REFERRAL_LEVEL, success, failure } from "./branded";
  * @throws Error if value is not a valid Telegram ID
  */
 export function asTelegramId(id: unknown): import("./branded").TelegramId {
-  if (!validateTelegramId(id)) {
+  if (!isTelegramId(id)) {
     throw new Error(`Invalid Telegram ID: ${String(id)}`);
   }
   return id;
@@ -42,7 +39,7 @@ export function asTelegramId(id: unknown): import("./branded").TelegramId {
 export function asMonopolyCoins(
   amount: unknown,
 ): import("./branded").MonopolyCoins {
-  if (!validateMonopolyCoins(amount)) {
+  if (!isMonopolyCoins(amount)) {
     throw new Error(`Invalid MonopolyCoins amount: ${String(amount)}`);
   }
   return amount;
