@@ -1,4 +1,8 @@
-import type { ReplyKeyboardMarkup, InlineKeyboardMarkup } from "telegraf/types";
+import type {
+  ReplyKeyboardMarkup,
+  InlineKeyboardMarkup,
+  KeyboardButton,
+} from "telegraf/types";
 import { getText, getSupportedLanguages, getLanguageName } from "@/i18n";
 import type { Language, MaybeOptional } from "@/types";
 import { LANGUAGE_EMOJIS, CHANNEL_URLS } from "@/constants";
@@ -13,7 +17,7 @@ export function getMainMenuKeyboard(
         { text: getText(language, "menu_balance") },
       ],
       [
-        { text: getText(language, "menu_advance") },
+        { text: getText(language, "menu_board") },
         { text: getText(language, "menu_referral") },
       ],
       [
@@ -21,6 +25,30 @@ export function getMainMenuKeyboard(
         { text: getText(language, "menu_settings") },
       ],
     ],
+    resize_keyboard: true,
+    is_persistent: true,
+  };
+}
+
+export function getBoardKeyboard(
+  language: MaybeOptional<Language>,
+  hasUnlockedItem: boolean,
+): ReplyKeyboardMarkup {
+  const buttons: KeyboardButton[][] = [];
+
+  if (hasUnlockedItem) {
+    buttons.push([
+      { text: getText(language, "board_roll_dice") },
+      { text: getText(language, "board_view_current") },
+    ]);
+  } else {
+    buttons.push([{ text: getText(language, "board_roll_dice") }]);
+  }
+
+  buttons.push([{ text: getText(language, "btn_back") }]);
+
+  return {
+    keyboard: buttons,
     resize_keyboard: true,
     is_persistent: true,
   };
@@ -106,7 +134,7 @@ export function getChannelsKeyboard(
 type MenuButtonKey =
   | "properties"
   | "balance"
-  | "advance"
+  | "board"
   | "referral"
   | "minigames"
   | "settings";
@@ -119,7 +147,7 @@ export function getMenuButtonTexts(
   return {
     properties: getText(language, "menu_properties"),
     balance: getText(language, "menu_balance"),
-    advance: getText(language, "menu_advance"),
+    board: getText(language, "menu_board"),
     referral: getText(language, "menu_referral"),
     minigames: getText(language, "menu_minigames"),
     settings: getText(language, "menu_settings"),
