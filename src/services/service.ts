@@ -67,11 +67,12 @@ async function userHasService(
 
 export async function getUserServices(
   userId: TelegramId,
-): Promise<{ service_index: number }[]> {
+): Promise<{ service_index: number; purchased_at: Date }[]> {
   const services = await db.query.userServices.findMany({
     where: (fields, { eq }) => eq(fields.user_id, userId),
     columns: {
       service_index: true,
+      purchased_at: true,
     },
     orderBy: (fields, { asc }) => asc(fields.service_index),
   });
