@@ -1,6 +1,14 @@
 import type { Context } from "telegraf";
 import type { SelectUser } from "./db";
-import type { MonopolyCoins, Language, MaybeOptional } from "./utils";
+import type {
+  MonopolyCoins,
+  Language,
+  MaybeNull,
+  MaybeUndefined,
+  MaybeOptional,
+  BuyErrorCode,
+  BuyResult,
+} from "./utils";
 
 /**
  * SelectUser with language guaranteed to be non-null.
@@ -44,11 +52,28 @@ function hasLanguage(ctx: BotContext): ctx is BotContextWithLanguage {
   return ctx.dbUser.language !== null && ctx.dbUser.language !== undefined;
 }
 
-export type { BotContext, BotContextWithLanguage };
+export type {
+  BotContext,
+  BotContextWithLanguage,
+  MaybeNull,
+  MaybeUndefined,
+  MaybeOptional,
+  BuyErrorCode,
+  BuyResult,
+};
 export { hasDbUser, hasLanguage };
 export * from "./utils";
 export * from "./db";
-export * from "@/utils/guards";
+export {
+  isTelegramId,
+  isMonopolyCoins,
+  isLanguage,
+  isReferralLevel,
+  isNonEmptyArray,
+  isPropertyIndex,
+  isPropertyLevel,
+  isServiceIndex,
+} from "@/utils/guards";
 
 export interface CallbackMatchResult {
   match: RegExpMatchArray;

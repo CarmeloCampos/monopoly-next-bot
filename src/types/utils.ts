@@ -10,12 +10,16 @@ import {
 
 // Re-export all branded types
 export type {
+  MaybeNull,
+  MaybeUndefined,
   MaybeOptional,
   TelegramId,
   MonopolyCoins,
   ReferralLevel,
   Language,
   Result,
+  BuyErrorCode,
+  BuyResult,
 } from "./branded";
 
 export { MAX_REFERRAL_LEVEL, success, failure } from "./branded";

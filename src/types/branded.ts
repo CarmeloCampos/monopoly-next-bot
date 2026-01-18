@@ -3,6 +3,12 @@
  * This file breaks the circular dependency between types and guards.
  */
 
+/** Utility type for nullable values */
+export type MaybeNull<T> = T | null;
+
+/** Utility type for optional values */
+export type MaybeUndefined<T> = T | undefined;
+
 /** Utility type for nullable or undefined values */
 export type MaybeOptional<T> = T | null | undefined;
 
@@ -48,3 +54,24 @@ export function success<T>(data: T): Success<T> {
 export function failure<E = string>(error: E): Failure<E> {
   return { success: false, error };
 }
+
+/** Error codes for purchase operations */
+export type BuyErrorCode =
+  | "already_owned"
+  | "insufficient_balance"
+  | "not_found";
+
+/** Success result for buy operations */
+interface BuySuccess {
+  success: true;
+}
+
+/** Failure result for buy operations with specific error codes */
+interface BuyFailure {
+  success: false;
+  code: BuyErrorCode;
+  needed?: MonopolyCoins;
+}
+
+/** Unified result type for all purchase operations (properties, services) */
+export type BuyResult = BuySuccess | BuyFailure;
