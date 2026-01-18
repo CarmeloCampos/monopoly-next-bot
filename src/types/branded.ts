@@ -75,3 +75,26 @@ interface BuyFailure {
 
 /** Unified result type for all purchase operations (properties, services) */
 export type BuyResult = BuySuccess | BuyFailure;
+
+/** Error codes for property upgrade operations */
+export type UpgradeErrorCode =
+  | "not_found"
+  | "insufficient_balance"
+  | "cannot_upgrade_free_property"
+  | "max_level_reached"
+  | "color_requirement_not_met";
+
+/** Success result for upgrade operations */
+interface UpgradeSuccess {
+  success: true;
+}
+
+/** Failure result for upgrade operations with specific error codes */
+export interface UpgradeFailure {
+  success: false;
+  code: UpgradeErrorCode;
+  needed?: MonopolyCoins;
+}
+
+/** Unified result type for property upgrade operations */
+export type UpgradeResult = UpgradeSuccess | UpgradeFailure;

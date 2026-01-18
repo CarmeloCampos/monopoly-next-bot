@@ -8,6 +8,7 @@ import type {
   MaybeOptional,
   BuyErrorCode,
   BuyResult,
+  UpgradeFailure,
 } from "./utils";
 
 /**
@@ -60,6 +61,7 @@ export type {
   MaybeOptional,
   BuyErrorCode,
   BuyResult,
+  UpgradeFailure,
 };
 export { hasDbUser, hasLanguage };
 export * from "./utils";
@@ -73,6 +75,7 @@ export {
   isPropertyIndex,
   isPropertyLevel,
   isServiceIndex,
+  isUpgradeErrorCode,
 } from "@/utils/guards";
 
 export interface CallbackMatchResult {

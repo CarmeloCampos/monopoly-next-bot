@@ -4,6 +4,7 @@ import type {
   MonopolyCoins,
   ReferralLevel,
   NonEmptyArray,
+  UpgradeErrorCode,
 } from "@/types/branded";
 import type { PropertyIndex, PropertyLevel } from "@/constants/properties";
 import type { ServiceIndex } from "@/constants/services";
@@ -42,4 +43,15 @@ export function isPropertyLevel(value: unknown): value is PropertyLevel {
 export function isServiceIndex(value: unknown): value is ServiceIndex {
   if (typeof value !== "number" || !Number.isInteger(value)) return false;
   return value >= 0 && value <= 11;
+}
+
+export function isUpgradeErrorCode(value: unknown): value is UpgradeErrorCode {
+  return (
+    typeof value === "string" &&
+    (value === "not_found" ||
+      value === "insufficient_balance" ||
+      value === "cannot_upgrade_free_property" ||
+      value === "max_level_reached" ||
+      value === "color_requirement_not_met")
+  );
 }

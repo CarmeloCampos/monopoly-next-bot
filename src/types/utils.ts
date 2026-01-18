@@ -17,6 +17,9 @@ export type {
   Result,
   BuyErrorCode,
   BuyResult,
+  UpgradeErrorCode,
+  UpgradeResult,
+  UpgradeFailure,
 } from "./branded";
 
 export { MAX_REFERRAL_LEVEL, success, failure } from "./branded";
