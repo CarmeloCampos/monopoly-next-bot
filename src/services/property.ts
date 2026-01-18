@@ -2,10 +2,13 @@ import { db } from "@/db";
 import { users, userProperties, transactions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { info } from "@/utils/logger";
+import { checkAndDeductBalance } from "@/utils/transaction";
 
 import {
   type TelegramId,
   type MonopolyCoins,
+  type MaybeNull,
+  type BuyResult,
   asMonopolyCoins,
   type UserPropertyData,
   isPropertyIndex,
@@ -15,7 +18,6 @@ import {
 import {
   getPropertyByIndex,
   getPropertyIncome,
-  formatIncome,
   type PropertyLevel,
   type PropertyIndex,
 } from "@/constants/properties";
@@ -26,48 +28,31 @@ interface BuyPropertyParams {
   propertyIndex: PropertyIndex;
   level: PropertyLevel;
   cost: MonopolyCoins;
-  ctx: BotContextWithLanguage;
 }
 
-export async function buyProperty(params: BuyPropertyParams): Promise<void> {
-  const { userId, propertyIndex, level, cost, ctx } = params;
-  const { language } = ctx.dbUser;
+export async function buyProperty(
+  params: BuyPropertyParams,
+): Promise<BuyResult> {
+  const { userId, propertyIndex, level, cost } = params;
 
   const property = getPropertyByIndex(propertyIndex);
   if (!property) {
-    throw new Error(`Property not found for index: ${propertyIndex}`);
+    return { success: false, code: "not_found" };
   }
 
-  const propertyName = getText(language, property.nameKey);
-
   if (await userHasProperty(userId, propertyIndex)) {
-    await ctx.reply(getText(language, "error_property_already_owned"));
-    return;
+    return { success: false, code: "already_owned" };
   }
 
   if (cost > 0) {
-    const user = await db.query.users.findFirst({
-      where: (fields, { eq }) => eq(fields.telegram_id, userId),
-      columns: { balance: true },
-    });
-
-    if (!user || user.balance < cost) {
-      await ctx.reply(
-        getText(language, "error_insufficient_balance").replace(
-          "{needed}",
-          String(cost),
-        ),
-      );
-      return;
+    const balanceResult = await checkAndDeductBalance(
+      userId,
+      cost,
+      `Purchase: ${property.nameKey}`,
+    );
+    if (!balanceResult.success) {
+      return { success: false, code: "insufficient_balance", needed: cost };
     }
-
-    await db
-      .update(users)
-      .set({
-        balance: sql`balance - ${cost}`,
-        updated_at: new Date(),
-      })
-      .where(eq(users.telegram_id, userId));
   }
 
   const now = new Date();
@@ -82,39 +67,15 @@ export async function buyProperty(params: BuyPropertyParams): Promise<void> {
     updated_at: now,
   });
 
-  if (cost > 0) {
-    await db.insert(transactions).values({
-      user_id: userId,
-      type: "purchase",
-      amount: cost,
-      description: `Purchase: ${propertyName}`,
-      created_at: now,
-    });
-  }
-
-  const income = getPropertyIncome(propertyIndex, level);
-  const incomeText = income ? formatIncome(income, language) : "N/A";
-
-  const messageKey =
-    cost === 0 ? "property_purchased_free" : "property_purchased";
-  const message = getText(language, messageKey)
-    .replace("{property}", propertyName)
-    .replace("{cost}", String(cost));
-
-  const incomeMessage = getText(language, "property_income").replace(
-    "{income}",
-    incomeText,
-  );
-
-  await ctx.reply(`${message}\n${incomeMessage}`);
-
   info("Property purchased", {
     userId,
     propertyIndex,
-    propertyName,
+    propertyName: property.nameKey,
     cost,
     level,
   });
+
+  return { success: true };
 }
 
 export async function userHasProperty(
@@ -198,7 +159,7 @@ interface ClaimPropertyParams {
 
 export async function claimPropertyEarnings(
   params: ClaimPropertyParams,
-): Promise<MonopolyCoins | null> {
+): Promise<MaybeNull<MonopolyCoins>> {
   const { userId, propertyIndex, ctx } = params;
   const { language } = ctx.dbUser;
 
