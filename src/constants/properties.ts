@@ -115,27 +115,11 @@ export function getPropertyIncome(
   return property.incomePerLevel[levelIndex];
 }
 
-const PROPERTY_COSTS: Record<PropertyIndex, number> = {
-  0: 2750,
-  1: 2750,
-  2: 2750,
-  3: 2750,
-  4: 4600,
-  5: 4600,
-  6: 4600,
-  7: 6900,
-  8: 6900,
-  9: 6900,
-  10: 9200,
-  11: 9200,
-  12: 0,
-} as const;
-
 const UPGRADE_COSTS: Record<PropertyLevel, Record<PropertyColor, number>> = {
-  1: { brown: 0, orange: 0, red: 0, blue: 0 },
-  2: { brown: 3700, orange: 6100, red: 9200, blue: 12200 },
-  3: { brown: 7400, orange: 10200, red: 13800, blue: 18400 },
-  4: { brown: 11100, orange: 15300, red: 20700, blue: 27600 },
+  1: { brown: 3000, orange: 5000, red: 7500, blue: 10000 },
+  2: { brown: 7000, orange: 11000, red: 15500, blue: 20000 },
+  3: { brown: 15000, orange: 21000, red: 27500, blue: 35000 },
+  4: { brown: 27000, orange: 36000, red: 47500, blue: 60000 },
 };
 
 export function getPropertyCost(
@@ -145,12 +129,5 @@ export function getPropertyCost(
   const property = getPropertyByIndex(index);
   if (!property) return undefined;
 
-  if (level === 1) return PROPERTY_COSTS[index];
-
-  const upgradeCost = UPGRADE_COSTS[level]?.[property.color];
-  if (upgradeCost === undefined) {
-    return PROPERTY_COSTS[index];
-  }
-
-  return PROPERTY_COSTS[index] + upgradeCost;
+  return UPGRADE_COSTS[level]?.[property.color] ?? undefined;
 }
