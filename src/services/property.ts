@@ -95,7 +95,7 @@ function isValidUserPropertyData(data: unknown): data is UserPropertyData {
     return false;
   }
 
-  const obj = data as Record<string, unknown>;
+  const obj = data;
 
   return (
     "property_index" in obj &&
