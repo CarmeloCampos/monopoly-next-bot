@@ -7,6 +7,8 @@ export const CALLBACK_DATA = {
   PROPERTY_CLAIM: "property_claim",
   PROPERTY_CLOSE: "property_close",
   PROPERTY_BACK: "property_back",
+  BOARD_BUY_PROPERTY: "board_buy_property",
+  BOARD_BUY_SERVICE: "board_buy_service",
 } as const;
 
 export const CALLBACK_PATTERNS = {
@@ -14,4 +16,6 @@ export const CALLBACK_PATTERNS = {
   START_REFERRAL: /^\/start\s+(\S+)$/,
   PROPERTY_NAV: /^property_nav_(\d+)$/,
   PROPERTY_CLAIM: /^property_claim_(\d+)$/,
+  BOARD_BUY_PROPERTY: /^board_buy_property_(\d+)$/,
+  BOARD_BUY_SERVICE: /^board_buy_service_(\d+)$/,
 } as const;
