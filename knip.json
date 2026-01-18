@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "project": ["src/**/*.ts"],
+  "entry": ["src/types/index.ts", "src/constants/services.ts"],
   "rules": {
     "files": "error",
     "dependencies": "error",
