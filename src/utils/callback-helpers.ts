@@ -1,4 +1,10 @@
-import type { BotContext, CallbackMatchResult } from "@/types";
+import type {
+  BotContext,
+  BotContextWithLanguage,
+  CallbackMatchResult,
+  MaybeNull,
+  BuyResult,
+} from "@/types";
 import { getText } from "@/i18n";
 
 export async function answerUserNotFound(ctx: BotContext): Promise<void> {
@@ -20,7 +26,7 @@ export async function answerInvalidCallback(ctx: BotContext): Promise<void> {
 export function extractCallbackMatch(
   ctx: BotContext,
   pattern: RegExp,
-): CallbackMatchResult | null {
+): MaybeNull<CallbackMatchResult> {
   const { callbackQuery } = ctx;
   if (!callbackQuery || !("data" in callbackQuery) || !callbackQuery.data) {
     return null;
@@ -32,4 +38,37 @@ export function extractCallbackMatch(
   }
 
   return { match, data: callbackQuery.data };
+}
+
+/** Extract error from BuyResult for error handling */
+type BuyFailureResult = Extract<BuyResult, { success: false }>;
+
+interface HandleBuyErrorParams {
+  ctx: BotContextWithLanguage;
+  result: BuyFailureResult;
+  alreadyOwnedKey: string;
+  notFoundKey: string;
+}
+
+/**
+ * Handles buy result errors uniformly for properties and services.
+ * Answers callback query with appropriate error message.
+ */
+export async function handleBuyError(
+  params: HandleBuyErrorParams,
+): Promise<void> {
+  const { ctx, result, alreadyOwnedKey, notFoundKey } = params;
+  const { language } = ctx.dbUser;
+
+  if (result.code === "already_owned") {
+    await ctx.answerCbQuery(getText(language, alreadyOwnedKey));
+  } else if (result.code === "insufficient_balance" && result.needed) {
+    const msg = getText(language, "error_insufficient_balance").replace(
+      "{needed}",
+      String(result.needed),
+    );
+    await ctx.answerCbQuery(msg);
+  } else {
+    await ctx.answerCbQuery(getText(language, notFoundKey));
+  }
 }

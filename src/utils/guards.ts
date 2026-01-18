@@ -6,6 +6,7 @@ import type {
   NonEmptyArray,
 } from "@/types/branded";
 import type { PropertyIndex, PropertyLevel } from "@/constants/properties";
+import type { ServiceIndex } from "@/constants/services";
 
 export function isTelegramId(value: unknown): value is TelegramId {
   return typeof value === "number" && value > 0 && Number.isInteger(value);
@@ -36,4 +37,9 @@ export function isPropertyIndex(value: unknown): value is PropertyIndex {
 export function isPropertyLevel(value: unknown): value is PropertyLevel {
   if (typeof value !== "number" || !Number.isInteger(value)) return false;
   return value >= 1 && value <= 4;
+}
+
+export function isServiceIndex(value: unknown): value is ServiceIndex {
+  if (typeof value !== "number" || !Number.isInteger(value)) return false;
+  return value >= 0 && value <= 11;
 }
