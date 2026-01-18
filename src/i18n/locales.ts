@@ -26,7 +26,7 @@ const locales: Locales = {
     more_commands: "Больше команд скоро!",
     menu_properties: "🏠 Недвижимость",
     menu_balance: "💰 MonopolyCoins",
-    menu_advance: "🎲 Вперёд",
+    menu_board: "🎲 Доска",
     menu_referral: "👥 Рефералы",
     menu_minigames: "🎮 Мини-игры",
     menu_settings: "⚙️ Настройки",
@@ -51,7 +51,6 @@ const locales: Locales = {
     referral_welcome_bonus: "Бонус приветствия за реферала",
     menu_properties_coming_soon: "🏠 Недвижимость - Скоро...",
     menu_balance_message: "💰 Ваш баланс: {balance} MC",
-    menu_advance_coming_soon: "🎲 Вперёд - Скоро...",
     menu_referral_code: "👥 Ваш реферальный код: `{code}`",
     menu_referral_share_link:
       "\n\nПоделитесь этой ссылкой:\nt.me/MonopolyFunBot?start={code}",
@@ -95,6 +94,31 @@ const locales: Locales = {
     property_days_ago: "{days} д. назад",
     property_minutes_ago: "{minutes} мин. назад",
     welcome_existing_user: "👋 Добро пожаловать в Monopoly Bot!",
+    board_roll_dice: "🎲 Бросить Кубик",
+    board_view_current: "👁️ Посмотреть Свойство",
+    board_welcome:
+      "🎲 Добро пожаловать на доску!\n\nБросьте кубик, чтобы открыть новые свойства и услуги.",
+    board_rolled_property: "🎲 Вы выбросили {roll} и открыли: {property}!",
+    board_rolled_service: "🎲 Вы выбросили {roll} и открыли: {service}!",
+    board_unlocked_property:
+      "🏠 **{property}**\n\n🎨 Цвет: {color}\n\n💰 **Стоимость по уровням:**\n⭐ Уровень 1: {cost1} MC\n⭐ Уровень 2: {cost2} MC\n⭐ Уровень 3: {cost3} MC\n⭐ Уровень 4: {cost4} MC\n\n💰 **Доход по уровням:**\n⭐ Уровень 1: {income1}/ч\n⭐ Уровень 2: {income2}/ч\n⭐ Уровень 3: {income3}/ч\n⭐ Уровень 4: {income4}/ч",
+    board_unlocked_service:
+      "⚡ **{service}**\n\n💰 Стоимость: {cost} MC\n📈 Буст: +{boost}",
+    board_purchased: "✅ Покупка завершена! Вы можете бросить кубик снова.",
+    board_no_item: "📭 У вас пока нет открытых свойств или услуг.",
+    error_cannot_advance_property:
+      "❌ Вы не можете продолжить, пока не купите открытое свойство.",
+    error_cannot_advance_service:
+      "❌ Вы не можете продолжить, пока не купите открытую услугу.",
+    error_service_not_found: "❌ Услуга не найдена",
+    error_service_already_owned: "❌ У вас уже есть эта услуга",
+    error_no_items_available:
+      "❌ Нет доступных свойств или услуг. Вы уже владеете всем!",
+    service_purchased: "🎉 Вы приобрели {service} за {cost} MC!",
+    service_purchased_free: "🎉 Вы приобрели {service} совершенно бесплатно!",
+    service_cost: "💰 Стоимость: {cost} MC",
+    service_boost: "📈 Буст: +{boost}%",
+    btn_buy: "✅ Купить",
   },
   en: {
     language_selection: "Please select your language",
@@ -108,7 +132,7 @@ const locales: Locales = {
     more_commands: "More commands coming soon!",
     menu_properties: "🏠 Properties",
     menu_balance: "💰 MonopolyCoins",
-    menu_advance: "🎲 Advance",
+    menu_board: "🎲 Board",
     menu_referral: "👥 Referrals",
     menu_minigames: "🎮 Mini-games",
     menu_settings: "⚙️ Settings",
@@ -132,7 +156,6 @@ const locales: Locales = {
     referral_welcome_bonus: "Welcome bonus for referral",
     menu_properties_coming_soon: "🏠 Properties - Coming soon...",
     menu_balance_message: "💰 Your balance: {balance} MC",
-    menu_advance_coming_soon: "🎲 Advance - Coming soon...",
     menu_referral_code: "👥 Your referral code: `{code}`",
     menu_referral_share_link:
       "\n\nShare this link:\nt.me/MonopolyFunBot?start={code}",
@@ -174,6 +197,44 @@ const locales: Locales = {
     property_days_ago: "{days}d ago",
     property_minutes_ago: "{minutes}m ago",
     welcome_existing_user: "👋 Welcome back to Monopoly Bot!",
+    board_roll_dice: "🎲 Roll Dice",
+    board_view_current: "👁️ View Property",
+    board_welcome:
+      "🎲 Welcome to Board!\n\nRoll dice to discover new properties and services.",
+    board_rolled_property: "🎲 You rolled a {roll} and discovered: {property}!",
+    board_rolled_service: "🎲 You rolled a {roll} and discovered: {service}!",
+    board_unlocked_property:
+      "🏠 **{property}**\n\n🎨 Color: {color}\n\n💰 **Cost per Level:**\n⭐ Level 1: {cost1} MC\n⭐ Level 2: {cost2} MC\n⭐ Level 3: {cost3} MC\n⭐ Level 4: {cost4} MC\n\n💰 **Income per Level:**\n⭐ Level 1: {income1}/h\n⭐ Level 2: {income2}/h\n⭐ Level 3: {income3}/h\n⭐ Level 4: {income4}/h",
+    board_unlocked_service:
+      "⚡ **{service}**\n\n💰 Cost: {cost} MC\n📈 Boost: +{boost}",
+    board_purchased: "✅ Purchase complete! You can roll dice again.",
+    board_no_item:
+      "📭 You don't have any discovered property or service at the moment.",
+    error_cannot_advance_property:
+      "❌ You cannot advance until you purchase the discovered property.",
+    error_cannot_advance_service:
+      "❌ You cannot advance until you purchase the discovered service.",
+    error_service_not_found: "❌ Service not found",
+    error_service_already_owned: "❌ You already own this service",
+    error_no_items_available:
+      "❌ No properties or services available. You already own everything!",
+    service_purchased: "🎉 You purchased {service} for {cost} MC!",
+    service_purchased_free: "🎉 You acquired {service} completely for free!",
+    service_cost: "💰 Cost: {cost} MC",
+    service_boost: "📈 Boost: +{boost}%",
+    btn_buy: "✅ Buy",
+    service_train_orient: "Orient Express",
+    service_train_transiberiano: "Transiberiano",
+    service_train_bullet: "Bullet Train",
+    service_train_polar: "Expreso Polar",
+    service_light_itaipu: "Itaipú Power Plant",
+    service_light_chernobyl: "Chernobyl Power Plant",
+    service_water_segovia: "Segovia Aqueduct",
+    service_water_arcos: "Arcos Aqueduct",
+    service_cinema: "Grauman's Chinese Theatre",
+    service_museum: "American Museum of Natural History",
+    service_gas: "Shell Station",
+    service_pharmacy: "CVS Pharmacy",
   },
   es: {
     language_selection: "Por favor, selecciona tu idioma",
@@ -187,7 +248,7 @@ const locales: Locales = {
     more_commands: "¡Más comandos pronto!",
     menu_properties: "🏠 Propiedades",
     menu_balance: "💰 MonopolyCoins",
-    menu_advance: "🎲 Avanzar",
+    menu_board: "🎲 Tablero",
     menu_referral: "👥 Referidos",
     menu_minigames: "🎮 Minijuegos",
     menu_settings: "⚙️ Configuración",
@@ -212,7 +273,6 @@ const locales: Locales = {
     referral_welcome_bonus: "Bono de bienvenida por referido",
     menu_properties_coming_soon: "🏠 Propiedades - Próximamente...",
     menu_balance_message: "💰 Tu balance: {balance} MC",
-    menu_advance_coming_soon: "🎲 Avanzar - Próximamente...",
     menu_referral_code: "👥 Tu código de referido: `{code}`",
     menu_referral_share_link:
       "\n\nComparte este enlace:\nt.me/MonopolyFunBot?start={code}",
@@ -256,6 +316,44 @@ const locales: Locales = {
     property_hours_ago: "hace {hours}h",
     property_days_ago: "hace {days}d",
     property_minutes_ago: "hace {minutes}m",
+    btn_buy: "✅ Comprar",
+    board_roll_dice: "🎲 Tirar Dados",
+    board_view_current: "👁️ Ver Propiedad",
+    board_welcome:
+      "🎲 ¡Bienvenido al Tablero!\n\nTira los dados para descubrir nuevas propiedades y servicios.",
+    board_rolled_property: "🎲 ¡Sacaste un {roll} y descubriste: {property}!",
+    board_rolled_service: "🎲 ¡Sacaste un {roll} y descubriste: {service}!",
+    board_unlocked_property:
+      "🏠 **{property}**\n\n🎨 Color: {color}\n\n💰 **Costo por Nivel:**\n⭐ Nivel 1: {cost1} MC\n⭐ Nivel 2: {cost2} MC\n⭐ Nivel 3: {cost3} MC\n⭐ Nivel 4: {cost4} MC\n\n💰 **Ingreso por Nivel:**\n⭐ Nivel 1: {income1}/h\n⭐ Nivel 2: {income2}/h\n⭐ Nivel 3: {income3}/h\n⭐ Nivel 4: {income4}/h",
+    board_unlocked_service:
+      "⚡ **{service}**\n\n💰 Costo: {cost} MC\n📈 Boost: +{boost}",
+    board_purchased: "✅ ¡Compra realizada! Puedes tirar los dados de nuevo.",
+    board_no_item:
+      "📭 No tienes ninguna propiedad o servicio descubierto por ahora.",
+    error_cannot_advance_property:
+      "❌ No puedes avanzar hasta que compres la propiedad descubierta.",
+    error_cannot_advance_service:
+      "❌ No puedes avanzar hasta que compres el servicio descubierto.",
+    error_service_not_found: "❌ Servicio no encontrado",
+    error_service_already_owned: "❌ Ya tienes este servicio",
+    error_no_items_available:
+      "❌ No hay propiedades o servicios disponibles. ¡Ya posees todo!",
+    service_purchased: "🎉 ¡Has comprado {service} por {cost} MC!",
+    service_purchased_free: "🎉 ¡Has adquirido {service} completamente gratis!",
+    service_cost: "💰 Costo: {cost} MC",
+    service_boost: "📈 Boost: +{boost}%",
+    service_train_orient: "Orient Express",
+    service_train_transiberiano: "Transiberiano",
+    service_train_bullet: "Bullet Train",
+    service_train_polar: "Expreso Polar",
+    service_light_itaipu: "Central de Itaipú",
+    service_light_chernobyl: "Central de Chernobyl",
+    service_water_segovia: "Acueducto de Segovia",
+    service_water_arcos: "Acueducto de los Arcos",
+    service_cinema: "Grauman's Chinese Theatre",
+    service_museum: "American Museum of Natural History",
+    service_gas: "Shell Station",
+    service_pharmacy: "CVS Pharmacy",
     welcome_existing_user: "👋 ¡Bienvenido a Monopoly Bot!",
   },
   pt: {
@@ -270,7 +368,7 @@ const locales: Locales = {
     more_commands: "Mais comandos em breve!",
     menu_properties: "🏠 Propriedades",
     menu_balance: "💰 MonopolyCoins",
-    menu_advance: "🎲 Avançar",
+    menu_board: "🎲 Tabuleiro",
     menu_referral: "👥 Indicações",
     menu_minigames: "🎮 Mini-jogos",
     menu_settings: "⚙️ Configurações",
@@ -340,6 +438,45 @@ const locales: Locales = {
     property_days_ago: "{days}d atrás",
     property_minutes_ago: "{minutes}m atrás",
     welcome_existing_user: "👋 Bem-vindo ao Monopoly Bot!",
+    board_roll_dice: "🎲 Lançar Dados",
+    board_view_current: "👁️ Ver Propriedade",
+    board_welcome:
+      "🎲 Bem-vindo ao Tabuleiro!\n\nLance os dados para descobrir novas propriedades e serviços.",
+    board_rolled_property: "🎲 Você tirou {roll} e descobriu: {property}!",
+    board_rolled_service: "🎲 Você tirou {roll} e descobriu: {service}!",
+    board_unlocked_property:
+      "🏠 **{property}**\n\n🎨 Cor: {color}\n\n💰 **Custo por Nível:**\n⭐ Nível 1: {cost1} MC\n⭐ Nível 2: {cost2} MC\n⭐ Nível 3: {cost3} MC\n⭐ Nível 4: {cost4} MC\n\n💰 **Renda por Nível:**\n⭐ Nível 1: {income1}/h\n⭐ Nível 2: {income2}/h\n⭐ Nível 3: {income3}/h\n⭐ Nível 4: {income4}/h",
+    board_unlocked_service:
+      "⚡ **{service}**\n\n💰 Custo: {cost} MC\n📈 Boost: +{boost}",
+    board_purchased:
+      "✅ Compra concluída! Você pode lançar os dados novamente.",
+    board_no_item:
+      "📭 Você não tem nenhuma propriedade ou serviço descoberto no momento.",
+    error_cannot_advance_property:
+      "❌ Você não pode avançar até comprar a propriedade descoberta.",
+    error_cannot_advance_service:
+      "❌ Você não pode avançar até comprar o serviço descoberto.",
+    error_service_not_found: "❌ Serviço não encontrado",
+    error_service_already_owned: "❌ Você já possui este serviço",
+    error_no_items_available:
+      "❌ Nenhuma propriedade ou serviço disponível. Você já possui tudo!",
+    service_purchased: "🎉 Você comprou {service} por {cost} MC!",
+    service_purchased_free:
+      "🎉 Você adquiriu {service} completamente de graça!",
+    service_cost: "💰 Custo: {cost} MC",
+    service_boost: "📈 Boost: +{boost}%",
+    service_train_orient: "Orient Express",
+    service_train_transiberiano: "Transiberiano",
+    service_train_bullet: "Bullet Train",
+    service_train_polar: "Expreso Polar",
+    service_light_itaipu: "Central de Itaipú",
+    service_light_chernobyl: "Central de Chernobyl",
+    service_water_segovia: "Acueducto de Segovia",
+    service_water_arcos: "Acueducto de los Arcos",
+    service_cinema: "Grauman's Chinese Theatre",
+    service_museum: "American Museum of Natural History",
+    service_gas: "Shell Station",
+    service_pharmacy: "CVS Pharmacy",
   },
 };
 
