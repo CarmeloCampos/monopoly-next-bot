@@ -27,6 +27,28 @@ export function getPropertyImageUrl(
   return `${IMAGE_BASE_URL}?${params.toString()}`;
 }
 
+export function getServiceImageUrl(
+  serviceIndex: number,
+  serviceName: string,
+): string {
+  const encodedName = encodeURIComponent(serviceName);
+  const text = `service_${serviceIndex}_${encodedName}`;
+  const gradient = encodeURIComponent(
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+  );
+
+  const params = new URLSearchParams({
+    w: "400",
+    h: "400",
+    pattern: "stripes",
+    gradient,
+    text,
+    f: "png",
+  });
+
+  return `${IMAGE_BASE_URL}?${params.toString()}`;
+}
+
 function formatElapsedTime(date: Date, language: Language): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
