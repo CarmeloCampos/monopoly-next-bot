@@ -17,7 +17,7 @@ import {
   getChannelsKeyboard,
   getSettingsKeyboard,
 } from "@/keyboards";
-import { info, error as logError } from "@/utils/logger";
+import { info, error } from "@/utils/logger";
 import {
   answerUserNotFound,
   answerInvalidCallback,
@@ -106,7 +106,7 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       });
       await ctx.deleteMessage();
     } catch (err) {
-      logError("Error updating language", {
+      error("Error updating language", {
         userId: dbUser.telegram_id,
         error: err instanceof Error ? err.message : String(err),
       });
