@@ -22,6 +22,7 @@ import {
 import { userHasProperty } from "@/services/property";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
 import { sendPropertyCard } from "@/handlers/shared/property-display";
+import { sendServiceCard } from "@/handlers/shared/service-display";
 import { handleBoard, handleRollDice, handleViewCurrent } from "./board-menu";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
@@ -87,6 +88,9 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
       case menuTexts.properties:
         await handleProperties(ctx);
         break;
+      case menuTexts.services:
+        await handleServices(ctx);
+        break;
       case menuTexts.balance:
         await handleBalance(ctx);
         break;
@@ -144,5 +148,13 @@ async function handleMinigames(ctx: BotContextWithLanguage): Promise<void> {
 async function handleSettings(ctx: BotContextWithLanguage): Promise<void> {
   await ctx.reply(getText(ctx.dbUser.language, "menu_settings"), {
     reply_markup: getSettingsKeyboard(ctx.dbUser.language),
+  });
+}
+
+async function handleServices(ctx: BotContextWithLanguage): Promise<void> {
+  await sendServiceCard({
+    ctx,
+    serviceIndex: 0,
+    isNavigation: false,
   });
 }

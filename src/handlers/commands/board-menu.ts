@@ -13,7 +13,7 @@ import {
   getPropertyIncome,
 } from "@/constants/properties";
 import { getServiceByIndex } from "@/constants/services";
-import { getPropertyImageUrl } from "@/utils/property";
+import { getPropertyImageUrl, getServiceImageUrl } from "@/utils/property";
 
 export async function handleBoard(ctx: BotContextWithLanguage): Promise<void> {
   const { dbUser } = ctx;
@@ -203,7 +203,10 @@ async function showUnlockedService(
     message = message.replace("{roll}", String(roll));
   }
 
-  await ctx.reply(message, {
+  const imageUrl = getServiceImageUrl(itemIndex, serviceName);
+
+  await ctx.replyWithPhoto(imageUrl, {
+    caption: message,
     parse_mode: "Markdown",
     reply_markup: {
       inline_keyboard: [
