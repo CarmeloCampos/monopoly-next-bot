@@ -2,7 +2,7 @@ import type { MaybeUndefined } from "@/types";
 
 export type PropertyLevel = 1 | 2 | 3 | 4;
 
-type PropertyColor = "brown" | "orange" | "red" | "blue";
+export type PropertyColor = "brown" | "orange" | "red" | "blue";
 
 export interface PropertyInfo {
   nameKey: string;
@@ -131,3 +131,20 @@ export function getPropertyCost(
 
   return UPGRADE_COSTS[level]?.[property.color] ?? undefined;
 }
+
+export const PROPERTY_COUNT_BY_COLOR: Record<PropertyColor, number> = {
+  brown: 4,
+  orange: 3,
+  red: 3,
+  blue: 2,
+};
+
+export const COLOR_COMPLETION_BOOSTS: Record<
+  PropertyColor,
+  { level3: number; level4: number }
+> = {
+  brown: { level3: 0.15, level4: 0.25 },
+  orange: { level3: 0.2, level4: 0.3 },
+  red: { level3: 0.2, level4: 0.3 },
+  blue: { level3: 0.25, level4: 0.4 },
+};

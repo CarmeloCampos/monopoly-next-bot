@@ -22,6 +22,7 @@ import {
   type PropertyIndex,
 } from "@/constants/properties";
 import { getText } from "@/i18n";
+import { calculateTotalBoost } from "@/services/boost";
 
 interface BuyPropertyParams {
   userId: TelegramId;
@@ -130,14 +131,19 @@ export async function getUserProperties(
   throw new Error("Invalid user property data returned from database");
 }
 
-function calculatePropertyEarnings(property: UserPropertyData): MonopolyCoins {
-  // Validate property_index and level before using with getPropertyIncome
+async function calculatePropertyEarnings(
+  userId: TelegramId,
+  property: UserPropertyData,
+): Promise<MonopolyCoins> {
   if (
     !isPropertyIndex(property.property_index) ||
     !isPropertyLevel(property.level)
   ) {
     return asMonopolyCoins(0);
   }
+
+  const propertyInfo = getPropertyByIndex(property.property_index);
+  if (!propertyInfo) return asMonopolyCoins(0);
 
   const income = getPropertyIncome(property.property_index, property.level);
 
@@ -146,7 +152,10 @@ function calculatePropertyEarnings(property: UserPropertyData): MonopolyCoins {
   const now = new Date();
   const diffHours =
     (now.getTime() - property.last_generated_at.getTime()) / (1000 * 60 * 60);
-  const newEarnings = income * diffHours;
+
+  const totalBoost = await calculateTotalBoost(userId, propertyInfo.color);
+  const boostedIncome = income * totalBoost;
+  const newEarnings = boostedIncome * diffHours;
 
   return asMonopolyCoins(property.accumulated_unclaimed + newEarnings);
 }
@@ -173,7 +182,7 @@ export async function claimPropertyEarnings(
     return null;
   }
 
-  const totalEarnings = await calculatePropertyEarnings(property);
+  const totalEarnings = await calculatePropertyEarnings(userId, property);
 
   if (totalEarnings <= 0) {
     await ctx.reply(getText(language, "error_no_earnings_to_claim"));
