@@ -130,7 +130,7 @@ export function registerUpgradeCallbacks(bot: Telegraf<BotContext>): void {
       const propertyName = getText(ctx.dbUser.language, property.nameKey);
       const upgradedProperty =
         currentIndex >= 0 ? properties[currentIndex] : undefined;
-      const newLevel = upgradedProperty ? upgradedProperty.level + 1 : 0;
+      const newLevel = upgradedProperty ? upgradedProperty.level : 0;
       const msg = getText(ctx.dbUser.language, "property_upgrade_success")
         .replace("{property}", propertyName)
         .replace("{level}", String(newLevel));
