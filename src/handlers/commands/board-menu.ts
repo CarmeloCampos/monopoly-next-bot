@@ -149,8 +149,7 @@ async function showUnlockedProperty(
     message = message.replace("{roll}", String(roll));
   }
 
-  // Generate property image URL
-  const imageUrl = getPropertyImageUrl(itemIndex, propertyName);
+  const imageUrl = getPropertyImageUrl(itemIndex, 1);
 
   await ctx.replyWithPhoto(imageUrl, {
     caption: message,
@@ -203,7 +202,7 @@ async function showUnlockedService(
     message = message.replace("{roll}", String(roll));
   }
 
-  const imageUrl = getServiceImageUrl(itemIndex, serviceName);
+  const imageUrl = getServiceImageUrl(itemIndex);
 
   await ctx.replyWithPhoto(imageUrl, {
     caption: message,

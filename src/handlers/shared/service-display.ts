@@ -77,8 +77,7 @@ export async function sendServiceCard(
     return;
   }
 
-  const serviceName = getText(dbUser.language, serviceInfo.nameKey);
-  const imageUrl = getServiceImageUrl(validServiceIndex, serviceName);
+  const imageUrl = getServiceImageUrl(validServiceIndex);
 
   const detailMessage = buildServiceDetailMessage(
     service,

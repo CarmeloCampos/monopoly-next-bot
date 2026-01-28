@@ -1,11 +1,16 @@
 import type { Language, UserPropertyData } from "@/types";
-import { isPropertyIndex, isPropertyLevel } from "@/utils/guards";
+import {
+  isPropertyIndex,
+  isPropertyLevel,
+  isServiceIndex,
+} from "@/utils/guards";
 import { getText } from "@/i18n";
 import { getPropertyIncome, type PropertyInfo } from "@/constants/properties";
+import { PROPERTY_IMAGES, SERVICE_IMAGES } from "@/constants/images";
 
 const IMAGE_BASE_URL = "https://via.assets.so/img.jpg";
 
-export function getPropertyImageUrl(
+function fallbackPropertyImageUrl(
   propertyIndex: number,
   propertyName: string,
 ): string {
@@ -27,7 +32,7 @@ export function getPropertyImageUrl(
   return `${IMAGE_BASE_URL}?${params.toString()}`;
 }
 
-export function getServiceImageUrl(
+function fallbackServiceImageUrl(
   serviceIndex: number,
   serviceName: string,
 ): string {
@@ -47,6 +52,26 @@ export function getServiceImageUrl(
   });
 
   return `${IMAGE_BASE_URL}?${params.toString()}`;
+}
+
+export function getPropertyImageUrl(
+  propertyIndex: number,
+  level: number,
+): string {
+  if (!isPropertyIndex(propertyIndex) || !isPropertyLevel(level)) {
+    return fallbackPropertyImageUrl(propertyIndex, `property_${propertyIndex}`);
+  }
+
+  const images = PROPERTY_IMAGES[propertyIndex];
+  return images[level];
+}
+
+export function getServiceImageUrl(serviceIndex: number): string {
+  if (!isServiceIndex(serviceIndex)) {
+    return fallbackServiceImageUrl(serviceIndex, `service_${serviceIndex}`);
+  }
+
+  return SERVICE_IMAGES[serviceIndex];
 }
 
 function formatElapsedTime(date: Date, language: Language): string {
@@ -80,7 +105,6 @@ export function buildPropertyDetailMessage(
 ): string {
   const propertyName = getText(language, propertyInfo.nameKey);
 
-  // Validate property_index and level before using with getPropertyIncome
   const validIndex = isPropertyIndex(property.property_index)
     ? property.property_index
     : null;

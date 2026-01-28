@@ -80,8 +80,7 @@ export async function sendPropertyCard(
     return;
   }
 
-  const propertyName = getText(dbUser.language, propertyInfo.nameKey);
-  const imageUrl = getPropertyImageUrl(property.property_index, propertyName);
+  const imageUrl = getPropertyImageUrl(property.property_index, property.level);
 
   const detailMessage = buildPropertyDetailMessage(
     property,
