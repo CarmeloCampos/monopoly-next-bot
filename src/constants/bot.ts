@@ -12,6 +12,7 @@ export const CALLBACK_DATA = {
   BOARD_BUY_SERVICE: "board_buy_service",
   SERVICE_CLOSE: "service_close",
   SERVICE_BACK: "service_back",
+  MINIGAME_CANCEL: "minigame_cancel",
 } as const;
 
 export const CALLBACK_PATTERNS = {
@@ -23,4 +24,6 @@ export const CALLBACK_PATTERNS = {
   SERVICE_NAV: /^service_nav_(\d+)$/,
   BOARD_BUY_PROPERTY: /^board_buy_property_(\d+)$/,
   BOARD_BUY_SERVICE: /^board_buy_service_(\d+)$/,
+  MINIGAME_SELECT: /^minigame_(dice|darts|basketball|football|bowling|slots)$/,
+  MINIGAME_DICE_PICK: /^dice_pick_([1-6])$/,
 } as const;

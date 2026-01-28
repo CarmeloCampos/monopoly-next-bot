@@ -37,6 +37,7 @@ import { sendPropertyCard } from "@/handlers/shared/property-display";
 import { registerBoardCallbacks } from "./board";
 import { registerUpgradeCallbacks } from "./upgrade";
 import { registerServiceCallbacks } from "./service";
+import { registerMinigameCallbacks } from "./minigames";
 
 export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   bot.action(CALLBACK_PATTERNS.LANGUAGE, async (ctx: BotContext) => {
@@ -271,4 +272,5 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   registerBoardCallbacks(bot);
   registerUpgradeCallbacks(bot);
   registerServiceCallbacks(bot);
+  registerMinigameCallbacks(bot);
 };

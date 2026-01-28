@@ -14,11 +14,12 @@ export function getMainMenuKeyboard(
     keyboard: [
       [
         { text: getText(language, "menu_properties") },
+        { text: getText(language, "menu_advance") },
         { text: getText(language, "menu_services") },
       ],
       [
         { text: getText(language, "menu_balance") },
-        { text: getText(language, "menu_board") },
+        { text: getText(language, "menu_minigames") },
       ],
       [
         { text: getText(language, "menu_referral") },
@@ -133,6 +134,7 @@ export function getChannelsKeyboard(
 
 type MenuButtonKey =
   | "properties"
+  | "advance"
   | "services"
   | "balance"
   | "board"
@@ -147,6 +149,7 @@ export function getMenuButtonTexts(
 ): MenuButtonTexts {
   return {
     properties: getText(language, "menu_properties"),
+    advance: getText(language, "menu_advance"),
     services: getText(language, "menu_services"),
     balance: getText(language, "menu_balance"),
     board: getText(language, "menu_board"),

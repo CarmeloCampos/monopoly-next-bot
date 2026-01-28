@@ -1,3 +1,4 @@
 export * from "./main-menu";
 export * from "./property";
 export * from "./service";
+export * from "./minigames";

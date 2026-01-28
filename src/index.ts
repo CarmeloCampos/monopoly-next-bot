@@ -4,6 +4,7 @@ import { setLogLevel, info, error } from "@/utils/logger";
 import type { BotContext } from "@/types";
 import { registerCommands } from "@/handlers/commands";
 import { registerCallbacks } from "@/handlers/callbacks";
+import { registerDiceHandler } from "@/handlers/dice";
 import { autoUserMiddleware } from "@/middleware/auto-user";
 import { languageMiddleware } from "@/middleware/language";
 import { startPolling, startWebhook } from "@/bot/launcher";
@@ -27,6 +28,7 @@ bot.use(languageMiddleware);
 
 registerCommands(bot);
 registerCallbacks(bot);
+registerDiceHandler(bot);
 
 bot.catch((err, ctx) => {
   const errorMessage = err instanceof Error ? err.message : String(err);

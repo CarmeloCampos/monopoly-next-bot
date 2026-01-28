@@ -24,6 +24,8 @@ import { STARTER_PROPERTY_INDEX } from "@/constants/game";
 import { sendPropertyCard } from "@/handlers/shared/property-display";
 import { sendServiceCard } from "@/handlers/shared/service-display";
 import { handleBoard, handleRollDice, handleViewCurrent } from "./board-menu";
+import { handleMinigames, handleBetAmount } from "./minigames-menu";
+import { isAwaitingBet } from "@/services/minigame-state";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -84,6 +86,14 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
     const messageText = ctx.message.text;
     const menuTexts = getMenuButtonTexts(dbUser.language);
 
+    if (messageText && isAwaitingBet(dbUser.telegram_id)) {
+      const amount = Number.parseFloat(messageText);
+      if (!isNaN(amount) && isFinite(amount)) {
+        await handleBetAmount(ctx, amount);
+        return;
+      }
+    }
+
     switch (messageText) {
       case menuTexts.properties:
         await handleProperties(ctx);
@@ -95,6 +105,9 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
         await handleBalance(ctx);
         break;
       case menuTexts.board:
+        await handleBoard(ctx);
+        break;
+      case menuTexts.advance:
         await handleBoard(ctx);
         break;
       case menuTexts.referral:
@@ -139,10 +152,6 @@ async function handleReferral(ctx: BotContextWithLanguage): Promise<void> {
       parse_mode: "Markdown",
     },
   );
-}
-
-async function handleMinigames(ctx: BotContextWithLanguage): Promise<void> {
-  await ctx.reply(getText(ctx.dbUser.language, "menu_minigames_coming_soon"));
 }
 
 async function handleSettings(ctx: BotContextWithLanguage): Promise<void> {
