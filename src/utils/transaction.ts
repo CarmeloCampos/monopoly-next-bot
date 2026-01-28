@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users, transactions } from "@/db/schema";
+import { users, transactions, miniGameLogs } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import type { MonopolyCoins, TelegramId } from "@/types";
 
@@ -40,4 +40,44 @@ export async function checkAndDeductBalance(
   });
 
   return { success: true, userBalance: user.balance };
+}
+
+export async function addBalanceAndTransaction(
+  userId: TelegramId,
+  amount: MonopolyCoins,
+  type: "referral" | "earning" | "minigame_winning" | "minigame_refund",
+  description: string,
+): Promise<void> {
+  await db
+    .update(users)
+    .set({
+      balance: sql`balance + ${amount}`,
+      updated_at: new Date(),
+    })
+    .where(eq(users.telegram_id, userId));
+
+  await db.insert(transactions).values({
+    user_id: userId,
+    type,
+    amount,
+    description,
+    created_at: new Date(),
+  });
+}
+
+export async function addMinigameLog(
+  userId: TelegramId,
+  gameType: string,
+  cost: MonopolyCoins,
+  result: string,
+  winnings: MonopolyCoins,
+): Promise<void> {
+  await db.insert(miniGameLogs).values({
+    user_id: userId,
+    game_type: gameType,
+    cost,
+    result,
+    winnings,
+    created_at: new Date(),
+  });
 }

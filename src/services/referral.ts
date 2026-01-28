@@ -1,6 +1,5 @@
 import { db } from "@/db";
-import { users, referrals, referralEarnings, transactions } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { referrals, referralEarnings } from "@/db/schema";
 import {
   isReferralLevel,
   isLanguage,
@@ -22,6 +21,7 @@ import { REFERRAL_BONUS, getReferralBonusByLevel } from "@/constants/game";
 import { DEFAULT_LANGUAGE } from "@/constants";
 import { info } from "@/utils/logger";
 import { buildReferralLevelMessage } from "@/i18n";
+import { addBalanceAndTransaction } from "@/utils/transaction";
 
 /** Represents a single referrer in the chain who received a bonus */
 interface ReferrerReward {
@@ -150,28 +150,5 @@ export async function processReferral(
     bonusGiven: asMonopolyCoins(REFERRAL_BONUS.INVITED),
     referrersRewarded: chain.length,
     referrers,
-  });
-}
-
-async function addBalanceAndTransaction(
-  userId: TelegramId,
-  amount: MonopolyCoins,
-  type: "referral" | "earning",
-  description: string,
-): Promise<void> {
-  await db
-    .update(users)
-    .set({
-      balance: sql`balance + ${amount}`,
-      updated_at: new Date(),
-    })
-    .where(eq(users.telegram_id, userId));
-
-  await db.insert(transactions).values({
-    user_id: userId,
-    type,
-    amount,
-    description,
-    created_at: new Date(),
   });
 }
