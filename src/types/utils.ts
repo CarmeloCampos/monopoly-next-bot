@@ -10,6 +10,7 @@ export type {
   MaybeNull,
   MaybeUndefined,
   MaybeOptional,
+  MaybeVoid,
   TelegramId,
   MonopolyCoins,
   ReferralLevel,

@@ -12,6 +12,9 @@ export type MaybeUndefined<T> = T | undefined;
 /** Utility type for nullable or undefined values */
 export type MaybeOptional<T> = T | null | undefined;
 
+/** Utility type for values that may be void (useful for callbacks) */
+export type MaybeVoid<T> = T | void;
+
 /** Non-empty array type */
 export type NonEmptyArray<T> = [T, ...T[]];
 
