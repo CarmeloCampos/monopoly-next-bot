@@ -21,11 +21,18 @@ import {
   getCurrencyDisplayName,
 } from "@/services/withdrawal";
 import {
+  setWithdrawalState,
+  getWithdrawalState,
+  clearWithdrawalState,
+  updateWithdrawalState,
+} from "@/services/withdrawal-state";
+import {
   answerUserNotFound,
   extractCallbackMatch,
   extractPageNumber,
 } from "@/utils/callback-helpers";
 import { info, error } from "@/utils/logger";
+import { notifyAdminsNewWithdrawal } from "@/utils/notifications";
 
 const WITHDRAWAL_PAGE_SIZE = 5;
 
@@ -39,7 +46,7 @@ export const registerWithdrawalCallbacks = (
       return;
     }
 
-    ctx.withdrawalState = { step: "currency" };
+    setWithdrawalState(ctx.dbUser.telegram_id, { step: "currency" });
 
     await ctx.answerCbQuery();
     await ctx.editMessageText(
@@ -76,10 +83,10 @@ export const registerWithdrawalCallbacks = (
       return;
     }
 
-    ctx.withdrawalState = {
+    setWithdrawalState(ctx.dbUser.telegram_id, {
       step: "amount",
       currency,
-    };
+    });
 
     await ctx.answerCbQuery();
     await ctx.editMessageText(
@@ -101,7 +108,9 @@ export const registerWithdrawalCallbacks = (
 
   // Cancel withdrawal creation
   bot.action(CALLBACK_DATA.WITHDRAWAL_CANCEL, async (ctx: BotContext) => {
-    ctx.withdrawalState = undefined;
+    if (hasDbUser(ctx)) {
+      clearWithdrawalState(ctx.dbUser.telegram_id);
+    }
 
     await ctx.answerCbQuery();
     await ctx.editMessageText(
@@ -140,16 +149,15 @@ export const registerWithdrawalCallbacks = (
   // Handle text messages for withdrawal flow
   bot.on("text", async (ctx: BotContext, next) => {
     // Skip if not in withdrawal flow
-    if (
-      !ctx.withdrawalState ||
-      !hasDbUser(ctx) ||
-      !hasLanguage(ctx) ||
-      !ctx.message
-    ) {
+    if (!hasDbUser(ctx) || !hasLanguage(ctx) || !ctx.message) {
       return next();
     }
 
-    const { withdrawalState } = ctx;
+    const withdrawalState = getWithdrawalState(ctx.dbUser.telegram_id);
+    if (!withdrawalState) {
+      return next();
+    }
+
     const text = "text" in ctx.message ? ctx.message.text : undefined;
 
     if (!text) {
@@ -169,8 +177,10 @@ export const registerWithdrawalCallbacks = (
           await ctx.reply(getText(ctx.dbUser.language, "minigame_bet_invalid"));
           return;
         }
-        withdrawalState.amount = amount;
-        withdrawalState.step = "wallet";
+        updateWithdrawalState(ctx.dbUser.telegram_id, {
+          amount,
+          step: "wallet",
+        });
 
         const currencyDisplay = withdrawalState.currency
           ? getCurrencyDisplayName(withdrawalState.currency)
@@ -195,10 +205,16 @@ export const registerWithdrawalCallbacks = (
           },
         );
       } else if (withdrawalState.step === "wallet") {
-        withdrawalState.walletAddress = text;
-        withdrawalState.step = "confirm";
+        updateWithdrawalState(ctx.dbUser.telegram_id, {
+          walletAddress: text,
+          step: "confirm",
+        });
 
-        const { amount, currency, walletAddress } = withdrawalState;
+        const updatedState = getWithdrawalState(ctx.dbUser.telegram_id);
+        if (!updatedState) {
+          return;
+        }
+        const { amount, currency, walletAddress } = updatedState;
         if (!isMonopolyCoins(amount)) {
           await ctx.reply(getText(ctx.dbUser.language, "minigame_bet_invalid"));
           return;
@@ -239,7 +255,7 @@ export const registerWithdrawalCallbacks = (
       return;
     }
 
-    const { withdrawalState } = ctx;
+    const withdrawalState = getWithdrawalState(ctx.dbUser.telegram_id);
 
     if (
       !withdrawalState ||
@@ -270,7 +286,7 @@ export const registerWithdrawalCallbacks = (
       walletAddress,
     });
 
-    ctx.withdrawalState = undefined;
+    clearWithdrawalState(ctx.dbUser.telegram_id);
 
     if (result.success && result.withdrawal) {
       const currencyDisplay = getCurrencyDisplayName(
@@ -287,6 +303,17 @@ export const registerWithdrawalCallbacks = (
       info("Withdrawal created", {
         withdrawalId: result.withdrawal.id,
         userId: ctx.dbUser.telegram_id,
+      });
+
+      await notifyAdminsNewWithdrawal(ctx.telegram, {
+        id: result.withdrawal.id,
+        userId: ctx.dbUser.telegram_id,
+        username: ctx.dbUser.username,
+        firstName: ctx.dbUser.first_name,
+        lastName: ctx.dbUser.last_name,
+        amount: result.withdrawal.amount,
+        currency: result.withdrawal.currency,
+        walletAddress: result.withdrawal.wallet_address,
       });
     } else {
       let errorMessage = getText(
