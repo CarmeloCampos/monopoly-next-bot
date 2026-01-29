@@ -9,7 +9,6 @@ import type {
   BuyErrorCode,
   BuyResult,
   UpgradeFailure,
-  WithdrawalCurrency,
   WithdrawalId,
 } from "./utils";
 
@@ -37,12 +36,6 @@ interface BotContext extends Context {
   isNewUser?: boolean;
   referralBonusReceived?: MonopolyCoins;
   isAdmin?: boolean;
-  withdrawalState?: {
-    step: "currency" | "amount" | "wallet" | "confirm";
-    currency?: WithdrawalCurrency;
-    amount?: MonopolyCoins;
-    walletAddress?: string;
-  };
   adminState?: {
     step: "process_hash" | "cancel_reason";
     withdrawalId?: WithdrawalId;
