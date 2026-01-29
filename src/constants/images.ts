@@ -80,10 +80,10 @@ export const PROPERTY_IMAGES: Record<
     4: `${BASE_URL}/kFhh2B7/The-Shard4.png`,
   },
   12: {
-    1: "https://via.assets.so/img.jpg?w=400&h=400&pattern=dots&text=Emprender&f=png",
-    2: "https://via.assets.so/img.jpg?w=400&h=400&pattern=dots&text=Emprender&f=png",
-    3: "https://via.assets.so/img.jpg?w=400&h=400&pattern=dots&text=Emprender&f=png",
-    4: "https://via.assets.so/img.jpg?w=400&h=400&pattern=dots&text=Emprender&f=png",
+    1: "https://i.ibb.co/Z1RRvJQp/Oficina-Emprender.png",
+    2: "https://i.ibb.co/Z1RRvJQp/Oficina-Emprender.png",
+    3: "https://i.ibb.co/Z1RRvJQp/Oficina-Emprender.png",
+    4: "https://i.ibb.co/Z1RRvJQp/Oficina-Emprender.png",
   },
 };
 
