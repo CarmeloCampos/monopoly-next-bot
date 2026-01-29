@@ -11,7 +11,7 @@ import { getText } from "@/i18n";
 import { getBoardKeyboard } from "@/keyboards";
 import {
   answerInvalidCallback,
-  extractCallbackMatch,
+  extractValidatedIndex,
   handleBuyError,
 } from "@/utils/callback-helpers";
 import { CALLBACK_PATTERNS } from "@/constants";
@@ -26,28 +26,13 @@ export function registerBoardCallbacks(bot: Telegraf<BotContext>): void {
   bot.action(CALLBACK_PATTERNS.BOARD_BUY_PROPERTY, async (ctx: BotContext) => {
     if (!hasDbUser(ctx) || !hasLanguage(ctx)) return;
 
-    const matchResult = extractCallbackMatch(
+    const propertyIndex = extractValidatedIndex(
       ctx,
       CALLBACK_PATTERNS.BOARD_BUY_PROPERTY,
+      isPropertyIndex,
     );
-    if (!matchResult) {
+    if (propertyIndex === null) {
       await answerInvalidCallback(ctx);
-      return;
-    }
-
-    const [, propertyIndexStr] = matchResult.match;
-    if (!propertyIndexStr) {
-      await ctx.answerCbQuery(
-        getText(ctx.dbUser.language, "error_invalid_callback"),
-      );
-      return;
-    }
-
-    const propertyIndex = Number.parseInt(propertyIndexStr, 10);
-    if (!isPropertyIndex(propertyIndex)) {
-      await ctx.answerCbQuery(
-        getText(ctx.dbUser.language, "error_invalid_callback"),
-      );
       return;
     }
 
@@ -98,28 +83,13 @@ export function registerBoardCallbacks(bot: Telegraf<BotContext>): void {
   bot.action(CALLBACK_PATTERNS.BOARD_BUY_SERVICE, async (ctx: BotContext) => {
     if (!hasDbUser(ctx) || !hasLanguage(ctx)) return;
 
-    const matchResult = extractCallbackMatch(
+    const serviceIndex = extractValidatedIndex(
       ctx,
       CALLBACK_PATTERNS.BOARD_BUY_SERVICE,
+      isServiceIndex,
     );
-    if (!matchResult) {
+    if (serviceIndex === null) {
       await answerInvalidCallback(ctx);
-      return;
-    }
-
-    const [, serviceIndexStr] = matchResult.match;
-    if (!serviceIndexStr) {
-      await ctx.answerCbQuery(
-        getText(ctx.dbUser.language, "error_invalid_callback"),
-      );
-      return;
-    }
-
-    const serviceIndex = Number.parseInt(serviceIndexStr, 10);
-    if (!isServiceIndex(serviceIndex)) {
-      await ctx.answerCbQuery(
-        getText(ctx.dbUser.language, "error_invalid_callback"),
-      );
       return;
     }
 

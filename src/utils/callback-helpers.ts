@@ -72,3 +72,40 @@ export async function handleBuyError(
     await ctx.answerCbQuery(getText(language, notFoundKey));
   }
 }
+
+/**
+ * Type guard function type for validating indices.
+ */
+export type IndexValidator<T> = (value: unknown) => value is T;
+
+/**
+ * Extracts and validates an index from callback data.
+ * Returns null if extraction or validation fails.
+ *
+ * @param ctx - Bot context containing the callback query
+ * @param pattern - Regex pattern to match against callback data
+ * @param validator - Type guard function to validate the extracted index
+ * @returns Validated index or null if extraction/validation fails
+ */
+export function extractValidatedIndex<T>(
+  ctx: BotContext,
+  pattern: RegExp,
+  validator: IndexValidator<T>,
+): MaybeNull<T> {
+  const matchResult = extractCallbackMatch(ctx, pattern);
+  if (!matchResult) {
+    return null;
+  }
+
+  const [, indexStr] = matchResult.match;
+  if (!indexStr) {
+    return null;
+  }
+
+  const index = Number.parseInt(indexStr, 10);
+  if (!validator(index)) {
+    return null;
+  }
+
+  return index;
+}

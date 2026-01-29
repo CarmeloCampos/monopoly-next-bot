@@ -9,7 +9,7 @@ import {
 import { getText } from "@/i18n";
 import {
   answerInvalidCallback,
-  extractCallbackMatch,
+  extractValidatedIndex,
 } from "@/utils/callback-helpers";
 import { CALLBACK_PATTERNS } from "@/constants";
 import { upgradeProperty } from "@/services/upgrade";
@@ -74,28 +74,13 @@ export function registerUpgradeCallbacks(bot: Telegraf<BotContext>): void {
   bot.action(CALLBACK_PATTERNS.PROPERTY_UPGRADE, async (ctx: BotContext) => {
     if (!hasDbUser(ctx) || !hasLanguage(ctx)) return;
 
-    const matchResult = extractCallbackMatch(
+    const propertyIndex = extractValidatedIndex(
       ctx,
       CALLBACK_PATTERNS.PROPERTY_UPGRADE,
+      isPropertyIndex,
     );
-    if (!matchResult) {
+    if (propertyIndex === null) {
       await answerInvalidCallback(ctx);
-      return;
-    }
-
-    const [, propertyIndexStr] = matchResult.match;
-    if (!propertyIndexStr) {
-      await ctx.answerCbQuery(
-        getText(ctx.dbUser.language, "error_invalid_callback"),
-      );
-      return;
-    }
-
-    const propertyIndex = Number.parseInt(propertyIndexStr, 10);
-    if (!isPropertyIndex(propertyIndex)) {
-      await ctx.answerCbQuery(
-        getText(ctx.dbUser.language, "error_invalid_callback"),
-      );
       return;
     }
 
