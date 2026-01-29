@@ -4,7 +4,9 @@ import type {
   CallbackMatchResult,
   MaybeNull,
   BuyResult,
+  WithdrawalId,
 } from "@/types";
+import { isWithdrawalId } from "@/utils/guards";
 import { getText } from "@/i18n";
 
 export async function answerUserNotFound(ctx: BotContext): Promise<void> {
@@ -108,4 +110,64 @@ export function extractValidatedIndex<T>(
   }
 
   return index;
+}
+
+/**
+ * Extracts and validates a withdrawal ID from callback data.
+ * Returns null if extraction or validation fails.
+ *
+ * @param ctx - Bot context containing the callback query
+ * @param pattern - Regex pattern to match against callback data (should capture withdrawal ID)
+ * @returns Validated WithdrawalId or null if extraction/validation fails
+ */
+export function extractWithdrawalId(
+  ctx: BotContext,
+  pattern: RegExp,
+): MaybeNull<WithdrawalId> {
+  const matchResult = extractCallbackMatch(ctx, pattern);
+  if (!matchResult) {
+    return null;
+  }
+
+  const [, idStr] = matchResult.match;
+  if (!idStr) {
+    return null;
+  }
+
+  const id = Number.parseInt(idStr, 10);
+  if (!isWithdrawalId(id)) {
+    return null;
+  }
+
+  return id;
+}
+
+/**
+ * Extracts and validates a page number from callback data for pagination.
+ * Returns null if extraction or validation fails.
+ *
+ * @param ctx - Bot context containing the callback query
+ * @param pattern - Regex pattern to match against callback data (should capture page number)
+ * @returns Validated page number (minimum 1) or null if extraction/validation fails
+ */
+export function extractPageNumber(
+  ctx: BotContext,
+  pattern: RegExp,
+): MaybeNull<number> {
+  const matchResult = extractCallbackMatch(ctx, pattern);
+  if (!matchResult) {
+    return null;
+  }
+
+  const [, pageStr] = matchResult.match;
+  if (!pageStr) {
+    return null;
+  }
+
+  const page = Number.parseInt(pageStr, 10);
+  if (Number.isNaN(page) || page < 1) {
+    return null;
+  }
+
+  return page;
 }
