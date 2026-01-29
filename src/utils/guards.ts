@@ -5,9 +5,13 @@ import type {
   ReferralLevel,
   NonEmptyArray,
   UpgradeErrorCode,
+  WithdrawalCurrency,
+  WithdrawalStatus,
+  WithdrawalId,
 } from "@/types/branded";
 import type { PropertyIndex, PropertyLevel } from "@/constants/properties";
 import type { ServiceIndex } from "@/constants/services";
+import { WITHDRAWAL_CURRENCIES, WITHDRAWAL_STATUSES } from "@/constants/bot";
 
 export function isTelegramId(value: unknown): value is TelegramId {
   return typeof value === "number" && value > 0 && Number.isInteger(value);
@@ -54,4 +58,24 @@ export function isUpgradeErrorCode(value: unknown): value is UpgradeErrorCode {
       value === "max_level_reached" ||
       value === "color_requirement_not_met")
   );
+}
+
+export function isWithdrawalCurrency(
+  value: unknown,
+): value is WithdrawalCurrency {
+  return (
+    typeof value === "string" &&
+    WITHDRAWAL_CURRENCIES.includes(value as WithdrawalCurrency)
+  );
+}
+
+export function isWithdrawalStatus(value: unknown): value is WithdrawalStatus {
+  return (
+    typeof value === "string" &&
+    WITHDRAWAL_STATUSES.includes(value as WithdrawalStatus)
+  );
+}
+
+export function isWithdrawalId(value: unknown): value is WithdrawalId {
+  return typeof value === "number" && value > 0 && Number.isInteger(value);
 }

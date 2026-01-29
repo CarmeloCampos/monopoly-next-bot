@@ -3,7 +3,7 @@
  * Re-exports branded types and adds validation converter functions.
  */
 
-import { isTelegramId, isMonopolyCoins } from "@/utils/guards";
+import { isTelegramId, isMonopolyCoins, isWithdrawalId } from "@/utils/guards";
 
 // Re-export all branded types
 export type {
@@ -21,6 +21,9 @@ export type {
   UpgradeErrorCode,
   UpgradeResult,
   UpgradeFailure,
+  WithdrawalCurrency,
+  WithdrawalStatus,
+  WithdrawalId,
 } from "./branded";
 
 export { MAX_REFERRAL_LEVEL, success, failure } from "./branded";
@@ -47,4 +50,15 @@ export function asMonopolyCoins(
     throw new Error(`Invalid MonopolyCoins amount: ${String(amount)}`);
   }
   return amount;
+}
+
+/**
+ * Validates and converts an unknown value to WithdrawalId.
+ * @throws Error if value is not a valid Withdrawal ID
+ */
+export function asWithdrawalId(id: unknown): import("./branded").WithdrawalId {
+  if (!isWithdrawalId(id)) {
+    throw new Error(`Invalid Withdrawal ID: ${String(id)}`);
+  }
+  return id;
 }
