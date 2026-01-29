@@ -93,7 +93,7 @@ export const SERVICE_IMAGES: Record<ServiceIndex, string> = {
   1: `${BASE_URL}/Trenes/Transiberiano.png`,
   2: `${BASE_URL}/Trenes/Bullet%20Train.png`,
   3: `${BASE_URL}/Trenes/Expreso%20Polar.png`,
-  4: `${BASE_URL}/Servicios/Central%20de%20Itaipu.png`,
+  4: `${BASE_URL}/Servicios/Central%20de%20Itaipu%CC%81.png`,
   5: `${BASE_URL}/Servicios/Central%20de%20Chernobyl.png`,
   6: `${BASE_URL}/Servicios/Acueducto%20de%20Segovia.png`,
   7: `${BASE_URL}/Servicios/Acueducto%20de%20los%20Arcos.png`,
