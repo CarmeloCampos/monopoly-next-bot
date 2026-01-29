@@ -6,6 +6,7 @@ import type {
 import { getText, getSupportedLanguages, getLanguageName } from "@/i18n";
 import type { Language, MaybeOptional } from "@/types";
 import { LANGUAGE_EMOJIS, CHANNEL_URLS } from "@/constants";
+import { debug } from "@/utils/logger";
 
 export function getMainMenuKeyboard(
   language: MaybeOptional<Language>,
@@ -27,8 +28,13 @@ export function getMainMenuKeyboard(
     ],
   ];
 
+  debug("Building main menu keyboard", { isAdmin, language });
+
   if (isAdmin) {
     keyboard.push([{ text: getText(language, "admin_panel_button") }]);
+    debug("Admin button added to keyboard");
+  } else {
+    debug("Admin button NOT added - user is not admin");
   }
 
   return {
