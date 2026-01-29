@@ -116,7 +116,11 @@ export async function processReferral(
       columns: { language: true },
     });
     const referrerLanguage: Language =
-      user?.language && isLanguage(user.language)
+      user !== null &&
+      user !== undefined &&
+      user.language !== null &&
+      user.language !== undefined &&
+      isLanguage(user.language)
         ? user.language
         : DEFAULT_LANGUAGE;
 
