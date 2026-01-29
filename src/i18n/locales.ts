@@ -53,6 +53,8 @@ const locales: Locales = {
     referral_welcome_bonus: "Бонус приветствия за реферала",
     menu_properties_coming_soon: "🏠 Недвижимость - Скоро...",
     menu_balance_message: "💰 Ваш баланс: {balance} MC",
+    balance_submenu_prompt: "Что вы хотите сделать?",
+    balance_submenu_title: "💰 Баланс",
     menu_referral_code: "👥 Ваш реферальный код: `{code}`",
     menu_referral_share_link:
       "\n\nПоделитесь этой ссылкой:\nt.me/MonopolyFunBot?start={code}",
@@ -214,6 +216,66 @@ const locales: Locales = {
     minigame_slots_jackpot: "🎰 ДЖЕКПОТ! 777!",
     minigame_slots_triple: "🎰 Тройка!",
     minigame_play_again: "🎮 Играть снова",
+    // Withdrawal
+    menu_withdrawal: "💸 Вывод средств",
+    withdrawal_title: "💸 Вывод средств",
+    withdrawal_menu_text:
+      "💸 *Вывод средств*\n\nЗдесь вы можете вывести свои MonopolyCoins в криптовалюту.\n\n*Минимум:* 10,000 MC ($10)\n*Кулдаун:* 7 дней между выводами",
+    withdrawal_create_button: "➕ Создать заявку",
+    withdrawal_history_button: "📜 История",
+    withdrawal_select_currency: "💱 Выберите валюту для вывода:",
+    withdrawal_enter_amount: "💰 Введите сумму в MC (минимум 10,000):",
+    withdrawal_enter_wallet: "👛 Введите адрес кошелька {currency}:",
+    withdrawal_confirm_title: "✅ Подтвердите вывод",
+    withdrawal_confirm_text:
+      "💸 *Подтвердите вывод*\n\n💰 Сумма: {amount} MC\n💵 В USD: {usd}\n💱 Валюта: {currency}\n👛 Кошелек: `{wallet}`\n\n⚠️ Убедитесь, что адрес кошелька верный!",
+    withdrawal_created_success:
+      "✅ Заявка на вывод создана!\n\n💰 Сумма: {amount} MC\n💱 Валюта: {currency}\n⏳ Статус: Ожидает обработки\n\nАдминистраторы уведомлены. Вы получите уведомление после обработки.",
+    withdrawal_error_minimum: "❌ Минимальная сумма вывода: 10,000 MC ($10)",
+    withdrawal_error_balance: "❌ Недостаточно средств. Нужно: {needed} MC",
+    withdrawal_error_pending: "❌ У вас уже есть ожидающая заявка на вывод",
+    withdrawal_error_cooldown: "❌ Кулдаун активен. Подождите {days} дней",
+    withdrawal_cancelled: "❌ Вывод отменен",
+    withdrawal_history_title: "📜 История выводов",
+    withdrawal_history_empty: "У вас пока нет выводов",
+    withdrawal_history_item:
+      "{status} {amount} MC → {currency}\n📅 {date}\n👛 `{wallet}`",
+    withdrawal_status_pending: "⏳ Ожидает",
+    withdrawal_status_processed: "✅ Выполнен",
+    withdrawal_status_cancelled: "❌ Отменен",
+    withdrawal_status_refunded: "🔄 Возвращен",
+    withdrawal_processed_notification:
+      "✅ Ваш вывод обработан!\n\n💰 Сумма: {amount} MC\n💱 Валюта: {currency}\n🔗 Хэш: `{hash}`",
+    withdrawal_cancelled_notification:
+      "❌ Ваш вывод отменен.\n\n💰 Сумма: {amount} MC вернулась на ваш баланс.",
+    // Admin
+    admin_panel_title: "🔐 Панель администратора",
+    admin_panel_button: "🔐 Админ панель",
+    admin_users_button: "👥 Пользователи",
+    admin_top_users_button: "🏆 Топ по балансу",
+    admin_pending_withdrawals_button: "⏳ Ожидающие выводы",
+    admin_all_withdrawals_button: "📜 Все выводы",
+    admin_stats_title: "📊 Статистика",
+    admin_stats_text:
+      "📊 *Статистика системы*\n\n👥 Всего пользователей: {totalUsers}\n💰 Общий баланс: {totalBalance} MC\n⏳ Ожидающие выводы: {pendingWithdrawals}\n📜 Всего выводов: {totalWithdrawals}",
+    admin_top_users_title: "🏆 Топ пользователей по балансу",
+    admin_top_users_item: "{rank}. {name} - {balance} MC",
+    admin_pending_withdrawals_title: "⏳ Ожидающие выводы",
+    admin_pending_withdrawals_empty: "Нет ожидающих выводов",
+    admin_pending_withdrawals_item:
+      "#{id} | {user}\n💰 {amount} MC | {currency}\n👛 `{wallet}`\n📅 {date}",
+    admin_process_withdrawal_button: "✅ Обработать",
+    admin_cancel_withdrawal_button: "❌ Отменить",
+    admin_refund_withdrawal_button: "🔄 Вернуть",
+    admin_enter_transaction_hash: "🔗 Введите хэш транзакции:",
+    admin_withdrawal_processed: "✅ Вывод #{id} обработан успешно",
+    admin_withdrawal_cancelled: "❌ Вывод #{id} отменен",
+    admin_withdrawal_refunded: "🔄 Вывод #{id} возвращен",
+    admin_new_withdrawal_notification:
+      "🔔 *Новая заявка на вывод*\n\n👤 Пользователь: {user}\n💰 Сумма: {amount} MC\n💱 Валюта: {currency}\n👛 Кошелек: `{wallet}`",
+    btn_confirm: "✅ Подтвердить",
+    btn_cancel: "❌ Отменить",
+    btn_close: "❌ Закрыть",
   },
   en: {
     language_selection: "Please select your language",
@@ -253,6 +315,8 @@ const locales: Locales = {
     referral_welcome_bonus: "Welcome bonus for referral",
     menu_properties_coming_soon: "🏠 Properties - Coming soon...",
     menu_balance_message: "💰 Your balance: {balance} MC",
+    balance_submenu_prompt: "What would you like to do?",
+    balance_submenu_title: "💰 Balance",
     menu_referral_code: "👥 Your referral code: `{code}`",
     menu_referral_share_link:
       "\n\nShare this link:\nt.me/MonopolyFunBot?start={code}",
@@ -410,6 +474,67 @@ const locales: Locales = {
     minigame_slots_jackpot: "🎰 JACKPOT! 777!",
     minigame_slots_triple: "🎰 Triple match!",
     minigame_play_again: "🎮 Play Again",
+    // Withdrawal
+    menu_withdrawal: "💸 Withdraw",
+    withdrawal_title: "💸 Withdrawal",
+    withdrawal_menu_text:
+      "💸 *Withdrawal*\n\nHere you can withdraw your MonopolyCoins to cryptocurrency.\n\n*Minimum:* 10,000 MC ($10)\n*Cooldown:* 7 days between withdrawals",
+    withdrawal_create_button: "➕ Create Request",
+    withdrawal_history_button: "📜 History",
+    withdrawal_select_currency: "💱 Select withdrawal currency:",
+    withdrawal_enter_amount: "💰 Enter amount in MC (minimum 10,000):",
+    withdrawal_enter_wallet: "👛 Enter your {currency} wallet address:",
+    withdrawal_confirm_title: "✅ Confirm Withdrawal",
+    withdrawal_confirm_text:
+      "💸 *Confirm Withdrawal*\n\n💰 Amount: {amount} MC\n💵 In USD: {usd}\n💱 Currency: {currency}\n👛 Wallet: `{wallet}`\n\n⚠️ Make sure the wallet address is correct!",
+    withdrawal_created_success:
+      "✅ Withdrawal request created!\n\n💰 Amount: {amount} MC\n💱 Currency: {currency}\n⏳ Status: Pending\n\nAdministrators have been notified. You will receive a notification after processing.",
+    withdrawal_error_minimum: "❌ Minimum withdrawal amount: 10,000 MC ($10)",
+    withdrawal_error_balance: "❌ Insufficient balance. Needed: {needed} MC",
+    withdrawal_error_pending:
+      "❌ You already have a pending withdrawal request",
+    withdrawal_error_cooldown: "❌ Cooldown active. Wait {days} days",
+    withdrawal_cancelled: "❌ Withdrawal cancelled",
+    withdrawal_history_title: "📜 Withdrawal History",
+    withdrawal_history_empty: "You have no withdrawals yet",
+    withdrawal_history_item:
+      "{status} {amount} MC → {currency}\n📅 {date}\n👛 `{wallet}`",
+    withdrawal_status_pending: "⏳ Pending",
+    withdrawal_status_processed: "✅ Processed",
+    withdrawal_status_cancelled: "❌ Cancelled",
+    withdrawal_status_refunded: "🔄 Refunded",
+    withdrawal_processed_notification:
+      "✅ Your withdrawal has been processed!\n\n💰 Amount: {amount} MC\n💱 Currency: {currency}\n🔗 Hash: `{hash}`",
+    withdrawal_cancelled_notification:
+      "❌ Your withdrawal has been cancelled.\n\n💰 Amount: {amount} MC has been returned to your balance.",
+    // Admin
+    admin_panel_title: "🔐 Admin Panel",
+    admin_panel_button: "🔐 Admin Panel",
+    admin_users_button: "👥 Users",
+    admin_top_users_button: "🏆 Top by Balance",
+    admin_pending_withdrawals_button: "⏳ Pending Withdrawals",
+    admin_all_withdrawals_button: "📜 All Withdrawals",
+    admin_stats_title: "📊 Statistics",
+    admin_stats_text:
+      "📊 *System Statistics*\n\n👥 Total Users: {totalUsers}\n💰 Total Balance: {totalBalance} MC\n⏳ Pending Withdrawals: {pendingWithdrawals}\n📜 Total Withdrawals: {totalWithdrawals}",
+    admin_top_users_title: "🏆 Top Users by Balance",
+    admin_top_users_item: "{rank}. {name} - {balance} MC",
+    admin_pending_withdrawals_title: "⏳ Pending Withdrawals",
+    admin_pending_withdrawals_empty: "No pending withdrawals",
+    admin_pending_withdrawals_item:
+      "#{id} | {user}\n💰 {amount} MC | {currency}\n👛 `{wallet}`\n📅 {date}",
+    admin_process_withdrawal_button: "✅ Process",
+    admin_cancel_withdrawal_button: "❌ Cancel",
+    admin_refund_withdrawal_button: "🔄 Refund",
+    admin_enter_transaction_hash: "🔗 Enter transaction hash:",
+    admin_withdrawal_processed: "✅ Withdrawal #{id} processed successfully",
+    admin_withdrawal_cancelled: "❌ Withdrawal #{id} cancelled",
+    admin_withdrawal_refunded: "🔄 Withdrawal #{id} refunded",
+    admin_new_withdrawal_notification:
+      "🔔 *New Withdrawal Request*\n\n👤 User: {user}\n💰 Amount: {amount} MC\n💱 Currency: {currency}\n👛 Wallet: `{wallet}`",
+    btn_confirm: "✅ Confirm",
+    btn_cancel: "❌ Cancel",
+    btn_close: "❌ Close",
   },
   es: {
     language_selection: "Por favor, selecciona tu idioma",
@@ -449,6 +574,8 @@ const locales: Locales = {
     referral_welcome_bonus: "Bono de bienvenida por referido",
     menu_properties_coming_soon: "🏠 Propiedades - Próximamente...",
     menu_balance_message: "💰 Tu balance: {balance} MC",
+    balance_submenu_prompt: "¿Qué deseas hacer?",
+    balance_submenu_title: "💰 Balance",
     menu_referral_code: "👥 Tu código de referido: `{code}`",
     menu_referral_share_link:
       "\n\nComparte este enlace:\nt.me/MonopolyFunBot?start={code}",
@@ -613,6 +740,67 @@ const locales: Locales = {
     minigame_slots_triple: "🎰 ¡Triple!",
     minigame_play_again: "🎮 Jugar de nuevo",
     welcome_existing_user: "👋 ¡Bienvenido a Monopoly Bot!",
+    // Withdrawal
+    menu_withdrawal: "💸 Retirar",
+    withdrawal_title: "💸 Retiro",
+    withdrawal_menu_text:
+      "💸 *Retiro*\n\nAquí puedes retirar tus MonopolyCoins a criptomoneda.\n\n*Mínimo:* 10,000 MC ($10)\n*Enfriamiento:* 7 días entre retiros",
+    withdrawal_create_button: "➕ Crear solicitud",
+    withdrawal_history_button: "📜 Historial",
+    withdrawal_select_currency: "💱 Selecciona la moneda de retiro:",
+    withdrawal_enter_amount: "💰 Ingresa el monto en MC (mínimo 10,000):",
+    withdrawal_enter_wallet:
+      "👛 Ingresa la dirección de tu billetera {currency}:",
+    withdrawal_confirm_title: "✅ Confirmar Retiro",
+    withdrawal_confirm_text:
+      "💸 *Confirmar Retiro*\n\n💰 Monto: {amount} MC\n💵 En USD: {usd}\n💱 Moneda: {currency}\n👛 Billetera: `{wallet}`\n\n⚠️ ¡Asegúrate de que la dirección de la billetera sea correcta!",
+    withdrawal_created_success:
+      "✅ ¡Solicitud de retiro creada!\n\n💰 Monto: {amount} MC\n💱 Moneda: {currency}\n⏳ Estado: Pendiente\n\nLos administradores han sido notificados. Recibirás una notificación después del procesamiento.",
+    withdrawal_error_minimum: "❌ Monto mínimo de retiro: 10,000 MC ($10)",
+    withdrawal_error_balance: "❌ Balance insuficiente. Necesitas: {needed} MC",
+    withdrawal_error_pending: "❌ Ya tienes una solicitud de retiro pendiente",
+    withdrawal_error_cooldown: "❌ Enfriamiento activo. Espera {days} días",
+    withdrawal_cancelled: "❌ Retiro cancelado",
+    withdrawal_history_title: "📜 Historial de Retiros",
+    withdrawal_history_empty: "Aún no tienes retiros",
+    withdrawal_history_item:
+      "{status} {amount} MC → {currency}\n📅 {date}\n👛 `{wallet}`",
+    withdrawal_status_pending: "⏳ Pendiente",
+    withdrawal_status_processed: "✅ Procesado",
+    withdrawal_status_cancelled: "❌ Cancelado",
+    withdrawal_status_refunded: "🔄 Reembolsado",
+    withdrawal_processed_notification:
+      "✅ ¡Tu retiro ha sido procesado!\n\n💰 Monto: {amount} MC\n💱 Moneda: {currency}\n🔗 Hash: `{hash}`",
+    withdrawal_cancelled_notification:
+      "❌ Tu retiro ha sido cancelado.\n\n💰 Monto: {amount} MC ha sido devuelto a tu balance.",
+    // Admin
+    admin_panel_title: "🔐 Panel de Administrador",
+    admin_panel_button: "🔐 Panel Admin",
+    admin_users_button: "👥 Usuarios",
+    admin_top_users_button: "🏆 Top por Balance",
+    admin_pending_withdrawals_button: "⏳ Retiros Pendientes",
+    admin_all_withdrawals_button: "📜 Todos los Retiros",
+    admin_stats_title: "📊 Estadísticas",
+    admin_stats_text:
+      "📊 *Estadísticas del Sistema*\n\n👥 Total de Usuarios: {totalUsers}\n💰 Balance Total: {totalBalance} MC\n⏳ Retiros Pendientes: {pendingWithdrawals}\n📜 Total de Retiros: {totalWithdrawals}",
+    admin_top_users_title: "🏆 Top Usuarios por Balance",
+    admin_top_users_item: "{rank}. {name} - {balance} MC",
+    admin_pending_withdrawals_title: "⏳ Retiros Pendientes",
+    admin_pending_withdrawals_empty: "No hay retiros pendientes",
+    admin_pending_withdrawals_item:
+      "#{id} | {user}\n💰 {amount} MC | {currency}\n👛 `{wallet}`\n📅 {date}",
+    admin_process_withdrawal_button: "✅ Procesar",
+    admin_cancel_withdrawal_button: "❌ Cancelar",
+    admin_refund_withdrawal_button: "🔄 Reembolsar",
+    admin_enter_transaction_hash: "🔗 Ingresa el hash de la transacción:",
+    admin_withdrawal_processed: "✅ Retiro #{id} procesado exitosamente",
+    admin_withdrawal_cancelled: "❌ Retiro #{id} cancelado",
+    admin_withdrawal_refunded: "🔄 Retiro #{id} reembolsado",
+    admin_new_withdrawal_notification:
+      "🔔 *Nueva Solicitud de Retiro*\n\n👤 Usuario: {user}\n💰 Monto: {amount} MC\n💱 Moneda: {currency}\n👛 Billetera: `{wallet}`",
+    btn_confirm: "✅ Confirmar",
+    btn_cancel: "❌ Cancelar",
+    btn_close: "❌ Cerrar",
   },
   pt: {
     language_selection: "Por favor, selecione seu idioma",
@@ -652,6 +840,8 @@ const locales: Locales = {
     referral_welcome_bonus: "Bônus de boas-vindas por indicação",
     menu_properties_coming_soon: "🏠 Propriedades - Em breve...",
     menu_balance_message: "💰 Seu saldo: {balance} MC",
+    balance_submenu_prompt: "O que você gostaria de fazer?",
+    balance_submenu_title: "💰 Saldo",
     menu_advance_coming_soon: "🎲 Avançar - Em breve...",
     menu_referral_code: "👥 Seu código de referência: `{code}`",
     menu_referral_share_link:
@@ -816,6 +1006,67 @@ const locales: Locales = {
     minigame_slots_jackpot: "🎰 JACKPOT! 777!",
     minigame_slots_triple: "🎰 Triplo!",
     minigame_play_again: "🎮 Jogar novamente",
+    // Withdrawal
+    menu_withdrawal: "💸 Sacar",
+    withdrawal_title: "💸 Saque",
+    withdrawal_menu_text:
+      "💸 *Saque*\n\nAqui você pode sacar seus MonopolyCoins para criptomoeda.\n\n*Mínimo:* 10.000 MC ($10)\n*Cooldown:* 7 dias entre saques",
+    withdrawal_create_button: "➕ Criar solicitação",
+    withdrawal_history_button: "📜 Histórico",
+    withdrawal_select_currency: "💱 Selecione a moeda para saque:",
+    withdrawal_enter_amount: "💰 Digite o valor em MC (mínimo 10.000):",
+    withdrawal_enter_wallet: "👛 Digite o endereço da sua carteira {currency}:",
+    withdrawal_confirm_title: "✅ Confirmar Saque",
+    withdrawal_confirm_text:
+      "💸 *Confirmar Saque*\n\n💰 Valor: {amount} MC\n💵 Em USD: {usd}\n💱 Moeda: {currency}\n👛 Carteira: `{wallet}`\n\n⚠️ Certifique-se de que o endereço da carteira está correto!",
+    withdrawal_created_success:
+      "✅ Solicitação de saque criada!\n\n💰 Valor: {amount} MC\n💱 Moeda: {currency}\n⏳ Status: Pendente\n\nOs administradores foram notificados. Você receberá uma notificação após o processamento.",
+    withdrawal_error_minimum: "❌ Valor mínimo de saque: 10.000 MC ($10)",
+    withdrawal_error_balance: "❌ Saldo insuficiente. Necessário: {needed} MC",
+    withdrawal_error_pending:
+      "❌ Você já tem uma solicitação de saque pendente",
+    withdrawal_error_cooldown: "❌ Cooldown ativo. Aguarde {days} dias",
+    withdrawal_cancelled: "❌ Saque cancelado",
+    withdrawal_history_title: "📜 Histórico de Saques",
+    withdrawal_history_empty: "Você ainda não tem saques",
+    withdrawal_history_item:
+      "{status} {amount} MC → {currency}\n📅 {date}\n👛 `{wallet}`",
+    withdrawal_status_pending: "⏳ Pendente",
+    withdrawal_status_processed: "✅ Processado",
+    withdrawal_status_cancelled: "❌ Cancelado",
+    withdrawal_status_refunded: "🔄 Reembolsado",
+    withdrawal_processed_notification:
+      "✅ Seu saque foi processado!\n\n💰 Valor: {amount} MC\n💱 Moeda: {currency}\n🔗 Hash: `{hash}`",
+    withdrawal_cancelled_notification:
+      "❌ Seu saque foi cancelado.\n\n💰 Valor: {amount} MC foi devolvido ao seu saldo.",
+    // Admin
+    admin_panel_title: "🔐 Painel de Administrador",
+    admin_panel_button: "🔐 Painel Admin",
+    admin_users_button: "👥 Usuários",
+    admin_top_users_button: "🏆 Top por Saldo",
+    admin_pending_withdrawals_button: "⏳ Saques Pendentes",
+    admin_all_withdrawals_button: "📜 Todos os Saques",
+    admin_stats_title: "📊 Estatísticas",
+    admin_stats_text:
+      "📊 *Estatísticas do Sistema*\n\n👥 Total de Usuários: {totalUsers}\n💰 Saldo Total: {totalBalance} MC\n⏳ Saques Pendentes: {pendingWithdrawals}\n📜 Total de Saques: {totalWithdrawals}",
+    admin_top_users_title: "🏆 Top Usuários por Saldo",
+    admin_top_users_item: "{rank}. {name} - {balance} MC",
+    admin_pending_withdrawals_title: "⏳ Saques Pendentes",
+    admin_pending_withdrawals_empty: "Não há saques pendentes",
+    admin_pending_withdrawals_item:
+      "#{id} | {user}\n💰 {amount} MC | {currency}\n👛 `{wallet}`\n📅 {date}",
+    admin_process_withdrawal_button: "✅ Processar",
+    admin_cancel_withdrawal_button: "❌ Cancelar",
+    admin_refund_withdrawal_button: "🔄 Reembolsar",
+    admin_enter_transaction_hash: "🔗 Digite o hash da transação:",
+    admin_withdrawal_processed: "✅ Saque #{id} processado com sucesso",
+    admin_withdrawal_cancelled: "❌ Saque #{id} cancelado",
+    admin_withdrawal_refunded: "🔄 Saque #{id} reembolsado",
+    admin_new_withdrawal_notification:
+      "🔔 *Nova Solicitação de Saque*\n\n👤 Usuário: {user}\n💰 Valor: {amount} MC\n💱 Moeda: {currency}\n👛 Carteira: `{wallet}`",
+    btn_confirm: "✅ Confirmar",
+    btn_cancel: "❌ Cancelar",
+    btn_close: "❌ Fechar",
   },
 };
 
