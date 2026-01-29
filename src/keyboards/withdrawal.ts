@@ -16,33 +16,6 @@ const CURRENCY_EMOJIS: Record<WithdrawalCurrency, string> = {
   monero: "🔒",
 };
 
-export function getWithdrawalMenuKeyboard(
-  language: MaybeOptional<Language>,
-): InlineKeyboardMarkup {
-  return {
-    inline_keyboard: [
-      [
-        {
-          text: getText(language, "withdrawal_create_button"),
-          callback_data: CALLBACK_DATA.WITHDRAWAL_CREATE,
-        },
-      ],
-      [
-        {
-          text: getText(language, "withdrawal_history_button"),
-          callback_data: CALLBACK_DATA.WITHDRAWAL_HISTORY,
-        },
-      ],
-      [
-        {
-          text: getText(language, "btn_back"),
-          callback_data: CALLBACK_DATA.SETTINGS_CLOSE,
-        },
-      ],
-    ],
-  };
-}
-
 export function getCurrencySelectionKeyboard(
   language: MaybeOptional<Language>,
 ): InlineKeyboardMarkup {
