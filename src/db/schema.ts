@@ -11,6 +11,8 @@ import type {
   MonopolyCoins,
   ReferralLevel,
   Language,
+  WithdrawalCurrency,
+  WithdrawalStatus,
 } from "@/types/utils";
 
 // ============================================
@@ -231,5 +233,36 @@ export const miniGameLogs = sqliteTable(
   },
   (table) => ({
     userIdIdx: index("mini_game_logs_user_id_idx").on(table.user_id),
+  }),
+);
+
+// ============================================
+// Withdrawals Table
+// ============================================
+
+export const withdrawals = sqliteTable(
+  "withdrawals",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    user_id: integer("user_id")
+      .notNull()
+      .references(() => users.telegram_id, { onDelete: "cascade" })
+      .$type<TelegramId>(),
+    amount: real("amount").notNull().$type<MonopolyCoins>(),
+    currency: text("currency").notNull().$type<WithdrawalCurrency>(),
+    wallet_address: text("wallet_address").notNull(),
+    status: text("status").notNull().$type<WithdrawalStatus>(),
+    transaction_hash: text("transaction_hash"),
+    processed_by: integer("processed_by")
+      .references(() => users.telegram_id, { onDelete: "set null" })
+      .$type<TelegramId>(),
+    processed_at: integer("processed_at", { mode: "timestamp" }),
+    created_at: integer("created_at", { mode: "timestamp" }).notNull(),
+    updated_at: integer("updated_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => ({
+    userIdIdx: index("withdrawals_user_id_idx").on(table.user_id),
+    statusIdx: index("withdrawals_status_idx").on(table.status),
+    createdAtIdx: index("withdrawals_created_at_idx").on(table.created_at),
   }),
 );
