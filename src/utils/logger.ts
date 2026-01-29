@@ -41,3 +41,8 @@ export const error = (message: string, data?: unknown): void => {
   if (!shouldLog("error")) return;
   console.error(formatMessage("error", message, data));
 };
+
+export const debug = (message: string, data?: unknown): void => {
+  if (!shouldLog("debug")) return;
+  console.log(formatMessage("debug", message, data));
+};
