@@ -39,6 +39,8 @@ import { registerUpgradeCallbacks } from "./upgrade";
 import { registerServiceCallbacks } from "./service";
 import { registerMinigameCallbacks } from "./minigames";
 import { registerReferralCallbacks } from "./referral";
+import { registerWithdrawalCallbacks } from "./withdrawal";
+import { registerAdminCallbacks } from "./admin";
 
 export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   bot.action(CALLBACK_PATTERNS.LANGUAGE, async (ctx: BotContext) => {
@@ -275,4 +277,6 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   registerServiceCallbacks(bot);
   registerMinigameCallbacks(bot);
   registerReferralCallbacks(bot);
+  registerWithdrawalCallbacks(bot);
+  registerAdminCallbacks(bot);
 };
