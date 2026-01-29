@@ -1,18 +1,31 @@
 import { db } from "@/db";
 import { users, withdrawals } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
-import type { TelegramId, SelectUser, SelectWithdrawal } from "@/types";
+import type {
+  TelegramId,
+  SelectUser,
+  SelectWithdrawal,
+  MaybeNull,
+} from "@/types";
 import { env } from "@/config/env";
-import { error } from "@/utils/logger";
+import { error, debug } from "@/utils/logger";
 
 export function isAdmin(userId: TelegramId): boolean {
-  return env.ADMIN_USER_IDS.includes(userId);
+  const result = env.ADMIN_USER_IDS.includes(userId);
+  debug("Checking admin status", {
+    userId,
+    adminIds: env.ADMIN_USER_IDS,
+    isAdmin: result,
+    totalAdmins: env.ADMIN_USER_IDS.length,
+  });
+  return result;
 }
 
 export interface TopUser {
   telegram_id: TelegramId;
-  username: string | null;
-  first_name: string | null;
+  username: MaybeNull<string>;
+  first_name: MaybeNull<string>;
+  last_name: MaybeNull<string>;
   balance: number;
 }
 
@@ -23,6 +36,7 @@ export async function getTopUsersByBalance(limit = 20): Promise<TopUser[]> {
         telegram_id: users.telegram_id,
         username: users.username,
         first_name: users.first_name,
+        last_name: users.last_name,
         balance: users.balance,
       })
       .from(users)
@@ -132,9 +146,10 @@ export async function getUserById(
 export interface WithdrawalWithUser extends SelectWithdrawal {
   user: {
     telegram_id: TelegramId;
-    username: string | null;
-    first_name: string | null;
-    language: string | null;
+    username: MaybeNull<string>;
+    first_name: MaybeNull<string>;
+    last_name: MaybeNull<string>;
+    language: MaybeNull<string>;
   };
 }
 
@@ -148,6 +163,7 @@ export async function getPendingWithdrawalsWithUsers(): Promise<
         user_telegram_id: users.telegram_id,
         user_username: users.username,
         user_first_name: users.first_name,
+        user_last_name: users.last_name,
         user_language: users.language,
       })
       .from(withdrawals)
@@ -161,6 +177,7 @@ export async function getPendingWithdrawalsWithUsers(): Promise<
         telegram_id: row.user_telegram_id as TelegramId,
         username: row.user_username,
         first_name: row.user_first_name,
+        last_name: row.user_last_name,
         language: row.user_language,
       },
     })) as WithdrawalWithUser[];
@@ -169,44 +186,5 @@ export async function getPendingWithdrawalsWithUsers(): Promise<
       error: err instanceof Error ? err.message : String(err),
     });
     return [];
-  }
-}
-
-export async function getWithdrawalStats(): Promise<{
-  pending: number;
-  processed: number;
-  cancelled: number;
-  refunded: number;
-  totalAmount: number;
-}> {
-  try {
-    const [stats] = await db
-      .select({
-        pending: sql<number>`count(case when ${withdrawals.status} = 'pending' then 1 end)`,
-        processed: sql<number>`count(case when ${withdrawals.status} = 'processed' then 1 end)`,
-        cancelled: sql<number>`count(case when ${withdrawals.status} = 'cancelled' then 1 end)`,
-        refunded: sql<number>`count(case when ${withdrawals.status} = 'refunded' then 1 end)`,
-        totalAmount: sql<number>`coalesce(sum(${withdrawals.amount}), 0)`,
-      })
-      .from(withdrawals);
-
-    return {
-      pending: stats?.pending ?? 0,
-      processed: stats?.processed ?? 0,
-      cancelled: stats?.cancelled ?? 0,
-      refunded: stats?.refunded ?? 0,
-      totalAmount: stats?.totalAmount ?? 0,
-    };
-  } catch (err) {
-    error("Error fetching withdrawal stats", {
-      error: err instanceof Error ? err.message : String(err),
-    });
-    return {
-      pending: 0,
-      processed: 0,
-      cancelled: 0,
-      refunded: 0,
-      totalAmount: 0,
-    };
   }
 }
