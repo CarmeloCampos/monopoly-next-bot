@@ -108,7 +108,7 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
         : getText(langValue, "welcome_new_user");
       await ctx.reply(welcomeMsg, {
         parse_mode: "Markdown",
-        reply_markup: getMainMenuKeyboard(langValue),
+        reply_markup: getMainMenuKeyboard(langValue, ctx.isAdmin),
       });
       await ctx.deleteMessage();
     } catch (err) {
