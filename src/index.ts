@@ -7,6 +7,7 @@ import { registerCallbacks } from "@/handlers/callbacks";
 import { registerDiceHandler } from "@/handlers/dice";
 import { autoUserMiddleware } from "@/middleware/auto-user";
 import { languageMiddleware } from "@/middleware/language";
+import { checkAdminMiddleware } from "@/middleware/admin";
 import { startPolling, startWebhook } from "@/bot/launcher";
 
 setLogLevel(config.logLevel);
@@ -25,6 +26,7 @@ bot.use(async (ctx, next) => {
 
 bot.use(autoUserMiddleware);
 bot.use(languageMiddleware);
+bot.use(checkAdminMiddleware);
 
 registerCommands(bot);
 registerCallbacks(bot);
