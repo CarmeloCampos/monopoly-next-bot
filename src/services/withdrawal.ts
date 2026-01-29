@@ -168,22 +168,6 @@ export async function getUserWithdrawals(
   }
 }
 
-export async function getPendingWithdrawals(): Promise<SelectWithdrawal[]> {
-  try {
-    const results = await db.query.withdrawals.findMany({
-      where: eq(withdrawals.status, "pending"),
-      orderBy: desc(withdrawals.created_at),
-    });
-
-    return results as SelectWithdrawal[];
-  } catch (err) {
-    error("Error fetching pending withdrawals", {
-      error: err instanceof Error ? err.message : String(err),
-    });
-    return [];
-  }
-}
-
 export async function getWithdrawalById(
   withdrawalId: WithdrawalId,
 ): Promise<SelectWithdrawal | null> {
@@ -322,16 +306,6 @@ export async function cancelWithdrawal(
     });
     return { success: false, error: "Database error" };
   }
-}
-
-export function getWithdrawalStatusEmoji(status: WithdrawalStatus): string {
-  const emojis: Record<WithdrawalStatus, string> = {
-    pending: "⏳",
-    processed: "✅",
-    cancelled: "❌",
-    refunded: "🔄",
-  };
-  return emojis[status];
 }
 
 const CURRENCY_DISPLAY_NAMES: Record<WithdrawalCurrency, string> = {
