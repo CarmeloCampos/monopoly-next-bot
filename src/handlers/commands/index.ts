@@ -20,7 +20,6 @@ import {
   getSettingsKeyboard,
   getReferralDashboardKeyboard,
   getBalanceSubmenuKeyboard,
-  getAdminPanelKeyboard,
 } from "@/keyboards";
 import { userHasProperty } from "@/services/property";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
@@ -31,7 +30,7 @@ import { handleMinigames, handleBetAmount } from "./minigames-menu";
 import { isAwaitingBet } from "@/services/minigame-state";
 import { isInWithdrawalFlow } from "@/services/withdrawal-state";
 import { getReferralStats } from "@/services/referral";
-import { getUserStats } from "@/services/admin";
+import { showAdminPanel } from "@/utils/admin-helpers";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -141,6 +140,11 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
           await handleAdminPanel(ctx);
         }
         break;
+      case getText(dbUser.language, "btn_back"):
+        await ctx.reply(getText(dbUser.language, "menu_main"), {
+          reply_markup: getMainMenuKeyboard(dbUser.language, ctx.isAdmin),
+        });
+        break;
       default:
         await ctx.reply(getText(dbUser.language, "invalid_message"), {
           reply_markup: getMainMenuKeyboard(dbUser.language, ctx.isAdmin),
@@ -202,16 +206,5 @@ async function handleServices(ctx: BotContextWithLanguage): Promise<void> {
 }
 
 async function handleAdminPanel(ctx: BotContextWithLanguage): Promise<void> {
-  const stats = await getUserStats();
-
-  const message = getText(ctx.dbUser.language, "admin_stats_text")
-    .replace("{totalUsers}", String(stats.totalUsers))
-    .replace("{totalBalance}", String(stats.totalBalance))
-    .replace("{pendingWithdrawals}", String(stats.pendingWithdrawals))
-    .replace("{totalWithdrawals}", String(stats.totalWithdrawals));
-
-  await ctx.reply(message, {
-    parse_mode: "Markdown",
-    reply_markup: getAdminPanelKeyboard(ctx.dbUser.language),
-  });
+  await showAdminPanel(ctx);
 }
