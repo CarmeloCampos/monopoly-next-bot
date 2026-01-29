@@ -16,6 +16,17 @@ export const CALLBACK_DATA = {
   REFERRAL_HISTORY: "referral_history",
   REFERRAL_REFRESH: "referral_refresh",
   REFERRAL_CLOSE: "referral_close",
+  WITHDRAWAL_MENU: "withdrawal_menu",
+  WITHDRAWAL_CREATE: "withdrawal_create",
+  WITHDRAWAL_HISTORY: "withdrawal_history",
+  WITHDRAWAL_CANCEL: "withdrawal_cancel",
+  ADMIN_PANEL: "admin_panel",
+  ADMIN_USERS: "admin_users",
+  ADMIN_TOP_USERS: "admin_top_users",
+  ADMIN_WITHDRAWALS: "admin_withdrawals",
+  ADMIN_PENDING_WITHDRAWALS: "admin_pending_withdrawals",
+  ADMIN_BACK: "admin_back",
+  ADMIN_CLOSE: "admin_close",
 } as const;
 
 export const CALLBACK_PATTERNS = {
@@ -29,4 +40,23 @@ export const CALLBACK_PATTERNS = {
   BOARD_BUY_SERVICE: /^board_buy_service_(\d+)$/,
   MINIGAME_SELECT: /^minigame_(dice|darts|basketball|football|bowling|slots)$/,
   MINIGAME_DICE_PICK: /^dice_pick_([1-6])$/,
+  WITHDRAWAL_CURRENCY: /^withdrawal_currency_(bitcoin|usdt_tron|monero)$/,
+  WITHDRAWAL_HISTORY: /^withdrawal_history_(\d+)$/,
+  WITHDRAWAL_ADMIN_VIEW: /^withdrawal_admin_view_(\d+)$/,
+  WITHDRAWAL_ADMIN_PROCESS: /^withdrawal_admin_process_(\d+)$/,
+  WITHDRAWAL_ADMIN_CANCEL: /^withdrawal_admin_cancel_(\d+)$/,
+  WITHDRAWAL_ADMIN_REFUND: /^withdrawal_admin_refund_(\d+)$/,
+  ADMIN_USERS_PAGE: /^admin_users_page_(\d+)$/,
 } as const;
+
+export const WITHDRAWAL_CURRENCIES = [
+  "bitcoin",
+  "usdt_tron",
+  "monero",
+] as const;
+export const WITHDRAWAL_STATUSES = [
+  "pending",
+  "processed",
+  "cancelled",
+  "refunded",
+] as const;
