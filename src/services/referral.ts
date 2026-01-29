@@ -10,6 +10,8 @@ import {
   type Language,
   type MaybeOptional,
   type MaybeUndefined,
+  type ReferralStats,
+  type ReferralEarningRecord,
 } from "@/types";
 import {
   asMonopolyCoins,
@@ -22,6 +24,7 @@ import { DEFAULT_LANGUAGE } from "@/constants";
 import { info } from "@/utils/logger";
 import { buildReferralLevelMessage } from "@/i18n";
 import { addBalanceAndTransaction } from "@/utils/transaction";
+import { count, sum, eq, desc } from "drizzle-orm";
 
 /** Represents a single referrer in the chain who received a bonus */
 interface ReferrerReward {
@@ -150,5 +153,93 @@ export async function processReferral(
     bonusGiven: asMonopolyCoins(REFERRAL_BONUS.INVITED),
     referrersRewarded: chain.length,
     referrers,
+  });
+}
+
+async function getTotalReferrals(userId: TelegramId): Promise<number> {
+  const result = await db
+    .select({ count: count() })
+    .from(referrals)
+    .where(eq(referrals.referrer_id, userId));
+  return result[0]?.count ?? 0;
+}
+
+async function getTotalEarnings(userId: TelegramId): Promise<MonopolyCoins> {
+  const result = await db
+    .select({ total: sum(referralEarnings.amount) })
+    .from(referralEarnings)
+    .where(eq(referralEarnings.user_id, userId));
+  return asMonopolyCoins(result[0]?.total ?? 0);
+}
+
+async function getReferralCountByLevel(
+  userId: TelegramId,
+): Promise<Record<ReferralLevel, number>> {
+  const byLevel = await db
+    .select({
+      level: referralEarnings.level,
+      count: count(),
+    })
+    .from(referralEarnings)
+    .where(eq(referralEarnings.user_id, userId))
+    .groupBy(referralEarnings.level);
+
+  const result: Record<ReferralLevel, number> = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+  };
+
+  for (const row of byLevel) {
+    if (isReferralLevel(row.level)) {
+      result[row.level] = row.count;
+    }
+  }
+
+  return result;
+}
+
+export async function getReferralStats(
+  userId: TelegramId,
+): Promise<ReferralStats> {
+  const [totalReferrals, totalEarnings, referralsByLevel] = await Promise.all([
+    getTotalReferrals(userId),
+    getTotalEarnings(userId),
+    getReferralCountByLevel(userId),
+  ]);
+
+  return {
+    totalReferrals,
+    totalEarnings,
+    referralsByLevel,
+  };
+}
+
+export async function getEarningsHistory(
+  userId: TelegramId,
+  limit: number = 10,
+): Promise<ReferralEarningRecord[]> {
+  const records = await db
+    .select({
+      amount: referralEarnings.amount,
+      level: referralEarnings.level,
+      createdAt: referralEarnings.created_at,
+    })
+    .from(referralEarnings)
+    .where(eq(referralEarnings.user_id, userId))
+    .orderBy(desc(referralEarnings.created_at))
+    .limit(limit);
+
+  return records.map((r) => {
+    if (!isReferralLevel(r.level)) {
+      throw new Error(`Invalid referral level: ${r.level}`);
+    }
+    return {
+      amount: r.amount,
+      level: r.level,
+      createdAt: r.createdAt,
+    };
   });
 }

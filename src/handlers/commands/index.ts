@@ -10,14 +10,15 @@ import { info } from "@/utils/logger";
 import {
   buildReferralBonusMessage,
   buildBalanceMessage,
-  buildReferralCodeMessage,
   buildWelcomeExistingUserMessage,
+  buildReferralDashboardMessage,
   getText,
 } from "@/i18n";
 import {
   getMainMenuKeyboard,
   getMenuButtonTexts,
   getSettingsKeyboard,
+  getReferralDashboardKeyboard,
 } from "@/keyboards";
 import { userHasProperty } from "@/services/property";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
@@ -26,6 +27,7 @@ import { sendServiceCard } from "@/handlers/shared/service-display";
 import { handleBoard, handleRollDice, handleViewCurrent } from "./board-menu";
 import { handleMinigames, handleBetAmount } from "./minigames-menu";
 import { isAwaitingBet } from "@/services/minigame-state";
+import { getReferralStats } from "@/services/referral";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -146,12 +148,20 @@ async function handleBalance(ctx: BotContextWithLanguage): Promise<void> {
 }
 
 async function handleReferral(ctx: BotContextWithLanguage): Promise<void> {
-  await ctx.reply(
-    buildReferralCodeMessage(ctx.dbUser.language, ctx.dbUser.referral_code),
-    {
-      parse_mode: "Markdown",
-    },
+  const stats = await getReferralStats(ctx.dbUser.telegram_id);
+  const dashboardMessage = buildReferralDashboardMessage(
+    ctx.dbUser.language,
+    ctx.dbUser.referral_code,
+    stats,
   );
+
+  await ctx.reply(dashboardMessage, {
+    parse_mode: "Markdown",
+    reply_markup: getReferralDashboardKeyboard(
+      ctx.dbUser.language,
+      ctx.dbUser.referral_code,
+    ),
+  });
 }
 
 async function handleSettings(ctx: BotContextWithLanguage): Promise<void> {

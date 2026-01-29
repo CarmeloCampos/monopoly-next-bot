@@ -13,6 +13,9 @@ export const CALLBACK_DATA = {
   SERVICE_CLOSE: "service_close",
   SERVICE_BACK: "service_back",
   MINIGAME_CANCEL: "minigame_cancel",
+  REFERRAL_HISTORY: "referral_history",
+  REFERRAL_REFRESH: "referral_refresh",
+  REFERRAL_CLOSE: "referral_close",
 } as const;
 
 export const CALLBACK_PATTERNS = {
