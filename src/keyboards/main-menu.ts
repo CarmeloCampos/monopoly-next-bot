@@ -9,23 +9,30 @@ import { LANGUAGE_EMOJIS, CHANNEL_URLS } from "@/constants";
 
 export function getMainMenuKeyboard(
   language: MaybeOptional<Language>,
+  isAdmin = false,
 ): ReplyKeyboardMarkup {
-  return {
-    keyboard: [
-      [
-        { text: getText(language, "menu_properties") },
-        { text: getText(language, "menu_advance") },
-        { text: getText(language, "menu_services") },
-      ],
-      [
-        { text: getText(language, "menu_balance") },
-        { text: getText(language, "menu_minigames") },
-      ],
-      [
-        { text: getText(language, "menu_referral") },
-        { text: getText(language, "menu_settings") },
-      ],
+  const keyboard: KeyboardButton[][] = [
+    [
+      { text: getText(language, "menu_properties") },
+      { text: getText(language, "menu_advance") },
+      { text: getText(language, "menu_services") },
     ],
+    [
+      { text: getText(language, "menu_balance") },
+      { text: getText(language, "menu_minigames") },
+    ],
+    [
+      { text: getText(language, "menu_referral") },
+      { text: getText(language, "menu_settings") },
+    ],
+  ];
+
+  if (isAdmin) {
+    keyboard.push([{ text: getText(language, "admin_panel_button") }]);
+  }
+
+  return {
+    keyboard,
     resize_keyboard: true,
     is_persistent: true,
   };
