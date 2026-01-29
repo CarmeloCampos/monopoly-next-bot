@@ -1,7 +1,3 @@
-import type { InlineKeyboardMarkup } from "telegraf/types";
-import type { Language, MaybeOptional } from "@/types";
-import { getText } from "@/i18n";
-
 export interface PaginationButtonConfig {
   prevText: string;
   nextText: string;
@@ -86,27 +82,4 @@ export function createPaginationButtons(
   }
 
   return result;
-}
-
-/**
- * Creates a standard pagination keyboard with back button.
- */
-export function getPaginationKeyboard(
-  language: MaybeOptional<Language>,
-  options: PaginationOptions,
-  prefix: string,
-  backCallbackData: string,
-): InlineKeyboardMarkup {
-  const buttons = createPaginationButtons(options, {
-    prevData: `${prefix}_{page}`,
-    nextData: `${prefix}_{page}`,
-    backButton: {
-      text: getText(language, "btn_back"),
-      callbackData: backCallbackData,
-    },
-  });
-
-  return {
-    inline_keyboard: buttons,
-  };
 }
