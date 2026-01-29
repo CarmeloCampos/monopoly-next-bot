@@ -19,6 +19,7 @@ import {
   getMenuButtonTexts,
   getSettingsKeyboard,
   getReferralDashboardKeyboard,
+  getBalanceSubmenuKeyboard,
 } from "@/keyboards";
 import { userHasProperty } from "@/services/property";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
@@ -144,7 +145,16 @@ async function handleProperties(ctx: BotContextWithLanguage): Promise<void> {
 }
 
 async function handleBalance(ctx: BotContextWithLanguage): Promise<void> {
-  await ctx.reply(buildBalanceMessage(ctx.dbUser.language, ctx.dbUser.balance));
+  const balanceMessage = buildBalanceMessage(
+    ctx.dbUser.language,
+    ctx.dbUser.balance,
+  );
+  const submenuMessage = `${balanceMessage}\n\n${getText(ctx.dbUser.language, "balance_submenu_prompt")}`;
+
+  await ctx.reply(submenuMessage, {
+    parse_mode: "Markdown",
+    reply_markup: getBalanceSubmenuKeyboard(ctx.dbUser.language),
+  });
 }
 
 async function handleReferral(ctx: BotContextWithLanguage): Promise<void> {
