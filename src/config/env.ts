@@ -38,6 +38,27 @@ const envSchema = z.object({
   // Withdrawal Configuration
   MINIMUM_WITHDRAWAL_MC: z.coerce.number().default(10000),
   WITHDRAWAL_COOLDOWN_DAYS: z.coerce.number().default(7),
+
+  // Bot Configuration
+  BOT_USERNAME: z.string().default("MonopolyFunBot"),
+  BOT_DISPLAY_NAME: z.string().default("Monopoly Bot"),
+
+  // Support Contact
+  SUPPORT_USERNAME: z.string().default("MonopolyFunBotSupport"),
+
+  // Channel URLs
+  CHANNEL_OFFICIAL_URL: z
+    .string()
+    .url()
+    .default("https://t.me/monopolyfunbot_channel"),
+  CHANNEL_COMMUNITY_URL: z
+    .string()
+    .url()
+    .default("https://t.me/monopolyfunbot_chat"),
+  CHANNEL_NEWS_URL: z
+    .string()
+    .url()
+    .default("https://t.me/monopolyfunbot_news"),
 });
 
 const _env = envSchema.safeParse(process.env);
