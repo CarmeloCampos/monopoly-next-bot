@@ -1,19 +1,26 @@
 import {
   type BotContextWithLanguage,
+  type Language,
   isPropertyIndex,
   isServiceIndex,
+  type MaybeUndefined,
 } from "@/types";
-import { getText } from "@/i18n";
-import { getBoardKeyboard } from "@/keyboards";
-import { rollDice } from "@/services/dice";
-import { getUserGameState, setUnlockedItem } from "@/services/game-state";
 import {
   getPropertyByIndex,
   getPropertyCost,
   getPropertyIncome,
+  type PropertyIndex,
 } from "@/constants/properties";
+import { getText } from "@/i18n";
+import { getBoardKeyboard } from "@/keyboards";
+import { rollDice } from "@/services/dice";
+import { getUserGameState, setUnlockedItem } from "@/services/game-state";
 import { getServiceByIndex } from "@/constants/services";
 import { getPropertyImageUrl, getServiceImageUrl } from "@/utils/property";
+import {
+  sendPhotoWithFallback,
+  sendBackButton,
+} from "@/handlers/shared/photo-message";
 
 export async function handleBoard(ctx: BotContextWithLanguage): Promise<void> {
   const { dbUser } = ctx;
@@ -118,56 +125,70 @@ async function showUnlockedProperty(
   }
 
   const propertyName = getText(dbUser.language, property.nameKey);
-  const color =
-    property.color.charAt(0).toUpperCase() + property.color.slice(1);
+  const colorKey = `color_${property.color}` as const;
+  const color = getText(dbUser.language, colorKey);
 
   const cost1 = getPropertyCost(itemIndex, 1);
+  const income1 = getPropertyIncome(itemIndex, 1);
+
+  const message =
+    roll !== undefined
+      ? getText(dbUser.language, "board_rolled_property_simple")
+          .replace("{roll}", String(roll))
+          .replace(/{property}/g, propertyName)
+          .replace("{color}", color)
+          .replace("{cost}", String(cost1 ?? 0))
+          .replace("{income}", income1 ? String(income1) : "0")
+      : buildFullPropertyMessage(dbUser.language, propertyName, color, {
+          itemIndex,
+          cost1,
+          income1,
+        });
+
+  const imageUrl = getPropertyImageUrl(itemIndex, 1);
+
+  await sendPhotoWithFallback(ctx, {
+    imageUrl,
+    caption: message,
+    callbackData: `board_buy_property_${itemIndex}`,
+    itemIndex,
+    itemType: "property",
+  });
+
+  await sendBackButton(ctx);
+}
+
+interface PropertyCostIncome {
+  itemIndex: PropertyIndex;
+  cost1: MaybeUndefined<number>;
+  income1: MaybeUndefined<number>;
+}
+
+function buildFullPropertyMessage(
+  language: Language,
+  propertyName: string,
+  color: string,
+  costs: PropertyCostIncome,
+): string {
+  const { itemIndex, cost1, income1 } = costs;
   const cost2 = getPropertyCost(itemIndex, 2);
   const cost3 = getPropertyCost(itemIndex, 3);
   const cost4 = getPropertyCost(itemIndex, 4);
-
-  const income1 = getPropertyIncome(itemIndex, 1);
   const income2 = getPropertyIncome(itemIndex, 2);
   const income3 = getPropertyIncome(itemIndex, 3);
   const income4 = getPropertyIncome(itemIndex, 4);
 
-  const messageKey =
-    roll !== undefined ? "board_rolled_property" : "board_unlocked_property";
-  let message = getText(dbUser.language, messageKey)
+  return getText(language, "board_unlocked_property")
     .replace("{property}", propertyName)
     .replace("{color}", color)
-    .replace("{cost1}", String(cost1))
-    .replace("{cost2}", String(cost2))
-    .replace("{cost3}", String(cost3))
-    .replace("{cost4}", String(cost4))
+    .replace("{cost1}", String(cost1 ?? 0))
+    .replace("{cost2}", String(cost2 ?? 0))
+    .replace("{cost3}", String(cost3 ?? 0))
+    .replace("{cost4}", String(cost4 ?? 0))
     .replace("{income1}", income1 ? String(income1) : "0")
     .replace("{income2}", income2 ? String(income2) : "0")
     .replace("{income3}", income3 ? String(income3) : "0")
     .replace("{income4}", income4 ? String(income4) : "0");
-
-  if (roll !== undefined) {
-    message = message.replace("{roll}", String(roll));
-  }
-
-  const imageUrl = getPropertyImageUrl(itemIndex, 1);
-
-  await ctx.replyWithPhoto(imageUrl, {
-    caption: message,
-    parse_mode: "Markdown",
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: getText(dbUser.language, "btn_buy"),
-            callback_data: `board_buy_property_${itemIndex}`,
-          },
-        ],
-      ],
-    },
-  });
-  await ctx.reply(getText(dbUser.language, "btn_back"), {
-    reply_markup: getBoardKeyboard(dbUser.language, true),
-  });
 }
 
 async function showUnlockedService(
@@ -193,32 +214,44 @@ async function showUnlockedService(
 
   const messageKey =
     roll !== undefined ? "board_rolled_service" : "board_unlocked_service";
-  let message = getText(dbUser.language, messageKey)
+  const message = buildServiceMessage(
+    dbUser.language,
+    messageKey,
+    serviceName,
+    service.cost,
+    boostText,
+    roll,
+  );
+
+  const imageUrl = getServiceImageUrl(itemIndex);
+
+  await sendPhotoWithFallback(ctx, {
+    imageUrl,
+    caption: message,
+    callbackData: `board_buy_service_${itemIndex}`,
+    itemIndex,
+    itemType: "service",
+  });
+
+  await sendBackButton(ctx);
+}
+
+function buildServiceMessage(
+  language: Language,
+  messageKey: string,
+  serviceName: string,
+  cost: number,
+  boostText: string,
+  roll?: number,
+): string {
+  let message = getText(language, messageKey)
     .replace("{service}", serviceName)
-    .replace("{cost}", String(service.cost))
+    .replace("{cost}", String(cost))
     .replace("{boost}", boostText);
 
   if (roll !== undefined) {
     message = message.replace("{roll}", String(roll));
   }
 
-  const imageUrl = getServiceImageUrl(itemIndex);
-
-  await ctx.replyWithPhoto(imageUrl, {
-    caption: message,
-    parse_mode: "Markdown",
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: getText(dbUser.language, "btn_buy"),
-            callback_data: `board_buy_service_${itemIndex}`,
-          },
-        ],
-      ],
-    },
-  });
-  await ctx.reply(getText(dbUser.language, "btn_back"), {
-    reply_markup: getBoardKeyboard(dbUser.language, true),
-  });
+  return message;
 }
