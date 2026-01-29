@@ -20,6 +20,7 @@ import {
   getSettingsKeyboard,
   getReferralDashboardKeyboard,
   getBalanceSubmenuKeyboard,
+  getAdminPanelKeyboard,
 } from "@/keyboards";
 import { userHasProperty } from "@/services/property";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
@@ -28,7 +29,9 @@ import { sendServiceCard } from "@/handlers/shared/service-display";
 import { handleBoard, handleRollDice, handleViewCurrent } from "./board-menu";
 import { handleMinigames, handleBetAmount } from "./minigames-menu";
 import { isAwaitingBet } from "@/services/minigame-state";
+import { isInWithdrawalFlow } from "@/services/withdrawal-state";
 import { getReferralStats } from "@/services/referral";
+import { getUserStats } from "@/services/admin";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -61,7 +64,7 @@ export const registerCommands = (bot: Telegraf<BotContext>): void => {
 
     await ctx.reply(startMessage, {
       parse_mode: "Markdown",
-      reply_markup: getMainMenuKeyboard(dbUser.language),
+      reply_markup: getMainMenuKeyboard(dbUser.language, ctx.isAdmin),
     });
   });
 
@@ -82,8 +85,8 @@ export const registerCommands = (bot: Telegraf<BotContext>): void => {
 };
 
 function registerMenuHandlers(bot: Telegraf<BotContext>): void {
-  bot.on(message("text"), async (ctx) => {
-    if (!hasLanguage(ctx)) return;
+  bot.on(message("text"), async (ctx, next) => {
+    if (!hasLanguage(ctx)) return next();
 
     const { dbUser } = ctx;
     const messageText = ctx.message.text;
@@ -95,6 +98,11 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
         await handleBetAmount(ctx, amount);
         return;
       }
+    }
+
+    // Skip if in withdrawal flow - let withdrawal handler handle it
+    if (isInWithdrawalFlow(dbUser.telegram_id)) {
+      return next();
     }
 
     switch (messageText) {
@@ -128,9 +136,14 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
       case getText(dbUser.language, "board_view_current"):
         await handleViewCurrent(ctx);
         break;
+      case getText(dbUser.language, "admin_panel_button"):
+        if (ctx.isAdmin) {
+          await handleAdminPanel(ctx);
+        }
+        break;
       default:
         await ctx.reply(getText(dbUser.language, "invalid_message"), {
-          reply_markup: getMainMenuKeyboard(dbUser.language),
+          reply_markup: getMainMenuKeyboard(dbUser.language, ctx.isAdmin),
         });
     }
   });
@@ -185,5 +198,20 @@ async function handleServices(ctx: BotContextWithLanguage): Promise<void> {
     ctx,
     serviceIndex: 0,
     isNavigation: false,
+  });
+}
+
+async function handleAdminPanel(ctx: BotContextWithLanguage): Promise<void> {
+  const stats = await getUserStats();
+
+  const message = getText(ctx.dbUser.language, "admin_stats_text")
+    .replace("{totalUsers}", String(stats.totalUsers))
+    .replace("{totalBalance}", String(stats.totalBalance))
+    .replace("{pendingWithdrawals}", String(stats.pendingWithdrawals))
+    .replace("{totalWithdrawals}", String(stats.totalWithdrawals));
+
+  await ctx.reply(message, {
+    parse_mode: "Markdown",
+    reply_markup: getAdminPanelKeyboard(ctx.dbUser.language),
   });
 }
