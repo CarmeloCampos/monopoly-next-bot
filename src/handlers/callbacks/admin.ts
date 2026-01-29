@@ -27,8 +27,11 @@ import {
   extractWithdrawalId,
   extractPageNumber,
 } from "@/utils/callback-helpers";
-import { error } from "@/utils/logger";
-import { isLanguage } from "@/utils/guards";
+import { buildUserDisplayName } from "@/utils/user-display";
+import {
+  notifyUserWithdrawalProcessed,
+  notifyUserWithdrawalCancelled,
+} from "@/utils/withdrawal-notifications";
 
 const USERS_PAGE_SIZE = 20;
 
@@ -267,30 +270,18 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
         // Notify user
         const withdrawal = await getWithdrawalById(withdrawalId);
         if (withdrawal) {
-          try {
-            // Fetch user's language preference for the notification
-            const withdrawalUser = await getUserById(withdrawal.user_id);
-            const userLanguage =
-              withdrawalUser?.language && isLanguage(withdrawalUser.language)
-                ? withdrawalUser.language
-                : "en";
-
-            await ctx.telegram.sendMessage(
-              withdrawal.user_id,
-              getText(userLanguage, "withdrawal_processed_notification")
-                .replace("{amount}", String(withdrawal.amount))
-                .replace(
-                  "{currency}",
-                  getCurrencyDisplayName(withdrawal.currency),
-                )
-                .replace("{hash}", text),
-            );
-          } catch {
-            error("Failed to notify user about processed withdrawal", {
+          const withdrawalUser = await getUserById(withdrawal.user_id);
+          await notifyUserWithdrawalProcessed(
+            ctx.telegram,
+            withdrawal.user_id,
+            withdrawalUser?.language,
+            {
               userId: withdrawal.user_id,
-              withdrawalId: adminState.withdrawalId,
-            });
-          }
+              amount: withdrawal.amount,
+              currency: withdrawal.currency,
+            },
+            text,
+          );
         }
       } else {
         await ctx.reply(processResult.error ?? "Error");
@@ -339,9 +330,12 @@ async function showUsersList(ctx: BotContext, page: number): Promise<void> {
   const items = users
     .map((user, index) => {
       const rank = (page - 1) * USERS_PAGE_SIZE + index + 1;
-      const name = user.username
-        ? `@${user.username}`
-        : (user.first_name ?? `User ${user.telegram_id}`);
+      const name = buildUserDisplayName({
+        telegramId: user.telegram_id,
+        username: user.username,
+        firstName: user.first_name,
+        lastName: user.last_name,
+      });
       return `${rank}. ${name} - ${user.balance} MC`;
     })
     .join("\n");
@@ -374,9 +368,12 @@ async function showTopUsers(ctx: BotContext): Promise<void> {
   const items = users
     .map((user, index) => {
       const rank = index + 1;
-      const name = user.username
-        ? `@${user.username}`
-        : (user.first_name ?? `User ${user.telegram_id}`);
+      const name = buildUserDisplayName({
+        telegramId: user.telegram_id,
+        username: user.username,
+        firstName: user.first_name,
+        lastName: user.last_name,
+      });
       return getText(ctx.dbUser.language, "admin_top_users_item")
         .replace("{rank}", String(rank))
         .replace("{name}", name)
@@ -413,9 +410,12 @@ async function showPendingWithdrawals(ctx: BotContext): Promise<void> {
       const date = new Date(w.created_at).toLocaleDateString(
         ctx.dbUser.language,
       );
-      const userName = w.user.username
-        ? `@${w.user.username}`
-        : (w.user.first_name ?? `User ${w.user.telegram_id}`);
+      const userName = buildUserDisplayName({
+        telegramId: w.user.telegram_id,
+        username: w.user.username,
+        firstName: w.user.first_name,
+        lastName: w.user.last_name,
+      });
       const currencyDisplay = getCurrencyDisplayName(w.currency);
 
       return getText(ctx.dbUser.language, "admin_pending_withdrawals_item")
@@ -524,27 +524,15 @@ async function handleWithdrawalCancellation(
     // Notify user
     const withdrawal = await getWithdrawalById(withdrawalId);
     if (withdrawal) {
-      try {
-        // Fetch user's language preference for the notification
-        const withdrawalUser = await getUserById(withdrawal.user_id);
-        const userLanguage =
-          withdrawalUser?.language && isLanguage(withdrawalUser.language)
-            ? withdrawalUser.language
-            : "en";
-
-        await ctx.telegram.sendMessage(
-          withdrawal.user_id,
-          getText(userLanguage, config.notificationKey).replace(
-            "{amount}",
-            String(withdrawal.amount),
-          ),
-        );
-      } catch {
-        error(config.logMessage, {
-          userId: withdrawal.user_id,
-          withdrawalId,
-        });
-      }
+      const withdrawalUser = await getUserById(withdrawal.user_id);
+      await notifyUserWithdrawalCancelled(
+        ctx.telegram,
+        withdrawal.user_id,
+        withdrawalUser?.language,
+        withdrawalId,
+        withdrawal.amount,
+        refund,
+      );
     }
   } else {
     await ctx.answerCbQuery(result.error ?? "Error");
