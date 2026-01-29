@@ -1,0 +1,212 @@
+import { db } from "@/db";
+import { users, withdrawals } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
+import type { TelegramId, SelectUser, SelectWithdrawal } from "@/types";
+import { env } from "@/config/env";
+import { error } from "@/utils/logger";
+
+export function isAdmin(userId: TelegramId): boolean {
+  return env.ADMIN_USER_IDS.includes(userId);
+}
+
+export interface TopUser {
+  telegram_id: TelegramId;
+  username: string | null;
+  first_name: string | null;
+  balance: number;
+}
+
+export async function getTopUsersByBalance(limit = 20): Promise<TopUser[]> {
+  try {
+    const results = await db
+      .select({
+        telegram_id: users.telegram_id,
+        username: users.username,
+        first_name: users.first_name,
+        balance: users.balance,
+      })
+      .from(users)
+      .orderBy(desc(users.balance))
+      .limit(limit);
+
+    return results as TopUser[];
+  } catch (err) {
+    error("Error fetching top users", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return [];
+  }
+}
+
+export interface UserStats {
+  totalUsers: number;
+  totalBalance: number;
+  pendingWithdrawals: number;
+  totalWithdrawals: number;
+}
+
+export async function getUserStats(): Promise<UserStats> {
+  try {
+    const [userStats] = await db
+      .select({
+        totalUsers: sql<number>`count(*)`,
+        totalBalance: sql<number>`coalesce(sum(${users.balance}), 0)`,
+      })
+      .from(users);
+
+    const [withdrawalStats] = await db
+      .select({
+        pending: sql<number>`count(case when ${withdrawals.status} = 'pending' then 1 end)`,
+        total: sql<number>`count(*)`,
+      })
+      .from(withdrawals);
+
+    return {
+      totalUsers: userStats?.totalUsers ?? 0,
+      totalBalance: userStats?.totalBalance ?? 0,
+      pendingWithdrawals: withdrawalStats?.pending ?? 0,
+      totalWithdrawals: withdrawalStats?.total ?? 0,
+    };
+  } catch (err) {
+    error("Error fetching user stats", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return {
+      totalUsers: 0,
+      totalBalance: 0,
+      pendingWithdrawals: 0,
+      totalWithdrawals: 0,
+    };
+  }
+}
+
+export async function getAllUsers(
+  page = 1,
+  pageSize = 20,
+): Promise<{ users: SelectUser[]; total: number }> {
+  try {
+    const offset = (page - 1) * pageSize;
+
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users);
+
+    const results = await db.query.users.findMany({
+      orderBy: desc(users.created_at),
+      limit: pageSize,
+      offset,
+    });
+
+    return {
+      users: results as SelectUser[],
+      total: countResult?.count ?? 0,
+    };
+  } catch (err) {
+    error("Error fetching all users", {
+      page,
+      pageSize,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return { users: [], total: 0 };
+  }
+}
+
+export async function getUserById(
+  userId: TelegramId,
+): Promise<SelectUser | null> {
+  try {
+    const user = await db.query.users.findFirst({
+      where: eq(users.telegram_id, userId),
+    });
+
+    return user ?? null;
+  } catch (err) {
+    error("Error fetching user by id", {
+      userId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
+}
+
+export interface WithdrawalWithUser extends SelectWithdrawal {
+  user: {
+    telegram_id: TelegramId;
+    username: string | null;
+    first_name: string | null;
+    language: string | null;
+  };
+}
+
+export async function getPendingWithdrawalsWithUsers(): Promise<
+  WithdrawalWithUser[]
+> {
+  try {
+    const results = await db
+      .select({
+        withdrawal: withdrawals,
+        user_telegram_id: users.telegram_id,
+        user_username: users.username,
+        user_first_name: users.first_name,
+        user_language: users.language,
+      })
+      .from(withdrawals)
+      .innerJoin(users, eq(withdrawals.user_id, users.telegram_id))
+      .where(eq(withdrawals.status, "pending"))
+      .orderBy(desc(withdrawals.created_at));
+
+    return results.map((row) => ({
+      ...row.withdrawal,
+      user: {
+        telegram_id: row.user_telegram_id as TelegramId,
+        username: row.user_username,
+        first_name: row.user_first_name,
+        language: row.user_language,
+      },
+    })) as WithdrawalWithUser[];
+  } catch (err) {
+    error("Error fetching pending withdrawals with users", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return [];
+  }
+}
+
+export async function getWithdrawalStats(): Promise<{
+  pending: number;
+  processed: number;
+  cancelled: number;
+  refunded: number;
+  totalAmount: number;
+}> {
+  try {
+    const [stats] = await db
+      .select({
+        pending: sql<number>`count(case when ${withdrawals.status} = 'pending' then 1 end)`,
+        processed: sql<number>`count(case when ${withdrawals.status} = 'processed' then 1 end)`,
+        cancelled: sql<number>`count(case when ${withdrawals.status} = 'cancelled' then 1 end)`,
+        refunded: sql<number>`count(case when ${withdrawals.status} = 'refunded' then 1 end)`,
+        totalAmount: sql<number>`coalesce(sum(${withdrawals.amount}), 0)`,
+      })
+      .from(withdrawals);
+
+    return {
+      pending: stats?.pending ?? 0,
+      processed: stats?.processed ?? 0,
+      cancelled: stats?.cancelled ?? 0,
+      refunded: stats?.refunded ?? 0,
+      totalAmount: stats?.totalAmount ?? 0,
+    };
+  } catch (err) {
+    error("Error fetching withdrawal stats", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return {
+      pending: 0,
+      processed: 0,
+      cancelled: 0,
+      refunded: 0,
+      totalAmount: 0,
+    };
+  }
+}
