@@ -4,6 +4,7 @@ import {
   LANGUAGE_NAMES,
   SUPPORTED_LANGUAGES,
   DEFAULT_LANGUAGE,
+  BOT_CONFIG,
 } from "@/constants";
 
 interface Locales {
@@ -17,7 +18,8 @@ const locales: Locales = {
   ru: {
     language_selection: "Пожалуйста, выберите язык",
     language_selected: "Язык успешно выбран! Добро пожаловать!",
-    welcome: "👋 Добро пожаловать в Monopoly Bot!",
+    welcome: "👋 Добро пожаловать в {botName}!",
+    bot_name: "{botName}",
     referral_code: "Ваш реферальный код:",
     share_referral: "Поделитесь им с друзьями, чтобы получить награды!",
     help_title: "📚 Доступные команды:",
@@ -32,6 +34,7 @@ const locales: Locales = {
     menu_referral: "👥 Рефералы",
     menu_minigames: "🎮 Мини-игры",
     menu_settings: "⚙️ Настройки",
+    menu_main: "🏠 Главное меню",
     settings_language: "🌐 Изменить язык",
     settings_support: "💬 Поддержка",
     settings_channels: "📢 Каналы",
@@ -40,7 +43,7 @@ const locales: Locales = {
     channel_news: "Новости",
     btn_back: "◀️ Назад",
     welcome_new_user:
-      "🎉 Добро пожаловать в Monopoly Bot!\n\nВы получили свою первую недвижимость: *Стартовая Квартира*\n\nНачните строить свою империю!",
+      "🎉 Добро пожаловать в {botName}!\n\nВы получили свою первую недвижимость: *Стартовая Квартира*\n\nНачните строить свою империю!",
     referral_bonus_received:
       "🎁 Вы получили {amount} MC за использование реферального кода!",
     referral_notification:
@@ -57,7 +60,7 @@ const locales: Locales = {
     balance_submenu_title: "💰 Баланс",
     menu_referral_code: "👥 Ваш реферальный код: `{code}`",
     menu_referral_share_link:
-      "\n\nПоделитесь этой ссылкой:\nt.me/MonopolyFunBot?start={code}",
+      "\n\nПоделитесь этой ссылкой:\nt.me/{botUsername}?start={code}",
     referral_dashboard_title: "👥 Dashboard Рефералов",
     referral_stats_total: "📊 Всего рефералов: {count}",
     referral_stats_earnings: "💰 Всего заработано: {amount} MC",
@@ -74,7 +77,7 @@ const locales: Locales = {
     referral_btn_history: "📜 История",
     referral_btn_refresh: "🔄",
     referral_share_text:
-      "🎮 Присоединяйтесь к Monopoly Bot и получайте награды!\n\nt.me/MonopolyFunBot?start={code}",
+      "🎮 Присоединяйтесь к {botName} и получайте награды!\n\nt.me/{botUsername}?start={code}",
     referral_history_title: "📜 История заработка",
     referral_history_empty: "У вас пока нет заработка от рефералов.",
     referral_history_item: "• +{amount} MC · Уровень {level} · {date}",
@@ -84,8 +87,7 @@ const locales: Locales = {
     error_invalid_callback: "Неверный callback",
     error_invalid_language: "Неверный язык",
     error_updating_language: "Ошибка при обновлении языка",
-    settings_support_message:
-      "💬 Для поддержки напишите: @MonopolyFunBotSupport",
+    settings_support_message: "💬 Для поддержки напишите: @{supportUsername}",
     property_casa_blanca: "Белый Дом",
     property_anne_frank: "Дом Анны Франк",
     property_fallingwater: "Дом Фолингуотер",
@@ -119,13 +121,19 @@ const locales: Locales = {
     property_hours_ago: "{hours} ч. назад",
     property_days_ago: "{days} д. назад",
     property_minutes_ago: "{minutes} мин. назад",
-    welcome_existing_user: "👋 Добро пожаловать в Monopoly Bot!",
+    welcome_existing_user: "👋 Добро пожаловать в {botName}!",
     board_roll_dice: "🎲 Бросить Кубик",
     board_view_current: "👁️ Посмотреть Свойство",
     board_welcome:
       "🎲 Добро пожаловать на доску!\n\nБросьте кубик, чтобы открыть новые свойства и услуги.",
     board_rolled_property: "🎲 Вы выбросили {roll} и открыли: {property}!",
     board_rolled_service: "🎲 Вы выбросили {roll} и открыли: {service}!",
+    board_rolled_property_simple:
+      "🎲 Вы выбросили {roll} и открыли: {property}!\n\n🏠 {property}\n🎨 Цвет: {color}\n💰 Стоимость: {cost} MC\n💵 Доход: {income}/ч",
+    color_brown: "Коричневый",
+    color_orange: "Оранжевый",
+    color_red: "Красный",
+    color_blue: "Синий",
     board_unlocked_property:
       "🏠 **{property}**\n\n🎨 Цвет: {color}\n\n💰 **Стоимость по уровням:**\n⭐ Уровень 1: {cost1} MC\n⭐ Уровень 2: {cost2} MC\n⭐ Уровень 3: {cost3} MC\n⭐ Уровень 4: {cost4} MC\n\n💰 **Доход по уровням:**\n⭐ Уровень 1: {income1}/ч\n⭐ Уровень 2: {income2}/ч\n⭐ Уровень 3: {income3}/ч\n⭐ Уровень 4: {income4}/ч",
     board_unlocked_service:
@@ -280,7 +288,7 @@ const locales: Locales = {
   en: {
     language_selection: "Please select your language",
     language_selected: "Language selected successfully! Welcome!",
-    welcome: "👋 Welcome to Monopoly Bot!",
+    welcome: "👋 Welcome to {botName}!",
     referral_code: "Your referral code:",
     share_referral: "Share it with friends to earn rewards!",
     help_title: "📚 Available Commands:",
@@ -295,6 +303,7 @@ const locales: Locales = {
     menu_referral: "👥 Referrals",
     menu_minigames: "🎮 Mini-games",
     menu_settings: "⚙️ Settings",
+    menu_main: "🏠 Main Menu",
     settings_language: "🌐 Change Language",
     settings_support: "💬 Support",
     settings_channels: "📢 Channels",
@@ -303,7 +312,7 @@ const locales: Locales = {
     channel_news: "News",
     btn_back: "◀️ Back",
     welcome_new_user:
-      "🎉 Welcome to Monopoly Bot!\n\nYou received your first property: *Startup Apartment*\n\nStart building your empire!",
+      "🎉 Welcome to {botName}!\n\nYou received your first property: *Startup Apartment*\n\nStart building your empire!",
     referral_bonus_received:
       "🎁 You received {amount} MC for using a referral code!",
     referral_notification:
@@ -319,7 +328,7 @@ const locales: Locales = {
     balance_submenu_title: "💰 Balance",
     menu_referral_code: "👥 Your referral code: `{code}`",
     menu_referral_share_link:
-      "\n\nShare this link:\nt.me/MonopolyFunBot?start={code}",
+      "\n\nShare this link:\nt.me/{botUsername}?start={code}",
     referral_dashboard_title: "👥 Referral Dashboard",
     referral_stats_total: "📊 Total referrals: {count}",
     referral_stats_earnings: "💰 Total earnings: {amount} MC",
@@ -336,7 +345,7 @@ const locales: Locales = {
     referral_btn_history: "📜 History",
     referral_btn_refresh: "🔄",
     referral_share_text:
-      "🎮 Join Monopoly Bot and earn rewards!\n\nt.me/MonopolyFunBot?start={code}",
+      "🎮 Join {botName} and earn rewards!\n\nt.me/{botUsername}?start={code}",
     referral_history_title: "📜 Earnings History",
     referral_history_empty: "You have no referral earnings yet.",
     referral_history_item: "• +{amount} MC · Level {level} · {date}",
@@ -346,7 +355,7 @@ const locales: Locales = {
     error_invalid_callback: "Invalid callback",
     error_invalid_language: "Invalid language",
     error_updating_language: "Error updating language",
-    settings_support_message: "💬 For support, contact: @MonopolyFunBotSupport",
+    settings_support_message: "💬 For support, contact: @{supportUsername}",
     property_casa_blanca: "Casa Blanca",
     property_anne_frank: "Anne Frank House",
     property_fallingwater: "Fallingwater House",
@@ -379,13 +388,19 @@ const locales: Locales = {
     property_hours_ago: "{hours}h ago",
     property_days_ago: "{days}d ago",
     property_minutes_ago: "{minutes}m ago",
-    welcome_existing_user: "👋 Welcome back to Monopoly Bot!",
+    welcome_existing_user: "👋 Welcome back to {botName}!",
     board_roll_dice: "🎲 Roll Dice",
     board_view_current: "👁️ View Property",
     board_welcome:
       "🎲 Welcome to Board!\n\nRoll dice to discover new properties and services.",
     board_rolled_property: "🎲 You rolled a {roll} and discovered: {property}!",
     board_rolled_service: "🎲 You rolled a {roll} and discovered: {service}!",
+    board_rolled_property_simple:
+      "🎲 You rolled a {roll} and discovered: {property}!\n\n🏠 {property}\n🎨 Color: {color}\n💰 Cost: {cost} MC\n💵 Income: {income}/h",
+    color_brown: "Brown",
+    color_orange: "Orange",
+    color_red: "Red",
+    color_blue: "Blue",
     board_unlocked_property:
       "🏠 **{property}**\n\n🎨 Color: {color}\n\n💰 **Cost per Level:**\n⭐ Level 1: {cost1} MC\n⭐ Level 2: {cost2} MC\n⭐ Level 3: {cost3} MC\n⭐ Level 4: {cost4} MC\n\n💰 **Income per Level:**\n⭐ Level 1: {income1}/h\n⭐ Level 2: {income2}/h\n⭐ Level 3: {income3}/h\n⭐ Level 4: {income4}/h",
     board_unlocked_service:
@@ -539,7 +554,7 @@ const locales: Locales = {
   es: {
     language_selection: "Por favor, selecciona tu idioma",
     language_selected: "¡Idioma seleccionado con éxito! ¡Bienvenido!",
-    welcome: "👋 ¡Bienvenido a Monopoly Bot!",
+    welcome: "👋 ¡Bienvenido a {botName}!",
     referral_code: "Tu código de referido:",
     share_referral: "¡Compártelo con amigos para ganar recompensas!",
     help_title: "📚 Comandos disponibles:",
@@ -554,6 +569,7 @@ const locales: Locales = {
     menu_referral: "👥 Referidos",
     menu_minigames: "🎮 Minijuegos",
     menu_settings: "⚙️ Configuración",
+    menu_main: "🏠 Menú Principal",
     settings_language: "🌐 Cambiar Idioma",
     settings_support: "💬 Soporte",
     settings_channels: "📢 Canales",
@@ -562,7 +578,7 @@ const locales: Locales = {
     channel_news: "Noticias",
     btn_back: "◀️ Volver",
     welcome_new_user:
-      "🎉 ¡Bienvenido a Monopoly Bot!\n\nHas recibido tu primera propiedad: *Apartamento Emprender*\n\n¡Empieza a construir tu imperio!",
+      "🎉 ¡Bienvenido a {botName}!\n\nHas recibido tu primera propiedad: *Apartamento Emprender*\n\n¡Empieza a construir tu imperio!",
     referral_bonus_received:
       "🎁 ¡Has recibido {amount} MC por usar un código de referido!",
     referral_notification:
@@ -579,7 +595,7 @@ const locales: Locales = {
     balance_submenu_title: "💰 Balance",
     menu_referral_code: "👥 Tu código de referido: `{code}`",
     menu_referral_share_link:
-      "\n\nComparte este enlace:\nt.me/MonopolyFunBot?start={code}",
+      "\n\nComparte este enlace:\nt.me/{botUsername}?start={code}",
     referral_dashboard_title: "👥 Dashboard de Referidos",
     referral_stats_total: "📊 Total referidos: {count}",
     referral_stats_earnings: "💰 Ganancias totales: {amount} MC",
@@ -596,7 +612,7 @@ const locales: Locales = {
     referral_btn_history: "📜 Historial",
     referral_btn_refresh: "🔄",
     referral_share_text:
-      "🎮 ¡Únete a Monopoly Bot y gana recompensas!\n\nt.me/MonopolyFunBot?start={code}",
+      "🎮 ¡Únete a {botName} y gana recompensas!\n\nt.me/{botUsername}?start={code}",
     referral_history_title: "📜 Historial de Ganancias",
     referral_history_empty: "No tienes ganancias de referidos aún.",
     referral_history_item: "• +{amount} MC · Nivel {level} · {date}",
@@ -606,8 +622,7 @@ const locales: Locales = {
     error_invalid_callback: "Callback inválido",
     error_invalid_language: "Idioma inválido",
     error_updating_language: "Error al actualizar el idioma",
-    settings_support_message:
-      "💬 Para soporte, contacta: @MonopolyFunBotSupport",
+    settings_support_message: "💬 Para soporte, contacta: @{supportUsername}",
     property_casa_blanca: "Casa Blanca",
     property_anne_frank: "Casa de Anne Frank",
     property_fallingwater: "Fallingwater House",
@@ -649,6 +664,12 @@ const locales: Locales = {
       "🎲 ¡Bienvenido al Tablero!\n\nTira los dados para descubrir nuevas propiedades y servicios.",
     board_rolled_property: "🎲 ¡Sacaste un {roll} y descubriste: {property}!",
     board_rolled_service: "🎲 ¡Sacaste un {roll} y descubriste: {service}!",
+    board_rolled_property_simple:
+      "🎲 ¡Sacaste un {roll} y descubriste: {property}!\n\n🏠 {property}\n🎨 Color: {color}\n💰 Valor: {cost} MC\n💵 Genera: {income}/h",
+    color_brown: "Marrón",
+    color_orange: "Naranja",
+    color_red: "Rojo",
+    color_blue: "Azul",
     board_unlocked_property:
       "🏠 **{property}**\n\n🎨 Color: {color}\n\n💰 **Costo por Nivel:**\n⭐ Nivel 1: {cost1} MC\n⭐ Nivel 2: {cost2} MC\n⭐ Nivel 3: {cost3} MC\n⭐ Nivel 4: {cost4} MC\n\n💰 **Ingreso por Nivel:**\n⭐ Nivel 1: {income1}/h\n⭐ Nivel 2: {income2}/h\n⭐ Nivel 3: {income3}/h\n⭐ Nivel 4: {income4}/h",
     board_unlocked_service:
@@ -740,7 +761,7 @@ const locales: Locales = {
     minigame_slots_jackpot: "🎰 ¡JACKPOT! 777!",
     minigame_slots_triple: "🎰 ¡Triple!",
     minigame_play_again: "🎮 Jugar de nuevo",
-    welcome_existing_user: "👋 ¡Bienvenido a Monopoly Bot!",
+    welcome_existing_user: "👋 ¡Bienvenido a {botName}!",
     // Withdrawal
     menu_withdrawal: "💸 Retirar",
     withdrawal_title: "💸 Retiro",
@@ -806,7 +827,7 @@ const locales: Locales = {
   pt: {
     language_selection: "Por favor, selecione seu idioma",
     language_selected: "Idioma selecionado com sucesso! Bem-vindo!",
-    welcome: "👋 Bem-vindo ao Monopoly Bot!",
+    welcome: "👋 Bem-vindo ao {botName}!",
     referral_code: "Seu código de referência:",
     share_referral: "Compartilhe com amigos para ganhar recompensas!",
     help_title: "📚 Comandos disponíveis:",
@@ -821,6 +842,7 @@ const locales: Locales = {
     menu_referral: "👥 Indicações",
     menu_minigames: "🎮 Mini-jogos",
     menu_settings: "⚙️ Configurações",
+    menu_main: "🏠 Menu Principal",
     settings_language: "🌐 Mudar Idioma",
     settings_support: "💬 Suporte",
     settings_channels: "📢 Canais",
@@ -829,7 +851,7 @@ const locales: Locales = {
     channel_news: "Notícias",
     btn_back: "◀️ Voltar",
     welcome_new_user:
-      "🎉 Bem-vindo ao Monopoly Bot!\n\nVocê recebeu sua primeira propriedade: *Apartamento Empreender*\n\nComece a construir seu império!",
+      "🎉 Bem-vindo ao {botName}!\n\nVocê recebeu sua primeira propriedade: *Apartamento Empreender*\n\nComece a construir seu império!",
     referral_bonus_received:
       "🎁 Você recebeu {amount} MC por usar um código de indicação!",
     referral_notification:
@@ -847,7 +869,7 @@ const locales: Locales = {
     menu_advance_coming_soon: "🎲 Avançar - Em breve...",
     menu_referral_code: "👥 Seu código de referência: `{code}`",
     menu_referral_share_link:
-      "\n\nCompartilhe este link:\nt.me/MonopolyFunBot?start={code}",
+      "\n\nCompartilhe este link:\nt.me/{botUsername}?start={code}",
     referral_dashboard_title: "👥 Dashboard de Indicações",
     referral_stats_total: "📊 Total de indicações: {count}",
     referral_stats_earnings: "💰 Ganhos totais: {amount} MC",
@@ -864,7 +886,7 @@ const locales: Locales = {
     referral_btn_history: "📜 Histórico",
     referral_btn_refresh: "🔄",
     referral_share_text:
-      "🎮 Junte-se ao Monopoly Bot e ganhe recompensas!\n\nt.me/MonopolyFunBot?start={code}",
+      "🎮 Junte-se ao {botName} e ganhe recompensas!\n\nt.me/{botUsername}?start={code}",
     referral_history_title: "📜 Histórico de Ganhos",
     referral_history_empty: "Você ainda não tem ganhos de indicações.",
     referral_history_item: "• +{amount} MC · Nível {level} · {date}",
@@ -874,8 +896,7 @@ const locales: Locales = {
     error_invalid_callback: "Callback inválido",
     error_invalid_language: "Idioma inválido",
     error_updating_language: "Erro ao atualizar idioma",
-    settings_support_message:
-      "💬 Para suporte, contate: @MonopolyFunBotSupport",
+    settings_support_message: "💬 Para suporte, contate: @{supportUsername}",
     property_casa_blanca: "Casa Branca",
     property_anne_frank: "Casa de Anne Frank",
     property_fallingwater: "Fallingwater House",
@@ -910,13 +931,19 @@ const locales: Locales = {
     property_hours_ago: "{hours}h atrás",
     property_days_ago: "{days}d atrás",
     property_minutes_ago: "{minutes}m atrás",
-    welcome_existing_user: "👋 Bem-vindo ao Monopoly Bot!",
+    welcome_existing_user: "👋 Bem-vindo ao {botName}!",
     board_roll_dice: "🎲 Lançar Dados",
     board_view_current: "👁️ Ver Propriedade",
     board_welcome:
       "🎲 Bem-vindo ao Tabuleiro!\n\nLance os dados para descobrir novas propriedades e serviços.",
     board_rolled_property: "🎲 Você tirou {roll} e descobriu: {property}!",
     board_rolled_service: "🎲 Você tirou {roll} e descobriu: {service}!",
+    board_rolled_property_simple:
+      "🎲 Você tirou {roll} e descobriu: {property}!\n\n🏠 {property}\n🎨 Cor: {color}\n💰 Custo: {cost} MC\n💵 Renda: {income}/h",
+    color_brown: "Marrom",
+    color_orange: "Laranja",
+    color_red: "Vermelho",
+    color_blue: "Azul",
     board_unlocked_property:
       "🏠 **{property}**\n\n🎨 Cor: {color}\n\n💰 **Custo por Nível:**\n⭐ Nível 1: {cost1} MC\n⭐ Nível 2: {cost2} MC\n⭐ Nível 3: {cost3} MC\n⭐ Nível 4: {cost4} MC\n\n💰 **Renda por Nível:**\n⭐ Nível 1: {income1}/h\n⭐ Nível 2: {income2}/h\n⭐ Nível 3: {income3}/h\n⭐ Nível 4: {income4}/h",
     board_unlocked_service:
@@ -1084,7 +1111,11 @@ export function getText(
     return key;
   }
 
-  return translation;
+  // Replace placeholders with actual values from environment variables
+  return translation
+    .replace(/{botName}/g, BOT_CONFIG.displayName)
+    .replace(/{botUsername}/g, BOT_CONFIG.username)
+    .replace(/{supportUsername}/g, BOT_CONFIG.supportUsername);
 }
 
 export function getSupportedLanguages(): readonly Language[] {
