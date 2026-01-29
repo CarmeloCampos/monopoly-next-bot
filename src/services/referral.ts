@@ -173,7 +173,10 @@ async function getTotalEarnings(userId: TelegramId): Promise<MonopolyCoins> {
     .select({ total: sum(referralEarnings.amount) })
     .from(referralEarnings)
     .where(eq(referralEarnings.user_id, userId));
-  return asMonopolyCoins(result[0]?.total ?? 0);
+  const total = result[0]?.total;
+  const numericTotal =
+    typeof total === "string" ? Number.parseFloat(total) : (total ?? 0);
+  return asMonopolyCoins(numericTotal);
 }
 
 async function getReferralCountByLevel(
