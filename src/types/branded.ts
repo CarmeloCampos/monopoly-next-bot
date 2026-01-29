@@ -30,22 +30,15 @@ export type ReferralLevel = 1 | 2 | 3 | 4 | 5;
 /** Maximum referral level constant */
 export const MAX_REFERRAL_LEVEL: ReferralLevel = 5;
 
-/** Valid withdrawal currencies */
-export const WITHDRAWAL_CURRENCIES = [
-  "bitcoin",
-  "usdt_tron",
-  "monero",
-] as const;
-export type WithdrawalCurrency = (typeof WITHDRAWAL_CURRENCIES)[number];
+/** Valid withdrawal currencies - imported from constants/bot.ts */
+export type WithdrawalCurrency = "bitcoin" | "usdt_tron" | "monero";
 
-/** Valid withdrawal statuses */
-export const WITHDRAWAL_STATUSES = [
-  "pending",
-  "processed",
-  "cancelled",
-  "refunded",
-] as const;
-export type WithdrawalStatus = (typeof WITHDRAWAL_STATUSES)[number];
+/** Valid withdrawal statuses - imported from constants/bot.ts */
+export type WithdrawalStatus =
+  | "pending"
+  | "processed"
+  | "cancelled"
+  | "refunded";
 
 /** Branded type for withdrawal IDs */
 export type WithdrawalId = number & { readonly __brand: unique symbol };
