@@ -3,7 +3,6 @@ import type { BotContext, WithdrawalId } from "@/types";
 import { hasDbUser, hasLanguage } from "@/types/index";
 import { getText } from "@/i18n";
 import {
-  getAdminPanelKeyboard,
   getAdminUsersKeyboard,
   getAdminWithdrawalActionsKeyboard,
   getAdminBackKeyboard,
@@ -11,7 +10,6 @@ import {
 import { CALLBACK_DATA, CALLBACK_PATTERNS } from "@/constants/bot";
 import {
   getTopUsersByBalance,
-  getUserStats,
   getAllUsers,
   getPendingWithdrawalsWithUsers,
   getUserById,
@@ -27,6 +25,7 @@ import {
   extractWithdrawalId,
   extractPageNumber,
 } from "@/utils/callback-helpers";
+import { showAdminPanel } from "@/utils/admin-helpers";
 import { buildUserDisplayName } from "@/utils/user-display";
 import {
   notifyUserWithdrawalProcessed,
@@ -296,22 +295,7 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
   });
 };
 
-async function showAdminPanel(ctx: BotContext): Promise<void> {
-  if (!hasLanguage(ctx)) return;
-
-  const stats = await getUserStats();
-
-  const message = getText(ctx.dbUser.language, "admin_stats_text")
-    .replace("{totalUsers}", String(stats.totalUsers))
-    .replace("{totalBalance}", String(stats.totalBalance))
-    .replace("{pendingWithdrawals}", String(stats.pendingWithdrawals))
-    .replace("{totalWithdrawals}", String(stats.totalWithdrawals));
-
-  await ctx.reply(message, {
-    parse_mode: "Markdown",
-    reply_markup: getAdminPanelKeyboard(ctx.dbUser.language),
-  });
-}
+// showAdminPanel is now imported from @/utils/admin-helpers
 
 async function showUsersList(ctx: BotContext, page: number): Promise<void> {
   if (!hasLanguage(ctx)) return;
