@@ -21,6 +21,23 @@ const envSchema = z.object({
 
   // Debug logs
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+
+  // Admin Configuration
+  ADMIN_USER_IDS: z
+    .string()
+    .transform((val) =>
+      val
+        .split(",")
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0)
+        .map((id) => Number.parseInt(id, 10))
+        .filter((id) => !Number.isNaN(id)),
+    )
+    .default([]),
+
+  // Withdrawal Configuration
+  MINIMUM_WITHDRAWAL_MC: z.coerce.number().default(10000),
+  WITHDRAWAL_COOLDOWN_DAYS: z.coerce.number().default(7),
 });
 
 const _env = envSchema.safeParse(process.env);
