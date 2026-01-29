@@ -8,6 +8,7 @@ import {
   buildPropertyDetailMessage,
 } from "@/utils/property";
 import { getPropertyNavigationKeyboard } from "@/keyboards/property";
+import { displayMediaCard } from "./media-display";
 
 interface SendPropertyCardParams {
   ctx: BotContextWithLanguage;
@@ -96,28 +97,11 @@ export async function sendPropertyCard(
     property,
   );
 
-  if (isNavigation) {
-    if (ctx.callbackQuery?.message && "photo" in ctx.callbackQuery.message) {
-      await ctx.editMessageMedia(
-        {
-          type: "photo",
-          media: imageUrl,
-          caption: detailMessage,
-          parse_mode: "Markdown",
-        },
-        { reply_markup: keyboard },
-      );
-    } else {
-      await ctx.editMessageText(detailMessage, {
-        parse_mode: "Markdown",
-        reply_markup: keyboard,
-      });
-    }
-  } else {
-    await ctx.replyWithPhoto(imageUrl, {
-      caption: detailMessage,
-      parse_mode: "Markdown",
-      reply_markup: keyboard,
-    });
-  }
+  await displayMediaCard({
+    ctx,
+    imageUrl,
+    caption: detailMessage,
+    keyboard,
+    isNavigation,
+  });
 }

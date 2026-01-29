@@ -5,6 +5,7 @@ import { getUserServices } from "@/services/service";
 import { getServiceByIndex } from "@/constants/services";
 import { getServiceImageUrl } from "@/utils/property";
 import { getServiceNavigationKeyboard } from "@/keyboards";
+import { displayMediaCard } from "./media-display";
 
 interface SendServiceCardParams {
   ctx: BotContextWithLanguage;
@@ -87,30 +88,13 @@ export async function sendServiceCard(
 
   const keyboard = getServiceNavigationKeyboard(serviceIndex, services.length);
 
-  if (isNavigation) {
-    if (ctx.callbackQuery?.message && "photo" in ctx.callbackQuery.message) {
-      await ctx.editMessageMedia(
-        {
-          type: "photo",
-          media: imageUrl,
-          caption: detailMessage,
-          parse_mode: "Markdown",
-        },
-        { reply_markup: keyboard },
-      );
-    } else {
-      await ctx.editMessageText(detailMessage, {
-        parse_mode: "Markdown",
-        reply_markup: keyboard,
-      });
-    }
-  } else {
-    await ctx.replyWithPhoto(imageUrl, {
-      caption: detailMessage,
-      parse_mode: "Markdown",
-      reply_markup: keyboard,
-    });
-  }
+  await displayMediaCard({
+    ctx,
+    imageUrl,
+    caption: detailMessage,
+    keyboard,
+    isNavigation,
+  });
 }
 
 function buildServiceDetailMessage(
