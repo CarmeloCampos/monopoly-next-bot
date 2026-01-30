@@ -13,6 +13,7 @@ import type {
   Language,
   WithdrawalCurrency,
   WithdrawalStatus,
+  DepositStatus,
 } from "@/types/utils";
 
 // ============================================
@@ -264,5 +265,39 @@ export const withdrawals = sqliteTable(
     userIdIdx: index("withdrawals_user_id_idx").on(table.user_id),
     statusIdx: index("withdrawals_status_idx").on(table.status),
     createdAtIdx: index("withdrawals_created_at_idx").on(table.created_at),
+  }),
+);
+
+// ============================================
+// Deposits Table
+// ============================================
+
+export const deposits = sqliteTable(
+  "deposits",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    user_id: integer("user_id")
+      .notNull()
+      .references(() => users.telegram_id, { onDelete: "cascade" })
+      .$type<TelegramId>(),
+    amount_usd: real("amount_usd").notNull(),
+    amount_mc: integer("amount_mc").notNull().$type<MonopolyCoins>(),
+    nowpayments_payment_id: text("nowpayments_payment_id").notNull().unique(),
+    nowpayments_order_id: text("nowpayments_order_id").notNull(),
+    status: text("status").notNull().$type<DepositStatus>(),
+    pay_address: text("pay_address"),
+    pay_amount: real("pay_amount"),
+    pay_currency: text("pay_currency"),
+    payment_url: text("payment_url"),
+    created_at: integer("created_at", { mode: "timestamp" }).notNull(),
+    updated_at: integer("updated_at", { mode: "timestamp" }).notNull(),
+    paid_at: integer("paid_at", { mode: "timestamp" }),
+  },
+  (table) => ({
+    userIdIdx: index("deposits_user_id_idx").on(table.user_id),
+    statusIdx: index("deposits_status_idx").on(table.status),
+    paymentIdIdx: index("deposits_payment_id_idx").on(
+      table.nowpayments_payment_id,
+    ),
   }),
 );
