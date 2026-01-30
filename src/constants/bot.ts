@@ -27,6 +27,11 @@ export const CALLBACK_DATA = {
   ADMIN_PENDING_WITHDRAWALS: "admin_pending_withdrawals",
   ADMIN_BACK: "admin_back",
   ADMIN_CLOSE: "admin_close",
+  DEPOSIT_MENU: "deposit_menu",
+  DEPOSIT_CREATE: "deposit_create",
+  DEPOSIT_HISTORY: "deposit_history",
+  DEPOSIT_CANCEL: "deposit_cancel",
+  DEPOSIT_CRYPTO_BACK: "deposit_crypto_back",
 } as const;
 
 export const CALLBACK_PATTERNS = {
@@ -47,6 +52,9 @@ export const CALLBACK_PATTERNS = {
   WITHDRAWAL_ADMIN_CANCEL: /^withdrawal_admin_cancel_(\d+)$/,
   WITHDRAWAL_ADMIN_REFUND: /^withdrawal_admin_refund_(\d+)$/,
   ADMIN_USERS_PAGE: /^admin_users_page_(\d+)$/,
+  DEPOSIT_HISTORY: /^deposit_history_(\d+)$/,
+  DEPOSIT_CRYPTO:
+    /^deposit_crypto_(btc|eth|usdt|usdc|ltc|doge|bnb|sol|xrp|ada)$/,
 } as const;
 
 export const WITHDRAWAL_CURRENCIES = [
@@ -59,4 +67,17 @@ export const WITHDRAWAL_STATUSES = [
   "processed",
   "cancelled",
   "refunded",
+] as const;
+
+export const AVAILABLE_CRYPTO_CURRENCIES = [
+  { code: "btc", name: "Bitcoin", symbol: "BTC" },
+  { code: "eth", name: "Ethereum", symbol: "ETH" },
+  { code: "usdt", name: "Tether (ERC20)", symbol: "USDT" },
+  { code: "usdc", name: "USD Coin", symbol: "USDC" },
+  { code: "ltc", name: "Litecoin", symbol: "LTC" },
+  { code: "doge", name: "Dogecoin", symbol: "DOGE" },
+  { code: "bnb", name: "BNB Smart Chain", symbol: "BNB" },
+  { code: "sol", name: "Solana", symbol: "SOL" },
+  { code: "xrp", name: "Ripple", symbol: "XRP" },
+  { code: "ada", name: "Cardano", symbol: "ADA" },
 ] as const;
