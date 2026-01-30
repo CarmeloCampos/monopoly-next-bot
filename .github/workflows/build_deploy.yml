@@ -18,6 +18,9 @@ jobs:
           envkey_TURSO_DATABASE_URL: ${{ vars.TURSO_DATABASE_URL }}
           envkey_TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           envkey_BOT_TOKEN: true
+          envkey_NOWPAYMENTS_API_KEY: true
+          envkey_NOWPAYMENTS_IPN_SECRET: true
+          envkey_NOWPAYMENTS_IPN_URL: "https://api.example.com"
 
       - name: Install dependencies
         run: bun install
