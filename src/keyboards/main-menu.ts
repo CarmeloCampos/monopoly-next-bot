@@ -24,6 +24,7 @@ export function getMainMenuKeyboard(
     ],
     [
       { text: getText(language, "menu_referral") },
+      { text: getText(language, "menu_deposit") },
       { text: getText(language, "menu_settings") },
     ],
   ];
