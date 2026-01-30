@@ -55,6 +55,7 @@ const locales: Locales = {
     referral_level_n: "Реферал уровень {level}",
     referral_welcome_bonus: "Бонус приветствия за реферала",
     menu_properties_coming_soon: "🏠 Недвижимость - Скоро...",
+    menu_advance_coming_soon: "🎲 Продвигаться - Скоро...",
     menu_balance_message: "💰 Ваш баланс: {balance} MC",
     balance_submenu_prompt: "Что вы хотите сделать?",
     balance_submenu_title: "💰 Баланс",
@@ -284,11 +285,47 @@ const locales: Locales = {
     btn_confirm: "✅ Подтвердить",
     btn_cancel: "❌ Отменить",
     btn_close: "❌ Закрыть",
+    // Deposit
+    menu_deposit: "💳 Депозит",
+    deposit_menu_text:
+      "💳 *Депозит*\n\nЗдесь вы можете пополнить баланс MonopolyCoins.\n\n*Курс:* 1 USD = 1,000 MC\n*Минимум:* {min_amount} USD",
+    deposit_create_button: "➕ Создать депозит",
+    deposit_history_button: "📜 История",
+    deposit_enter_amount: "💰 Введите сумму в USD (минимум {min_amount}):",
+    deposit_invalid_amount:
+      "❌ Неверная сумма. Пожалуйста, введите положительное число.",
+    deposit_minimum_error: "❌ Минимальная сумма депозита: {min_amount} USD",
+    deposit_api_error: "❌ Ошибка при создании платежа. Попробуйте позже.",
+    deposit_created_success:
+      "✅ *Депозит создан!*\n\n💰 Сумма: {amount_usd} USD\n💎 Получите: {amount_mc} MC\n\n🔗 *Ссылка для оплаты:*\n{payment_url}\n\nНажмите кнопку ниже, чтобы перейти к оплате.",
+    deposit_created_no_url:
+      "✅ *Депозит создан!*\n\n💰 Сумма: {amount_usd} USD\n💎 Получите: {amount_mc} MC\n\n💳 *Данные для оплаты:*\n\n📍 Адрес: `{pay_address}`\n💰 Сумма: {pay_amount} {pay_currency}\n\nОтправьте указанную сумму на этот адрес кошелька.",
+    deposit_cancelled: "❌ Депозит отменен",
+    deposit_history_title: "📜 История депозитов",
+    deposit_history_empty: "У вас пока нет депозитов",
+    deposit_history_item:
+      "{status} {amount_usd} USD → {amount_mc} MC\n📅 {date}",
+    deposit_status_pending: "⏳ Ожидает",
+    deposit_status_paid: "✅ Оплачен",
+    deposit_status_failed: "❌ Не удался",
+    deposit_status_expired: "⌛ Истек",
+    btn_pay_now: "💳 Оплатить сейчас",
+    deposit_paid_notification:
+      "✅ *Депозит оплачен!*\n\n💰 Сумма: {amount_usd} USD\n💎 Получено: {amount_mc} MC\n\nСредства зачислены на ваш баланс.",
+    deposit_select_crypto:
+      "💱 *Выберите криптовалюту*\n\nСумма депозита: {amount_usd} USD\n\nДоступно вариантов: {count}\n\nВыберите криптовалюту для оплаты:",
+    deposit_no_crypto_available:
+      "❌ *Нет доступных криптовалют*\n\nДля суммы {amount_usd} USD нет доступных криптовалют.\n\nПопробуйте увеличить сумму депозита.",
+    deposit_crypto_minimum_error:
+      "❌ *Слишком маленькая сумма*\n\nЭта криптовалюта имеет минимальный лимит для данной суммы депозита.\n\nПожалуйста, выберите другую криптовалюту или увеличьте сумму депозита.",
+    deposit_crypto_estimate_error:
+      "❌ *Курс недоступен*\n\nНе удалось получить курс обмена для этой криптовалюты.\n\nПожалуйста, выберите другую криптовалюту или попробуйте позже.",
   },
   en: {
     language_selection: "Please select your language",
     language_selected: "Language selected successfully! Welcome!",
     welcome: "👋 Welcome to {botName}!",
+    bot_name: "{botName}",
     referral_code: "Your referral code:",
     share_referral: "Share it with friends to earn rewards!",
     help_title: "📚 Available Commands:",
@@ -323,6 +360,7 @@ const locales: Locales = {
     referral_level_n: "Referral level {level}",
     referral_welcome_bonus: "Welcome bonus for referral",
     menu_properties_coming_soon: "🏠 Properties - Coming soon...",
+    menu_advance_coming_soon: "🎲 Advance - Coming soon...",
     menu_balance_message: "💰 Your balance: {balance} MC",
     balance_submenu_prompt: "What would you like to do?",
     balance_submenu_title: "💰 Balance",
@@ -425,6 +463,7 @@ const locales: Locales = {
     service_type: "Type",
     service_purchased_at: "Purchased",
     btn_buy: "✅ Buy",
+    service_no_services: "You have no services",
     property_upgrade_button: "⬆️ Upgrade to level {level} ({cost} MC)",
     property_upgrade_free_property: "❌ Cannot upgrade starter property",
     property_upgrade_max_level: "❌ Maximum level reached",
@@ -550,11 +589,47 @@ const locales: Locales = {
     btn_confirm: "✅ Confirm",
     btn_cancel: "❌ Cancel",
     btn_close: "❌ Close",
+    // Deposit
+    menu_deposit: "💳 Deposit",
+    deposit_menu_text:
+      "💳 *Deposit*\n\nHere you can deposit funds to get MonopolyCoins.\n\n*Rate:* 1 USD = 1,000 MC\n*Minimum:* {min_amount} USD",
+    deposit_create_button: "➕ Create Deposit",
+    deposit_history_button: "📜 History",
+    deposit_enter_amount: "💰 Enter amount in USD (minimum {min_amount}):",
+    deposit_invalid_amount:
+      "❌ Invalid amount. Please enter a positive number.",
+    deposit_minimum_error: "❌ Minimum deposit amount: {min_amount} USD",
+    deposit_api_error: "❌ Error creating payment. Please try again later.",
+    deposit_created_success:
+      "✅ *Deposit Created!*\n\n💰 Amount: {amount_usd} USD\n💎 You will receive: {amount_mc} MC\n\n🔗 *Payment Link:*\n{payment_url}\n\nClick the button below to proceed with payment.",
+    deposit_created_no_url:
+      "✅ *Deposit Created!*\n\n💰 Amount: {amount_usd} USD\n💎 You will receive: {amount_mc} MC\n\n💳 *Payment Details:*\n\n📍 Address: `{pay_address}`\n💰 Amount: {pay_amount} {pay_currency}\n\nSend the specified amount to this wallet address.",
+    deposit_cancelled: "❌ Deposit cancelled",
+    deposit_history_title: "📜 Deposit History",
+    deposit_history_empty: "You have no deposits yet",
+    deposit_history_item:
+      "{status} {amount_usd} USD → {amount_mc} MC\n📅 {date}",
+    deposit_status_pending: "⏳ Pending",
+    deposit_status_paid: "✅ Paid",
+    deposit_status_failed: "❌ Failed",
+    deposit_status_expired: "⌛ Expired",
+    btn_pay_now: "💳 Pay Now",
+    deposit_paid_notification:
+      "✅ *Deposit Paid!*\n\n💰 Amount: {amount_usd} USD\n💎 Received: {amount_mc} MC\n\nFunds have been added to your balance.",
+    deposit_select_crypto:
+      "💱 *Select Cryptocurrency*\n\nDeposit amount: {amount_usd} USD\n\nAvailable options: {count}\n\nChoose a cryptocurrency to pay with:",
+    deposit_no_crypto_available:
+      "❌ *No Cryptocurrencies Available*\n\nFor the amount of {amount_usd} USD, there are no available cryptocurrencies.\n\nPlease try increasing your deposit amount.",
+    deposit_crypto_minimum_error:
+      "❌ *Amount Too Low*\n\nThis cryptocurrency has a minimum limit for this deposit amount.\n\nPlease choose another cryptocurrency or increase your deposit amount.",
+    deposit_crypto_estimate_error:
+      "❌ *Rate Unavailable*\n\nCould not get exchange rate for this cryptocurrency.\n\nPlease choose another cryptocurrency or try again later.",
   },
   es: {
     language_selection: "Por favor, selecciona tu idioma",
     language_selected: "¡Idioma seleccionado con éxito! ¡Bienvenido!",
     welcome: "👋 ¡Bienvenido a {botName}!",
+    bot_name: "{botName}",
     referral_code: "Tu código de referido:",
     share_referral: "¡Compártelo con amigos para ganar recompensas!",
     help_title: "📚 Comandos disponibles:",
@@ -590,6 +665,7 @@ const locales: Locales = {
     referral_level_n: "Referido nivel {level}",
     referral_welcome_bonus: "Bono de bienvenida por referido",
     menu_properties_coming_soon: "🏠 Propiedades - Próximamente...",
+    menu_advance_coming_soon: "🎲 Avanzar - Próximamente...",
     menu_balance_message: "💰 Tu balance: {balance} MC",
     balance_submenu_prompt: "¿Qué deseas hacer?",
     balance_submenu_title: "💰 Balance",
@@ -823,11 +899,48 @@ const locales: Locales = {
     btn_confirm: "✅ Confirmar",
     btn_cancel: "❌ Cancelar",
     btn_close: "❌ Cerrar",
+    // Deposit
+    menu_deposit: "💳 Depósito",
+    deposit_menu_text:
+      "💳 *Depósito*\n\nAquí puedes depositar fondos para obtener MonopolyCoins.\n\n*Tipo de cambio:* 1 USD = 1,000 MC\n*Mínimo:* {min_amount} USD",
+    deposit_create_button: "➕ Crear Depósito",
+    deposit_history_button: "📜 Historial",
+    deposit_enter_amount: "💰 Ingresa el monto en USD (mínimo {min_amount}):",
+    deposit_invalid_amount:
+      "❌ Monto inválido. Por favor ingresa un número positivo.",
+    deposit_minimum_error: "❌ Monto mínimo de depósito: {min_amount} USD",
+    deposit_api_error:
+      "❌ Error al crear el pago. Por favor intenta más tarde.",
+    deposit_created_success:
+      "✅ *¡Depósito Creado!*\n\n💰 Monto: {amount_usd} USD\n💎 Recibirás: {amount_mc} MC\n\n🔗 *Enlace de Pago:*\n{payment_url}\n\nHaz clic en el botón de abajo para proceder con el pago.",
+    deposit_created_no_url:
+      "✅ *¡Depósito Creado!*\n\n💰 Monto: {amount_usd} USD\n💎 Recibirás: {amount_mc} MC\n\n💳 *Detalles de Pago:*\n\n📍 Dirección: `{pay_address}`\n💰 Monto: {pay_amount} {pay_currency}\n\nEnvía el monto especificado a esta dirección de billetera.",
+    deposit_cancelled: "❌ Depósito cancelado",
+    deposit_history_title: "📜 Historial de Depósitos",
+    deposit_history_empty: "Aún no tienes depósitos",
+    deposit_history_item:
+      "{status} {amount_usd} USD → {amount_mc} MC\n📅 {date}",
+    deposit_status_pending: "⏳ Pendiente",
+    deposit_status_paid: "✅ Pagado",
+    deposit_status_failed: "❌ Fallido",
+    deposit_status_expired: "⌛ Expirado",
+    btn_pay_now: "💳 Pagar Ahora",
+    deposit_paid_notification:
+      "✅ *¡Depósito pagado!*\n\n💰 Monto: {amount_usd} USD\n💎 Recibido: {amount_mc} MC\n\nLos fondos han sido añadidos a tu balance.",
+    deposit_select_crypto:
+      "💱 *Seleccionar Criptomoneda*\n\nMonto del depósito: {amount_usd} USD\n\nOpciones disponibles: {count}\n\nElige una criptomoneda para pagar:",
+    deposit_no_crypto_available:
+      "❌ *No hay criptomonedas disponibles*\n\nPara el monto de {amount_usd} USD, no hay criptomonedas disponibles.\n\nIntenta aumentar el monto del depósito.",
+    deposit_crypto_minimum_error:
+      "❌ *Monto muy bajo*\n\nEsta criptomoneda tiene un límite mínimo para este monto de depósito.\n\nPor favor, elige otra criptomoneda o aumenta el monto del depósito.",
+    deposit_crypto_estimate_error:
+      "❌ *Tasa no disponible*\n\nNo se pudo obtener la tasa de cambio para esta criptomoneda.\n\nPor favor, elige otra criptomoneda o inténtalo de nuevo más tarde.",
   },
   pt: {
     language_selection: "Por favor, selecione seu idioma",
     language_selected: "Idioma selecionado com sucesso! Bem-vindo!",
     welcome: "👋 Bem-vindo ao {botName}!",
+    bot_name: "{botName}",
     referral_code: "Seu código de referência:",
     share_referral: "Compartilhe com amigos para ganhar recompensas!",
     help_title: "📚 Comandos disponíveis:",
@@ -970,6 +1083,7 @@ const locales: Locales = {
     service_type: "Tipo",
     service_purchased_at: "Comprado",
     service_no_services: "Ainda não tem serviços",
+    btn_buy: "✅ Comprar",
     property_upgrade_button: "⬆️ Melhorar para nível {level} ({cost} MC)",
     property_upgrade_free_property:
       "❌ Não é possível melhorar propriedade inicial",
@@ -1096,6 +1210,42 @@ const locales: Locales = {
     btn_confirm: "✅ Confirmar",
     btn_cancel: "❌ Cancelar",
     btn_close: "❌ Fechar",
+    // Deposit
+    menu_deposit: "💳 Depósito",
+    deposit_menu_text:
+      "💳 *Depósito*\n\nAqui você pode depositar fundos para obter MonopolyCoins.\n\n*Taxa:* 1 USD = 1,000 MC\n*Mínimo:* {min_amount} USD",
+    deposit_create_button: "➕ Criar Depósito",
+    deposit_history_button: "📜 Histórico",
+    deposit_enter_amount: "💰 Digite o valor em USD (mínimo {min_amount}):",
+    deposit_invalid_amount:
+      "❌ Valor inválido. Por favor digite um número positivo.",
+    deposit_minimum_error: "❌ Valor mínimo de depósito: {min_amount} USD",
+    deposit_api_error:
+      "❌ Erro ao criar pagamento. Por favor tente novamente mais tarde.",
+    deposit_created_success:
+      "✅ *Depósito Criado!*\n\n💰 Valor: {amount_usd} USD\n💎 Você receberá: {amount_mc} MC\n\n🔗 *Link de Pagamento:*\n{payment_url}\n\nClique no botão abaixo para prosseguir com o pagamento.",
+    deposit_created_no_url:
+      "✅ *Depósito Criado!*\n\n💰 Valor: {amount_usd} USD\n💎 Você receberá: {amount_mc} MC\n\n💳 *Detalhes do Pagamento:*\n\n📍 Endereço: `{pay_address}`\n💰 Valor: {pay_amount} {pay_currency}\n\nEnvie o valor especificado para este endereço de carteira.",
+    deposit_cancelled: "❌ Depósito cancelado",
+    deposit_history_title: "📜 Histórico de Depósitos",
+    deposit_history_empty: "Você ainda não tem depósitos",
+    deposit_history_item:
+      "{status} {amount_usd} USD → {amount_mc} MC\n📅 {date}",
+    deposit_status_pending: "⏳ Pendente",
+    deposit_status_paid: "✅ Pago",
+    deposit_status_failed: "❌ Falhou",
+    deposit_status_expired: "⌛ Expirado",
+    btn_pay_now: "💳 Pagar Agora",
+    deposit_paid_notification:
+      "✅ *Depósito pago!*\n\n💰 Valor: {amount_usd} USD\n💎 Recebido: {amount_mc} MC\n\nOs fundos foram adicionados ao seu saldo.",
+    deposit_select_crypto:
+      "💱 *Selecionar Criptomoeda*\n\nValor do depósito: {amount_usd} USD\n\nOpções disponíveis: {count}\n\nEscolha uma criptomoeda para pagar:",
+    deposit_no_crypto_available:
+      "❌ *Nenhuma criptomoeda disponível*\n\nPara o valor de {amount_usd} USD, não há criptomoedas disponíveis.\n\nTente aumentar o valor do depósito.",
+    deposit_crypto_minimum_error:
+      "❌ *Valor muito baixo*\n\nEsta criptomoeda tem um limite mínimo para este valor de depósito.\n\nPor favor, escolha outra criptomoeda ou aumente o valor do depósito.",
+    deposit_crypto_estimate_error:
+      "❌ *Taxa indisponível*\n\nNão foi possível obter a taxa de câmbio para esta criptomoeda.\n\nPor favor, escolha outra criptomoeda ou tente novamente mais tarde.",
   },
 };
 
