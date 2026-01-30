@@ -43,8 +43,14 @@ export type WithdrawalStatus =
 /** Branded type for withdrawal IDs */
 export type WithdrawalId = number & { readonly __brand: unique symbol };
 
+/** Branded type for deposit IDs */
+export type DepositId = number & { readonly __brand: unique symbol };
+
 /** Supported language codes */
 export type Language = "ru" | "en" | "es" | "pt";
+
+/** Valid deposit statuses */
+export type DepositStatus = "pending" | "paid" | "failed" | "expired";
 
 /** Discriminated union for success result */
 export interface Success<T> {

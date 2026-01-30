@@ -85,6 +85,7 @@ export {
   isWithdrawalCurrency,
   isWithdrawalStatus,
   isWithdrawalId,
+  isDepositId,
 } from "@/utils/guards";
 
 export interface CallbackMatchResult {

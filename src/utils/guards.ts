@@ -8,6 +8,7 @@ import type {
   WithdrawalCurrency,
   WithdrawalStatus,
   WithdrawalId,
+  DepositId,
 } from "@/types/branded";
 import type { PropertyIndex, PropertyLevel } from "@/constants/properties";
 import type { ServiceIndex } from "@/constants/services";
@@ -63,19 +64,19 @@ export function isUpgradeErrorCode(value: unknown): value is UpgradeErrorCode {
 export function isWithdrawalCurrency(
   value: unknown,
 ): value is WithdrawalCurrency {
-  return (
-    typeof value === "string" &&
-    WITHDRAWAL_CURRENCIES.includes(value as WithdrawalCurrency)
-  );
+  if (typeof value !== "string") return false;
+  return WITHDRAWAL_CURRENCIES.includes(value as WithdrawalCurrency);
 }
 
 export function isWithdrawalStatus(value: unknown): value is WithdrawalStatus {
-  return (
-    typeof value === "string" &&
-    WITHDRAWAL_STATUSES.includes(value as WithdrawalStatus)
-  );
+  if (typeof value !== "string") return false;
+  return WITHDRAWAL_STATUSES.includes(value as WithdrawalStatus);
 }
 
 export function isWithdrawalId(value: unknown): value is WithdrawalId {
+  return typeof value === "number" && value > 0 && Number.isInteger(value);
+}
+
+export function isDepositId(value: unknown): value is DepositId {
   return typeof value === "number" && value > 0 && Number.isInteger(value);
 }
