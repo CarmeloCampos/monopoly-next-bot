@@ -41,7 +41,11 @@ function validatePaymentResponse(
     pay_address:
       typeof record["pay_address"] === "string" ? record["pay_address"] : "",
     pay_amount:
-      typeof record["pay_amount"] === "string" ? record["pay_amount"] : "0",
+      typeof record["pay_amount"] === "string"
+        ? record["pay_amount"]
+        : typeof record["pay_amount"] === "number"
+          ? String(record["pay_amount"])
+          : "0",
     pay_currency:
       typeof record["pay_currency"] === "string" ? record["pay_currency"] : "",
     price_amount:
