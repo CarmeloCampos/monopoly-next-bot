@@ -6,3 +6,4 @@ export * from "./referral";
 export * from "./pagination";
 export * from "./withdrawal";
 export * from "./admin";
+export * from "./deposit";
