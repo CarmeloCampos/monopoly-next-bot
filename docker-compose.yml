@@ -1,8 +1,7 @@
 services:
   tgbot:
-    build:
-      context: .
-      dockerfile: Dockerfile.bot
+    build: .
+    command: ["bun", "src/index.ts"]
     restart: unless-stopped
     env_file: stack.env
     ports:
@@ -13,9 +12,8 @@ services:
       - cronserver
 
   cronserver:
-    build:
-      context: .
-      dockerfile: Dockerfile.cron
+    build: .
+    command: ["bun", "src/cronjobs/server.ts"]
     restart: always
     env_file: stack.env
     ports:
