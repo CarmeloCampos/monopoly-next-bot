@@ -39,6 +39,18 @@ const envSchema = z.object({
   MINIMUM_WITHDRAWAL_MC: z.coerce.number().default(10000),
   WITHDRAWAL_COOLDOWN_DAYS: z.coerce.number().default(7),
 
+  // Deposit Configuration
+  MINIMUM_DEPOSIT_USD: z.coerce.number().default(10),
+
+  // NOWPayments Configuration
+  NOWPAYMENTS_API_KEY: z.string(),
+  NOWPAYMENTS_IPN_SECRET: z.string(),
+  NOWPAYMENTS_API_URL: z
+    .string()
+    .url()
+    .default("https://api.nowpayments.io/v1"),
+  NOWPAYMENTS_IPN_URL: z.string().url(),
+
   // Bot Configuration
   BOT_USERNAME: z.string().default("MonopolyFunBot"),
   BOT_DISPLAY_NAME: z.string().default("Monopoly Bot"),
