@@ -29,8 +29,11 @@ import { handleBoard, handleRollDice, handleViewCurrent } from "./board-menu";
 import { handleMinigames, handleBetAmount } from "./minigames-menu";
 import { isAwaitingBet } from "@/services/minigame-state";
 import { isInWithdrawalFlow } from "@/services/withdrawal-state";
+import { isInDepositFlow } from "@/services/deposit-state";
 import { getReferralStats } from "@/services/referral";
 import { showAdminPanel } from "@/utils/admin-helpers";
+import { getDepositMenuKeyboard } from "@/keyboards/deposit";
+import { env } from "@/config/env";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -104,6 +107,11 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
       return next();
     }
 
+    // Skip if in deposit flow - let deposit handler handle it
+    if (isInDepositFlow(dbUser.telegram_id)) {
+      return next();
+    }
+
     switch (messageText) {
       case menuTexts.properties:
         await handleProperties(ctx);
@@ -134,6 +142,9 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
         break;
       case getText(dbUser.language, "board_view_current"):
         await handleViewCurrent(ctx);
+        break;
+      case getText(dbUser.language, "menu_deposit"):
+        await handleDeposit(ctx);
         break;
       case getText(dbUser.language, "admin_panel_button"):
         if (ctx.isAdmin) {
@@ -207,4 +218,18 @@ async function handleServices(ctx: BotContextWithLanguage): Promise<void> {
 
 async function handleAdminPanel(ctx: BotContextWithLanguage): Promise<void> {
   await showAdminPanel(ctx);
+}
+
+async function handleDeposit(ctx: BotContextWithLanguage): Promise<void> {
+  const { MINIMUM_DEPOSIT_USD } = env;
+  await ctx.reply(
+    getText(ctx.dbUser.language, "deposit_menu_text").replace(
+      "{min_amount}",
+      String(MINIMUM_DEPOSIT_USD),
+    ),
+    {
+      parse_mode: "Markdown",
+      reply_markup: getDepositMenuKeyboard(ctx.dbUser.language),
+    },
+  );
 }
