@@ -4,24 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.bot
     restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - BOT_TOKEN=${BOT_TOKEN}
-      - EXECUTION_MODE=${EXECUTION_MODE:-polling}
-      - WEBHOOK_URL=${WEBHOOK_URL:-}
-      - PORT=${PORT:-3000}
-      - TURSO_DATABASE_URL=${TURSO_DATABASE_URL}
-      - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - BOT_USERNAME=${BOT_USERNAME:-MonopolyFunBot}
-      - BOT_DISPLAY_NAME=${BOT_DISPLAY_NAME:-Monopoly Bot}
-      - ADMIN_USER_IDS=${ADMIN_USER_IDS:-}
-      - SUPPORT_USERNAME=${SUPPORT_USERNAME:-MonopolyFunBotSupport}
-      - CHANNEL_OFFICIAL_URL=${CHANNEL_OFFICIAL_URL:-}
-      - CHANNEL_COMMUNITY_URL=${CHANNEL_COMMUNITY_URL:-}
-      - CHANNEL_NEWS_URL=${CHANNEL_NEWS_URL:-}
-      - MINIMUM_WITHDRAWAL_MC=${MINIMUM_WITHDRAWAL_MC:-10000}
-      - WITHDRAWAL_COOLDOWN_DAYS=${WITHDRAWAL_COOLDOWN_DAYS:-7}
+    env_file: stack.env
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     networks:
@@ -34,13 +17,7 @@ services:
       context: .
       dockerfile: Dockerfile.cron
     restart: always
-    environment:
-      - NODE_ENV=production
-      - CRON_PORT=${CRON_PORT:-3001}
-      - CRON_SECRET=${CRON_SECRET}
-      - TURSO_DATABASE_URL=${TURSO_DATABASE_URL}
-      - TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
+    env_file: stack.env
     ports:
       - "${CRON_PORT:-3001}:${CRON_PORT:-3001}"
     networks:
