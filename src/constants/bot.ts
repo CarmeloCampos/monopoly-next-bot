@@ -54,7 +54,7 @@ export const CALLBACK_PATTERNS = {
   ADMIN_USERS_PAGE: /^admin_users_page_(\d+)$/,
   DEPOSIT_HISTORY: /^deposit_history_(\d+)$/,
   DEPOSIT_CRYPTO:
-    /^deposit_crypto_(btc|usdterc20|usdttrc20|usdc|ltc|bch|bnbbsc|sol)$/,
+    /^deposit_crypto_(btc|eth|usdttrc20|usdc|ltc|bch|bnbbsc|sol)$/,
 } as const;
 
 export const WITHDRAWAL_CURRENCIES = [
@@ -71,7 +71,7 @@ export const WITHDRAWAL_STATUSES = [
 
 export const AVAILABLE_CRYPTO_CURRENCIES = [
   { code: "btc", name: "Bitcoin", symbol: "BTC", network: "Bitcoin" },
-  { code: "usdterc20", name: "Tether", symbol: "USDT", network: "ERC20" },
+  { code: "eth", name: "Ethereum", symbol: "ETH", network: "ERC20" },
   { code: "usdttrc20", name: "Tether", symbol: "USDT", network: "TRC20" },
   { code: "usdc", name: "USD Coin", symbol: "USDC", network: "ERC20" },
   { code: "ltc", name: "Litecoin", symbol: "LTC", network: "Litecoin" },
