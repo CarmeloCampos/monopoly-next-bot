@@ -100,14 +100,14 @@ export function getCryptoSelectionKeyboard(
     const first = AVAILABLE_CRYPTO_CURRENCIES[i];
     if (first) {
       row.push({
-        text: `${first.symbol} - ${first.name}`,
+        text: `${first.symbol} (${first.network})`,
         callback_data: `deposit_crypto_${first.code}`,
       });
     }
     const second = AVAILABLE_CRYPTO_CURRENCIES[i + 1];
     if (second) {
       row.push({
-        text: `${second.symbol} - ${second.name}`,
+        text: `${second.symbol} (${second.network})`,
         callback_data: `deposit_crypto_${second.code}`,
       });
     }

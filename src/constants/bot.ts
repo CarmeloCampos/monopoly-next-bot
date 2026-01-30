@@ -54,7 +54,7 @@ export const CALLBACK_PATTERNS = {
   ADMIN_USERS_PAGE: /^admin_users_page_(\d+)$/,
   DEPOSIT_HISTORY: /^deposit_history_(\d+)$/,
   DEPOSIT_CRYPTO:
-    /^deposit_crypto_(btc|eth|usdt|usdc|ltc|doge|bnb|sol|xrp|ada)$/,
+    /^deposit_crypto_(btc|usdterc20|usdttrc20|usdc|ltc|bch|bnbbsc|sol)$/,
 } as const;
 
 export const WITHDRAWAL_CURRENCIES = [
@@ -70,14 +70,12 @@ export const WITHDRAWAL_STATUSES = [
 ] as const;
 
 export const AVAILABLE_CRYPTO_CURRENCIES = [
-  { code: "btc", name: "Bitcoin", symbol: "BTC" },
-  { code: "eth", name: "Ethereum", symbol: "ETH" },
-  { code: "usdt", name: "Tether (ERC20)", symbol: "USDT" },
-  { code: "usdc", name: "USD Coin", symbol: "USDC" },
-  { code: "ltc", name: "Litecoin", symbol: "LTC" },
-  { code: "doge", name: "Dogecoin", symbol: "DOGE" },
-  { code: "bnb", name: "BNB Smart Chain", symbol: "BNB" },
-  { code: "sol", name: "Solana", symbol: "SOL" },
-  { code: "xrp", name: "Ripple", symbol: "XRP" },
-  { code: "ada", name: "Cardano", symbol: "ADA" },
+  { code: "btc", name: "Bitcoin", symbol: "BTC", network: "Bitcoin" },
+  { code: "usdterc20", name: "Tether", symbol: "USDT", network: "ERC20" },
+  { code: "usdttrc20", name: "Tether", symbol: "USDT", network: "TRC20" },
+  { code: "usdc", name: "USD Coin", symbol: "USDC", network: "ERC20" },
+  { code: "ltc", name: "Litecoin", symbol: "LTC", network: "Litecoin" },
+  { code: "bch", name: "Bitcoin Cash", symbol: "BCH", network: "BCH" },
+  { code: "bnbbsc", name: "BNB", symbol: "BNB", network: "BEP20" },
+  { code: "sol", name: "Solana", symbol: "SOL", network: "Solana" },
 ] as const;
