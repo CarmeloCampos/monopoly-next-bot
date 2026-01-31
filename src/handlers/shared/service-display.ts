@@ -1,5 +1,5 @@
 import type { BotContextWithLanguage, MaybeOptional, Language } from "@/types";
-import { isServiceIndex, isLanguage } from "@/utils/guards";
+import { isServiceIndex, isLanguage } from "@/types/index";
 import { getText } from "@/i18n";
 import { getUserServices } from "@/services/service";
 import { getServiceByIndex, type ServiceInfo } from "@/constants/services";
@@ -91,7 +91,11 @@ export async function sendServiceCard(
     dbUser.language,
   );
 
-  const keyboard = getServiceNavigationKeyboard(serviceIndex, services.length);
+  const keyboard = getServiceNavigationKeyboard(
+    serviceIndex,
+    services.length,
+    dbUser.language,
+  );
 
   await displayMediaCard({
     ctx,
