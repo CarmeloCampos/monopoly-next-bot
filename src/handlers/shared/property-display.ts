@@ -128,6 +128,7 @@ export async function sendPropertyCard(
     validPropertyIndex,
     dbUser.language,
     property,
+    colorProgress.owned,
   );
 
   await displayMediaCard({
