@@ -58,11 +58,48 @@ async function handleUpgradeError(params: UpgradeFailureParams): Promise<void> {
       const color = property
         ? property.color.charAt(0).toUpperCase() + property.color.slice(1)
         : "";
-      const msg = getText(
+      const colorKey = property?.color ?? "unknown";
+
+      // Basic message in callback
+      const basicMsg = getText(
         language,
         "property_upgrade_color_requirement",
       ).replace("{color}", color);
-      await ctx.answerCbQuery(msg);
+      await ctx.answerCbQuery(basicMsg);
+
+      // Detailed message in chat
+      if (result.colorDetails) {
+        const { owned, required, missingCount, lowLevelCount } =
+          result.colorDetails;
+        const colorName = getText(language, `color_${colorKey}`);
+
+        const messageParts: string[] = [
+          getText(language, "property_upgrade_color_requirement_detailed")
+            .replace("{color}", colorName)
+            .replace("{owned}", String(owned))
+            .replace("{required}", String(required)),
+        ];
+
+        if (missingCount > 0) {
+          messageParts.push(
+            getText(language, "property_upgrade_missing_properties").replace(
+              "{count}",
+              String(missingCount),
+            ),
+          );
+        }
+
+        if (lowLevelCount > 0) {
+          messageParts.push(
+            getText(language, "property_upgrade_low_level_properties").replace(
+              "{count}",
+              String(lowLevelCount),
+            ),
+          );
+        }
+
+        await ctx.reply(messageParts.join("\n"));
+      }
       break;
     }
     default:
