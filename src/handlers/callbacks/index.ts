@@ -45,6 +45,9 @@ import { registerWithdrawalCallbacks } from "./withdrawal";
 import { registerAdminCallbacks } from "./admin";
 import { registerDepositCallbacks } from "./deposit";
 
+/** Sentinel value indicating an item was not found in an array */
+const NOT_FOUND_INDEX = -1;
+
 export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   bot.action(CALLBACK_PATTERNS.LANGUAGE, async (ctx: BotContext) => {
     const { callbackQuery } = ctx;
@@ -284,7 +287,10 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       return;
     }
 
-    if (!hasLanguage(ctx)) return;
+    if (!hasLanguage(ctx)) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
 
     const result = extractCallbackMatch(ctx, CALLBACK_PATTERNS.PROPERTY_COLOR);
     if (!result) {
@@ -292,8 +298,14 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       return;
     }
 
-    const [, color] = result.match;
-    if (!color) {
+    const [, color, currentIndexStr] = result.match;
+    if (!color || !currentIndexStr) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const currentIndex = Number.parseInt(currentIndexStr, 10);
+    if (Number.isNaN(currentIndex)) {
       await answerInvalidCallback(ctx);
       return;
     }
@@ -318,22 +330,62 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       return;
     }
 
-    const [firstColorProperty] = colorProperties;
-    if (!firstColorProperty) {
+    if (colorProperties.length === 1) {
+      // Only one property of this color, just acknowledge
+      await ctx.answerCbQuery();
+      return;
+    }
+
+    // Get all user properties to find the current property's position
+    const allUserProperties = await getUserProperties(dbUser.telegram_id);
+    const currentProperty = allUserProperties[currentIndex];
+
+    if (!currentProperty) {
       await ctx.answerCbQuery(
-        getText(dbUser.language, "property_no_properties"),
+        getText(dbUser.language, "error_property_not_found"),
       );
       return;
     }
 
-    const allUserProperties = await getUserProperties(dbUser.telegram_id);
-    const colorPropertyIndex = allUserProperties.findIndex(
-      (p) => p.property_index === firstColorProperty.property_index,
+    // Find the position of current property within color properties
+    const currentColorIndex = colorProperties.findIndex(
+      (p) => p.property_index === currentProperty.property_index,
     );
 
+    if (currentColorIndex === NOT_FOUND_INDEX) {
+      await ctx.answerCbQuery(
+        getText(dbUser.language, "error_property_not_found"),
+      );
+      return;
+    }
+
+    // Calculate next property index cyclically: 1 > 2 > 3 > 1 > 2 > 3...
+    const nextColorIndex = (currentColorIndex + 1) % colorProperties.length;
+    const nextColorProperty = colorProperties[nextColorIndex];
+
+    if (!nextColorProperty) {
+      await ctx.answerCbQuery(
+        getText(dbUser.language, "error_property_not_found"),
+      );
+      return;
+    }
+
+    // Find the index in allUserProperties for the next property
+    const nextPropertyIndex = allUserProperties.findIndex(
+      (p) => p.property_index === nextColorProperty.property_index,
+    );
+
+    if (nextPropertyIndex === NOT_FOUND_INDEX) {
+      await ctx.answerCbQuery(
+        getText(dbUser.language, "error_property_not_found"),
+      );
+      return;
+    }
+
+    await ctx.answerCbQuery();
     await sendPropertyCard({
       ctx,
-      propertyIndex: colorPropertyIndex >= 0 ? colorPropertyIndex : 0,
+      propertyIndex: nextPropertyIndex,
       isNavigation: true,
     });
   });
