@@ -186,6 +186,11 @@ const locales: Locales = {
       "❌ Требуется недвижимость цвета {color}",
     property_upgrade_color_requirement_all:
       "❌ Для уровня 4 нужны все {color} недвижимости на уровне 3",
+    property_upgrade_color_requirement_detailed:
+      "❌ Требование для уровня 4 - {color}\n\n📊 Прогресс: {owned}/{required} недвижимостей",
+    property_upgrade_missing_properties: "🔴 Не хватает: {count} недвижимостей",
+    property_upgrade_low_level_properties:
+      "⚠️ Нужно улучшить до уровня 3: {count} недвижимостей",
     property_upgrade_success: "✅ {property} улучшен до уровня {level}!",
     property_color_label: "🎨 Цвет",
     property_view_same_color: "🏘️ Все {color} недвижимости",
@@ -517,6 +522,11 @@ const locales: Locales = {
     property_upgrade_color_requirement: "❌ {color} property required",
     property_upgrade_color_requirement_all:
       "❌ Level 4 requires all {color} properties at level 3",
+    property_upgrade_color_requirement_detailed:
+      "❌ Level 4 Requirement - {color}\n\n📊 Progress: {owned}/{required} properties",
+    property_upgrade_missing_properties: "🔴 Missing: {count} properties",
+    property_upgrade_low_level_properties:
+      "⚠️ Need to upgrade to level 3: {count} properties",
     property_upgrade_success: "✅ {property} upgraded to level {level}!",
     property_color_label: "🎨 Color",
     property_view_same_color: "🏘️ All {color} properties",
@@ -853,6 +863,11 @@ const locales: Locales = {
     property_upgrade_color_requirement: "❌ Se requiere propiedad {color}",
     property_upgrade_color_requirement_all:
       "❌ Para nivel 4 se requieren todas las propiedades {color} en nivel 3",
+    property_upgrade_color_requirement_detailed:
+      "❌ Requisito para nivel 4 - {color}\n\n📊 Progreso: {owned}/{required} propiedades",
+    property_upgrade_missing_properties: "🔴 Te faltan: {count} propiedades",
+    property_upgrade_low_level_properties:
+      "⚠️ Necesitas subir a nivel 3: {count} propiedades",
     property_upgrade_success: "✅ ¡{property} mejorado a nivel {level}!",
     property_color_label: "🎨 Color",
     property_view_same_color: "🏘️ Ver propiedades {color}",
@@ -1196,6 +1211,11 @@ const locales: Locales = {
     property_upgrade_color_requirement: "❌ Propriedade {color} necessária",
     property_upgrade_color_requirement_all:
       "❌ Nível 4 requer todas as propriedades {color} no nível 3",
+    property_upgrade_color_requirement_detailed:
+      "❌ Requisito para nível 4 - {color}\n\n📊 Progresso: {owned}/{required} propriedades",
+    property_upgrade_missing_properties: "🔴 Faltam: {count} propriedades",
+    property_upgrade_low_level_properties:
+      "⚠️ Precisa melhorar para nível 3: {count} propriedades",
     property_upgrade_success: "✅ {property} melhorado para nível {level}!",
     property_color_label: "🎨 Cor",
     property_view_same_color: "🏘️ Ver propriedades {color}",
