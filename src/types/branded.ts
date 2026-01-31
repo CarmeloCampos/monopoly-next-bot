@@ -106,6 +106,18 @@ export type UpgradeErrorCode =
   | "max_level_reached"
   | "color_requirement_not_met";
 
+/** Property color values */
+export type PropertyColor = "brown" | "orange" | "red" | "blue";
+
+/** Detailed information about color requirement failure */
+export interface ColorRequirementDetails {
+  color: PropertyColor | "unknown";
+  owned: number;
+  required: number;
+  missingCount: number;
+  lowLevelCount: number;
+}
+
 /** Success result for upgrade operations */
 interface UpgradeSuccess {
   success: true;
@@ -116,6 +128,7 @@ export interface UpgradeFailure {
   success: false;
   code: UpgradeErrorCode;
   needed?: MonopolyCoins;
+  colorDetails?: ColorRequirementDetails;
 }
 
 /** Unified result type for property upgrade operations */

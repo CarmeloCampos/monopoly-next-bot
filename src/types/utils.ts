@@ -20,6 +20,7 @@ export type {
   MonopolyCoins,
   ReferralLevel,
   Language,
+  PropertyColor,
   Result,
   BuyErrorCode,
   BuyResult,

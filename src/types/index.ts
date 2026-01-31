@@ -72,6 +72,7 @@ export type {
 export { hasDbUser, hasLanguage };
 export * from "./utils";
 export * from "./db";
+export * from "./branded";
 export {
   isTelegramId,
   isMonopolyCoins,
