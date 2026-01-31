@@ -1,6 +1,11 @@
 import type { InlineKeyboardMarkup } from "telegraf/types";
 import { getText } from "@/i18n";
-import { type Language, type UserPropertyData, isPropertyIndex } from "@/types";
+import {
+  type Language,
+  type UserPropertyData,
+  isPropertyIndex,
+  isPropertyLevel,
+} from "@/types";
 import { getUpgradeCost } from "@/services/upgrade";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
 import { getPropertyByIndex } from "@/constants/properties";
@@ -11,6 +16,7 @@ export function getPropertyNavigationKeyboard(
   propertyIndex: number,
   language: Language,
   propertyData: UserPropertyData,
+  colorPropertyCount = 1,
 ): InlineKeyboardMarkup {
   const keyboard: InlineKeyboardMarkup["inline_keyboard"] = [];
 
@@ -41,8 +47,8 @@ export function getPropertyNavigationKeyboard(
     },
   ]);
 
-  // Add button to view properties of same color
-  if (isPropertyIndex(propertyIndex)) {
+  // Add button to view properties of same color only if user has more than 1 property of this color
+  if (isPropertyIndex(propertyIndex) && colorPropertyCount > 1) {
     const propertyInfo = getPropertyByIndex(propertyIndex);
     if (propertyInfo) {
       const colorName = getText(language, `color_${propertyInfo.color}`);
@@ -52,21 +58,22 @@ export function getPropertyNavigationKeyboard(
             "{color}",
             colorName,
           ),
-          callback_data: `property_color_${propertyInfo.color}`,
+          callback_data: `property_color_${propertyInfo.color}_${currentIndex}`,
         },
       ]);
     }
   }
 
-  if (propertyIndex !== STARTER_PROPERTY_INDEX && propertyData.level < 4) {
+  if (
+    propertyIndex !== STARTER_PROPERTY_INDEX &&
+    isPropertyLevel(propertyData.level) &&
+    propertyData.level < 4
+  ) {
     if (!isPropertyIndex(propertyIndex)) {
       return { inline_keyboard: keyboard };
     }
 
-    const upgradeCost = getUpgradeCost(
-      propertyIndex,
-      propertyData.level as 1 | 2 | 3,
-    );
+    const upgradeCost = getUpgradeCost(propertyIndex, propertyData.level);
     const nextLevel = propertyData.level + 1;
     const upgradeText = getText(language, "property_upgrade_button")
       .replace("{level}", String(nextLevel))
