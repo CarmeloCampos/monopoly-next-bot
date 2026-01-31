@@ -15,6 +15,8 @@ import {
   getPropertyCost,
   type PropertyLevel,
   type PropertyIndex,
+  type PropertyColor,
+  PROPERTY_COUNT_BY_COLOR,
 } from "@/constants/properties";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
 import { isPropertyIndex } from "@/utils/guards";
@@ -45,7 +47,7 @@ export function getUpgradeCost(
 
 async function getAllUserPropertiesByColor(
   userId: TelegramId,
-  color: string,
+  color: PropertyColor,
 ): Promise<PropertyIndex[]> {
   const allProperties = await db.query.userProperties.findMany({
     where: (fields, { eq }) => eq(fields.user_id, userId),
@@ -88,13 +90,19 @@ async function canUpgradeToLevel4(
 
   const colorProperties = await getAllUserPropertiesByColor(userId, color);
 
-  if (colorProperties.length === 0) {
+  // Check if user owns ALL properties of this color
+  const requiredCount = PROPERTY_COUNT_BY_COLOR[color];
+  if (colorProperties.length !== requiredCount) {
     return false;
   }
 
   for (const colorPropIndex of colorProperties) {
     const propRecord = await db.query.userProperties.findFirst({
-      where: (fields, { eq }) => eq(fields.property_index, colorPropIndex),
+      where: (fields, { eq, and }) =>
+        and(
+          eq(fields.user_id, userId),
+          eq(fields.property_index, colorPropIndex),
+        ),
     });
 
     if (!propRecord || propRecord.level < 3) {
