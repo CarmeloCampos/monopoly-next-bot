@@ -64,7 +64,7 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       return;
     }
 
-    await showDepositMenu(ctx as BotContextWithLanguage);
+    await showDepositMenu(ctx);
   });
 
   // Create deposit - start flow
@@ -175,9 +175,10 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       return;
     }
 
-    await ctx.answerCbQuery();
-
     const { amountUsd } = depositState;
+
+    // Show processing state
+    await ctx.answerCbQuery(getText(ctx.dbUser.language, "processing_deposit"));
 
     // Create deposit with selected crypto
     const result = await createDeposit({
@@ -186,7 +187,8 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       payCurrency: cryptoCode,
     });
 
-    if (result.success && result.deposit) {
+    const { deposit } = result;
+    if (result.success && deposit) {
       const amountMc = calculateMcAmount(amountUsd);
 
       // Check if we have a payment URL
@@ -217,15 +219,15 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
             },
           },
         );
-      } else if (result.deposit.pay_address) {
+      } else if (deposit.pay_address) {
         // Fallback: show payment address directly when no URL is available
         await ctx.editMessageText(
           getText(ctx.dbUser.language, "deposit_created_no_url")
             .replace("{amount_usd}", String(amountUsd))
             .replace("{amount_mc}", String(amountMc))
-            .replace("{pay_address}", result.deposit.pay_address)
-            .replace("{pay_amount}", String(result.deposit.pay_amount))
-            .replace("{pay_currency}", String(result.deposit.pay_currency)),
+            .replace("{pay_address}", deposit.pay_address)
+            .replace("{pay_amount}", String(deposit.pay_amount))
+            .replace("{pay_currency}", String(deposit.pay_currency)),
           {
             parse_mode: "Markdown",
             reply_markup: {
@@ -243,7 +245,7 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       } else {
         // Neither URL nor address available - this shouldn't happen
         error("Deposit created but no payment method available", {
-          depositId: result.deposit.id,
+          depositId: deposit.id,
           userId,
           amountUsd,
         });
@@ -253,22 +255,19 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       }
 
       info("Deposit created via bot", {
-        depositId: result.deposit.id,
+        depositId: deposit.id,
         userId,
         amountUsd,
         amountMc,
         payCurrency: cryptoCode,
         hasPaymentUrl: !!result.paymentUrl,
-        hasPayAddress: !!result.deposit.pay_address,
+        hasPayAddress: !!deposit.pay_address,
       });
 
       // Clear state only after successful deposit creation
       clearDepositState(userId);
     } else {
-      let errorMessage = getText(
-        ctx.dbUser.language,
-        "error_updating_language",
-      );
+      let errorMessage = getText(ctx.dbUser.language, "error_deposit_failed");
 
       switch (result.error) {
         case "minimum_amount":
@@ -332,7 +331,7 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
     const userId = ctx.dbUser.telegram_id;
     clearDepositState(userId);
 
-    await showDepositMenu(ctx as BotContextWithLanguage);
+    await showDepositMenu(ctx);
   });
 
   // Handle text messages for deposit flow
@@ -398,7 +397,7 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
         text,
         error: err instanceof Error ? err.message : String(err),
       });
-      await ctx.reply(getText(ctx.dbUser.language, "error_updating_language"));
+      await ctx.reply(getText(ctx.dbUser.language, "error_deposit_failed"));
       clearDepositState(userId);
     }
   });

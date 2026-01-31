@@ -84,6 +84,9 @@ export function registerUpgradeCallbacks(bot: Telegraf<BotContext>): void {
       return;
     }
 
+    // Show processing state
+    await ctx.answerCbQuery(getText(ctx.dbUser.language, "processing_upgrade"));
+
     const upgradeResult = await upgradeProperty({
       userId: ctx.dbUser.telegram_id,
       propertyIndex,

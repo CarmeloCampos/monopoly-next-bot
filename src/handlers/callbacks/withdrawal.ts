@@ -244,7 +244,7 @@ export const registerWithdrawalCallbacks = (
         step: withdrawalState.step,
         error: err instanceof Error ? err.message : String(err),
       });
-      await ctx.reply(getText(ctx.dbUser.language, "error_updating_language"));
+      await ctx.reply(getText(ctx.dbUser.language, "error_withdrawal_failed"));
     }
   });
 
@@ -278,6 +278,11 @@ export const registerWithdrawalCallbacks = (
       );
       return;
     }
+
+    // Show processing state
+    await ctx.answerCbQuery(
+      getText(ctx.dbUser.language, "processing_withdrawal"),
+    );
 
     const result = await createWithdrawal({
       userId: ctx.dbUser.telegram_id,
@@ -318,7 +323,7 @@ export const registerWithdrawalCallbacks = (
     } else {
       let errorMessage = getText(
         ctx.dbUser.language,
-        "error_updating_language",
+        "error_withdrawal_failed",
       );
 
       switch (result.error) {
