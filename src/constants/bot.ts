@@ -40,7 +40,7 @@ export const CALLBACK_PATTERNS = {
   PROPERTY_NAV: /^property_nav_(\d+)$/,
   PROPERTY_CLAIM: /^property_claim_(\d+)$/,
   PROPERTY_UPGRADE: /^property_upgrade_(\d+)$/,
-  PROPERTY_COLOR: /^property_color_(brown|orange|red|blue)$/,
+  PROPERTY_COLOR: /^property_color_(brown|orange|red|blue)_(\d+)$/,
   SERVICE_NAV: /^service_nav_(\d+)$/,
   BOARD_BUY_PROPERTY: /^board_buy_property_(\d+)$/,
   BOARD_BUY_SERVICE: /^board_buy_service_(\d+)$/,
