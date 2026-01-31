@@ -3,7 +3,7 @@ import { getUserServices } from "@/services/service";
 import { type PropertyIndex } from "@/constants/properties";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
 import { ALL_SERVICE_INDICES, type ServiceIndex } from "@/constants/services";
-import type { TelegramId } from "@/types";
+import type { TelegramId, MaybeUndefined } from "@/types";
 
 interface DiceResult {
   roll: number;
@@ -11,53 +11,89 @@ interface DiceResult {
   itemIndex: number;
 }
 
-type RollDiceErrorCode =
-  | "no_services_available"
-  | "no_properties_available"
-  | "selection_failed";
+type RollDiceErrorCode = "no_items_available" | "selection_failed";
 
 export type RollDiceResult =
   | { success: true; data: DiceResult }
   | { success: false; code: RollDiceErrorCode };
 
-const PROPERTY_INDICES: PropertyIndex[] = [
+const PROPERTY_INDICES: readonly PropertyIndex[] = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 ];
+
+/**
+ * Selects a random element from an array.
+ * @returns The selected element or undefined if array is empty
+ */
+function selectRandomElement<T>(array: readonly T[]): MaybeUndefined<T> {
+  if (array.length === 0) return undefined;
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+/**
+ * Creates a successful dice result.
+ */
+function createDiceResult(
+  roll: number,
+  itemType: DiceResult["itemType"],
+  itemIndex: number,
+): RollDiceResult {
+  return {
+    success: true,
+    data: { roll, itemType, itemIndex },
+  };
+}
+
+/**
+ * Attempts to select a service from available services.
+ */
+function trySelectService(
+  availableServices: readonly ServiceIndex[],
+  roll: number,
+): MaybeUndefined<RollDiceResult> {
+  const serviceIndex = selectRandomElement(availableServices);
+  if (serviceIndex === undefined) return undefined;
+  return createDiceResult(roll, "service", serviceIndex);
+}
+
+/**
+ * Attempts to select a property from available properties.
+ */
+function trySelectProperty(
+  availableProperties: readonly PropertyIndex[],
+  roll: number,
+): MaybeUndefined<RollDiceResult> {
+  const propertyIndex = selectRandomElement(availableProperties);
+  if (propertyIndex === undefined) return undefined;
+  return createDiceResult(roll, "property", propertyIndex);
+}
 
 export async function rollDice(userId: TelegramId): Promise<RollDiceResult> {
   const roll = Math.floor(Math.random() * 6) + 1;
 
-  if (roll <= 4) {
-    const availableServices = await getAvailableServices(userId);
-    if (availableServices.length === 0) {
-      return { success: false, code: "no_services_available" };
-    }
-    const serviceIndex =
-      availableServices[Math.floor(Math.random() * availableServices.length)];
-    if (serviceIndex === undefined) {
-      return { success: false, code: "selection_failed" };
-    }
-    return {
-      success: true,
-      data: { roll, itemType: "service", itemIndex: serviceIndex },
-    };
+  const [availableServices, availableProperties] = await Promise.all([
+    getAvailableServices(userId),
+    getAvailableProperties(userId),
+  ]);
+
+  const preferService = roll <= 4;
+  let result: MaybeUndefined<RollDiceResult>;
+
+  if (preferService) {
+    result = trySelectService(availableServices, roll);
+    if (result) return result;
+
+    result = trySelectProperty(availableProperties, roll);
+    if (result) return result;
   } else {
-    const availableProperties = await getAvailableProperties(userId);
-    if (availableProperties.length === 0) {
-      return { success: false, code: "no_properties_available" };
-    }
-    const propertyIndex =
-      availableProperties[
-        Math.floor(Math.random() * availableProperties.length)
-      ];
-    if (propertyIndex === undefined) {
-      return { success: false, code: "selection_failed" };
-    }
-    return {
-      success: true,
-      data: { roll, itemType: "property", itemIndex: propertyIndex },
-    };
+    result = trySelectProperty(availableProperties, roll);
+    if (result) return result;
+
+    result = trySelectService(availableServices, roll);
+    if (result) return result;
   }
+
+  return { success: false, code: "no_items_available" };
 }
 
 async function getAvailableServices(
