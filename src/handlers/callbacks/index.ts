@@ -237,6 +237,9 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
 
     const { dbUser } = ctx;
 
+    // Show processing state
+    await ctx.answerCbQuery(getText(dbUser.language, "processing_claim"));
+
     const earnings = await claimPropertyEarnings({
       userId: dbUser.telegram_id,
       propertyIndex: parsedIndex,
