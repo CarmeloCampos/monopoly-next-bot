@@ -1,8 +1,11 @@
 import type { InlineKeyboardMarkup } from "telegraf/types";
+import { getText } from "@/i18n";
+import type { Language } from "@/types";
 
 export function getServiceNavigationKeyboard(
   currentIndex: number,
   totalServices: number,
+  language: Language,
 ): InlineKeyboardMarkup {
   const keyboard: InlineKeyboardMarkup["inline_keyboard"] = [];
 
@@ -28,7 +31,7 @@ export function getServiceNavigationKeyboard(
 
   keyboard.push([
     {
-      text: "❌",
+      text: getText(language, "btn_close"),
       callback_data: "service_close",
     },
   ]);

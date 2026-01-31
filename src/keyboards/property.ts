@@ -82,7 +82,7 @@ export function getPropertyNavigationKeyboard(
 
   keyboard.push([
     {
-      text: "❌",
+      text: getText(language, "btn_close"),
       callback_data: "property_close",
     },
   ]);
