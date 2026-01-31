@@ -1,14 +1,36 @@
-import type { BotContextWithLanguage } from "@/types";
-import { isPropertyIndex } from "@/utils/guards";
+import type { BotContextWithLanguage, UserPropertyData } from "@/types";
+import { isPropertyIndex } from "@/types/index";
 import { getText } from "@/i18n";
 import { getUserProperties } from "@/services/property";
-import { getPropertyByIndex } from "@/constants/properties";
+import {
+  getPropertyByIndex,
+  PROPERTY_COUNT_BY_COLOR,
+  type PropertyColor,
+} from "@/constants/properties";
 import {
   getPropertyImageUrl,
   buildPropertyDetailMessage,
 } from "@/utils/property";
 import { getPropertyNavigationKeyboard } from "@/keyboards/property";
 import { displayMediaCard } from "./media-display";
+
+function calculateColorProgress(
+  properties: UserPropertyData[],
+  targetColor: PropertyColor,
+): { owned: number; minLevel: number } {
+  const colorProperties = properties.filter((p) => {
+    if (!isPropertyIndex(p.property_index)) return false;
+    const info = getPropertyByIndex(p.property_index);
+    return info?.color === targetColor;
+  });
+
+  if (colorProperties.length === 0) {
+    return { owned: 0, minLevel: 0 };
+  }
+
+  const minLevel = Math.min(...colorProperties.map((p) => p.level));
+  return { owned: colorProperties.length, minLevel };
+}
 
 interface SendPropertyCardParams {
   ctx: BotContextWithLanguage;
@@ -83,10 +105,21 @@ export async function sendPropertyCard(
 
   const imageUrl = getPropertyImageUrl(property.property_index, property.level);
 
+  // Calculate color progress
+  const colorProgress = calculateColorProgress(properties, propertyInfo.color);
+  const progressInfo = {
+    currentIndex: propertyIndex,
+    totalProperties: properties.length,
+    colorOwned: colorProgress.owned,
+    colorTotal: PROPERTY_COUNT_BY_COLOR[propertyInfo.color],
+    colorMinLevel: colorProgress.minLevel,
+  };
+
   const detailMessage = buildPropertyDetailMessage(
     property,
     propertyInfo,
     dbUser.language,
+    progressInfo,
   );
 
   const keyboard = getPropertyNavigationKeyboard(

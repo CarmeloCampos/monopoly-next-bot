@@ -109,10 +109,19 @@ function formatElapsedTime(date: Date, language: Language): string {
   );
 }
 
+interface PropertyProgressInfo {
+  currentIndex: number;
+  totalProperties: number;
+  colorOwned: number;
+  colorTotal: number;
+  colorMinLevel: number;
+}
+
 export function buildPropertyDetailMessage(
   property: UserPropertyData,
   propertyInfo: PropertyInfo,
   language: Language,
+  progressInfo?: PropertyProgressInfo,
 ): string {
   const propertyName = getText(language, propertyInfo.nameKey);
   const colorEmoji = COLOR_EMOJIS[propertyInfo.color];
@@ -133,13 +142,30 @@ export function buildPropertyDetailMessage(
 
   const lastUpdated = formatElapsedTime(property.last_generated_at, language);
 
-  return (
-    `${colorEmoji} ${propertyName}\n\n` +
+  let message = `${colorEmoji} ${propertyName}\n\n`;
+
+  // Add progress indicator if available
+  if (progressInfo) {
+    const progressText = getText(language, "property_progress")
+      .replace("{current}", String(progressInfo.currentIndex + 1))
+      .replace("{total}", String(progressInfo.totalProperties));
+    message += `${progressText}\n`;
+
+    const setProgressText = getText(language, "property_set_progress")
+      .replace("{color}", colorName)
+      .replace("{owned}", String(progressInfo.colorOwned))
+      .replace("{total}", String(progressInfo.colorTotal))
+      .replace("{minLevel}", String(progressInfo.colorMinLevel));
+    message += `${setProgressText}\n\n`;
+  }
+
+  message +=
     `${getText(language, "property_color_label")}: ${colorEmoji} ${colorName}\n` +
     `${getText(language, "property_level").replace("{level}", String(property.level))}\n` +
     `${getText(language, "property_hourly_income").replace("{income}", hourlyIncome.toFixed(2))}\n` +
     `${getText(language, "property_monthly_income").replace("{income}", monthlyIncome.toFixed(0))}\n` +
     `${getText(language, "property_accumulated").replace("{amount}", property.accumulated_unclaimed.toFixed(2))}\n\n` +
-    `${getText(language, "property_last_updated").replace("{time}", lastUpdated)}`
-  );
+    `${getText(language, "property_last_updated").replace("{time}", lastUpdated)}`;
+
+  return message;
 }
