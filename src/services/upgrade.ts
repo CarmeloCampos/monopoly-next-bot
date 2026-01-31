@@ -8,6 +8,7 @@ import {
   type TelegramId,
   type MonopolyCoins,
   type UpgradeResult,
+  type PropertyColor,
   asMonopolyCoins,
 } from "@/types";
 import {
@@ -15,7 +16,6 @@ import {
   getPropertyCost,
   type PropertyLevel,
   type PropertyIndex,
-  type PropertyColor,
   PROPERTY_COUNT_BY_COLOR,
 } from "@/constants/properties";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
@@ -67,14 +67,31 @@ async function getAllUserPropertiesByColor(
   return propertiesOfColor;
 }
 
+interface Level4RequirementResult {
+  readonly canUpgrade: boolean;
+  readonly owned: number;
+  readonly required: number;
+  readonly missingCount: number;
+  readonly lowLevelCount: number;
+}
+
 async function canUpgradeToLevel4(
   userId: TelegramId,
   propertyIndex: PropertyIndex,
-): Promise<boolean> {
+): Promise<Level4RequirementResult> {
   const property = getPropertyByIndex(propertyIndex);
-  if (!property) return false;
+  if (!property) {
+    return {
+      canUpgrade: false,
+      owned: 0,
+      required: 0,
+      missingCount: 0,
+      lowLevelCount: 0,
+    };
+  }
 
   const { color } = property;
+  const requiredCount = PROPERTY_COUNT_BY_COLOR[color];
 
   const userProperties = await db.query.userProperties.findMany({
     where: (fields, { eq, and }) =>
@@ -82,20 +99,21 @@ async function canUpgradeToLevel4(
   });
 
   const [userProperty] = userProperties;
-  if (!userProperty) return false;
-
-  if (userProperty.level !== 3) {
-    return false;
+  if (!userProperty || userProperty.level !== 3) {
+    return {
+      canUpgrade: false,
+      owned: 0,
+      required: requiredCount,
+      missingCount: requiredCount,
+      lowLevelCount: 0,
+    };
   }
 
   const colorProperties = await getAllUserPropertiesByColor(userId, color);
+  const owned = colorProperties.length;
+  const missingCount = requiredCount - owned;
 
-  // Check if user owns ALL properties of this color
-  const requiredCount = PROPERTY_COUNT_BY_COLOR[color];
-  if (colorProperties.length !== requiredCount) {
-    return false;
-  }
-
+  let lowLevelCount = 0;
   for (const colorPropIndex of colorProperties) {
     const propRecord = await db.query.userProperties.findFirst({
       where: (fields, { eq, and }) =>
@@ -106,11 +124,19 @@ async function canUpgradeToLevel4(
     });
 
     if (!propRecord || propRecord.level < 3) {
-      return false;
+      lowLevelCount++;
     }
   }
 
-  return true;
+  const canUpgrade = owned === requiredCount && lowLevelCount === 0;
+
+  return {
+    canUpgrade,
+    owned,
+    required: requiredCount,
+    missingCount,
+    lowLevelCount,
+  };
 }
 
 export async function upgradeProperty(
@@ -138,9 +164,20 @@ export async function upgradeProperty(
   const nextLevel = (userProperty.level + 1) as PropertyLevel;
 
   if (nextLevel === 4) {
-    const canUpgrade = await canUpgradeToLevel4(userId, propertyIndex);
-    if (!canUpgrade) {
-      return { success: false, code: "color_requirement_not_met" };
+    const requirementResult = await canUpgradeToLevel4(userId, propertyIndex);
+    if (!requirementResult.canUpgrade) {
+      const property = getPropertyByIndex(propertyIndex);
+      return {
+        success: false,
+        code: "color_requirement_not_met",
+        colorDetails: {
+          color: property?.color ?? "unknown",
+          owned: requirementResult.owned,
+          required: requirementResult.required,
+          missingCount: requirementResult.missingCount,
+          lowLevelCount: requirementResult.lowLevelCount,
+        },
+      };
     }
   }
 
