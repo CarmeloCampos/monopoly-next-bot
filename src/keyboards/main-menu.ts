@@ -15,7 +15,7 @@ export function getMainMenuKeyboard(
   const keyboard: KeyboardButton[][] = [
     [
       { text: getText(language, "menu_properties") },
-      { text: getText(language, "menu_advance") },
+      { text: getText(language, "menu_board") },
       { text: getText(language, "menu_services") },
     ],
     [
@@ -148,10 +148,9 @@ export function getChannelsKeyboard(
 
 type MenuButtonKey =
   | "properties"
-  | "advance"
+  | "board"
   | "services"
   | "balance"
-  | "board"
   | "referral"
   | "minigames"
   | "settings";
@@ -163,10 +162,9 @@ export function getMenuButtonTexts(
 ): MenuButtonTexts {
   return {
     properties: getText(language, "menu_properties"),
-    advance: getText(language, "menu_advance"),
+    board: getText(language, "menu_board"),
     services: getText(language, "menu_services"),
     balance: getText(language, "menu_balance"),
-    board: getText(language, "menu_board"),
     referral: getText(language, "menu_referral"),
     minigames: getText(language, "menu_minigames"),
     settings: getText(language, "menu_settings"),

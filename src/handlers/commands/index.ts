@@ -96,7 +96,7 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
 
     if (messageText && isAwaitingBet(dbUser.telegram_id)) {
       const amount = Number.parseFloat(messageText);
-      if (!isNaN(amount) && isFinite(amount)) {
+      if (!Number.isNaN(amount) && Number.isFinite(amount)) {
         await handleBetAmount(ctx, amount);
         return;
       }
@@ -123,9 +123,6 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
         await handleBalance(ctx);
         break;
       case menuTexts.board:
-        await handleBoard(ctx);
-        break;
-      case menuTexts.advance:
         await handleBoard(ctx);
         break;
       case menuTexts.referral:
