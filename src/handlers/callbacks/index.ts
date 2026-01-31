@@ -28,7 +28,9 @@ import {
   buyProperty,
   userHasProperty,
   claimPropertyEarnings,
+  getUserProperties,
 } from "@/services/property";
+import { getPropertyByIndex } from "@/constants/properties";
 import {
   STARTER_PROPERTY_INDEX,
   DEFAULT_PROPERTY_LEVEL,
@@ -269,6 +271,66 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
     await sendPropertyCard({
       ctx,
       propertyIndex: 0,
+      isNavigation: true,
+    });
+  });
+
+  bot.action(CALLBACK_PATTERNS.PROPERTY_COLOR, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    if (!hasLanguage(ctx)) return;
+
+    const result = extractCallbackMatch(ctx, CALLBACK_PATTERNS.PROPERTY_COLOR);
+    if (!result) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const [, color] = result.match;
+    if (!color) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const { dbUser } = ctx;
+
+    const userProperties = await db.query.userProperties.findMany({
+      where: (fields, { eq }) => eq(fields.user_id, dbUser.telegram_id),
+      orderBy: (fields, { asc }) => asc(fields.property_index),
+    });
+
+    const colorProperties = userProperties.filter((p) => {
+      if (!isPropertyIndex(p.property_index)) return false;
+      const propertyInfo = getPropertyByIndex(p.property_index);
+      return propertyInfo && propertyInfo.color === color;
+    });
+
+    if (colorProperties.length === 0) {
+      await ctx.answerCbQuery(
+        getText(dbUser.language, "property_no_properties"),
+      );
+      return;
+    }
+
+    const [firstColorProperty] = colorProperties;
+    if (!firstColorProperty) {
+      await ctx.answerCbQuery(
+        getText(dbUser.language, "property_no_properties"),
+      );
+      return;
+    }
+
+    const allUserProperties = await getUserProperties(dbUser.telegram_id);
+    const colorPropertyIndex = allUserProperties.findIndex(
+      (p) => p.property_index === firstColorProperty.property_index,
+    );
+
+    await sendPropertyCard({
+      ctx,
+      propertyIndex: colorPropertyIndex >= 0 ? colorPropertyIndex : 0,
       isNavigation: true,
     });
   });

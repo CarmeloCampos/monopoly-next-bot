@@ -3,6 +3,7 @@ import { getText } from "@/i18n";
 import { type Language, type UserPropertyData, isPropertyIndex } from "@/types";
 import { getUpgradeCost } from "@/services/upgrade";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
+import { getPropertyByIndex } from "@/constants/properties";
 
 export function getPropertyNavigationKeyboard(
   currentIndex: number,
@@ -39,6 +40,23 @@ export function getPropertyNavigationKeyboard(
       callback_data: `property_claim_${propertyIndex}`,
     },
   ]);
+
+  // Add button to view properties of same color
+  if (isPropertyIndex(propertyIndex)) {
+    const propertyInfo = getPropertyByIndex(propertyIndex);
+    if (propertyInfo) {
+      const colorName = getText(language, `color_${propertyInfo.color}`);
+      keyboard.push([
+        {
+          text: getText(language, "property_view_same_color").replace(
+            "{color}",
+            colorName,
+          ),
+          callback_data: `property_color_${propertyInfo.color}`,
+        },
+      ]);
+    }
+  }
 
   if (propertyIndex !== STARTER_PROPERTY_INDEX && propertyData.level < 4) {
     if (!isPropertyIndex(propertyIndex)) {
