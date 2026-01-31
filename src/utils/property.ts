@@ -5,8 +5,19 @@ import {
   isServiceIndex,
 } from "@/utils/guards";
 import { getText } from "@/i18n";
-import { getPropertyIncome, type PropertyInfo } from "@/constants/properties";
+import {
+  getPropertyIncome,
+  type PropertyInfo,
+  type PropertyColor,
+} from "@/constants/properties";
 import { PROPERTY_IMAGES, SERVICE_IMAGES } from "@/constants/images";
+
+const COLOR_EMOJIS: Record<PropertyColor, string> = {
+  brown: "🟤",
+  orange: "🟧",
+  red: "🔴",
+  blue: "🔵",
+};
 
 const IMAGE_BASE_URL = "https://via.assets.so/img.jpg";
 
@@ -104,6 +115,8 @@ export function buildPropertyDetailMessage(
   language: Language,
 ): string {
   const propertyName = getText(language, propertyInfo.nameKey);
+  const colorEmoji = COLOR_EMOJIS[propertyInfo.color];
+  const colorName = getText(language, `color_${propertyInfo.color}`);
 
   const validIndex = isPropertyIndex(property.property_index)
     ? property.property_index
@@ -121,7 +134,8 @@ export function buildPropertyDetailMessage(
   const lastUpdated = formatElapsedTime(property.last_generated_at, language);
 
   return (
-    `🏢 ${propertyName}\n\n` +
+    `${colorEmoji} ${propertyName}\n\n` +
+    `${getText(language, "property_color_label")}: ${colorEmoji} ${colorName}\n` +
     `${getText(language, "property_level").replace("{level}", String(property.level))}\n` +
     `${getText(language, "property_hourly_income").replace("{income}", hourlyIncome.toFixed(2))}\n` +
     `${getText(language, "property_monthly_income").replace("{income}", monthlyIncome.toFixed(0))}\n` +
