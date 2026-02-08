@@ -1,9 +1,14 @@
 import type { BotContextWithLanguage } from "@/types";
 import { getText } from "@/i18n";
-import { getMinigamesKeyboard, getDicePickKeyboard } from "@/keyboards";
+import {
+  getMinigamesKeyboard,
+  getDicePickKeyboard,
+  getQuickPlayKeyboard,
+} from "@/keyboards";
 import {
   MINIGAMES,
   BET_LIMITS,
+  ANIMATION_DELAY_MS,
   type MinigameType,
 } from "@/constants/minigames";
 import {
@@ -11,6 +16,7 @@ import {
   updateMinigameState,
   getMinigameState,
   clearMinigameState,
+  type MinigameState,
 } from "@/services/minigame-state";
 import {
   checkAndDeductBalance,
@@ -21,11 +27,19 @@ import { calculateGameResult, formatWinnings } from "@/services/minigame";
 import { asMonopolyCoins } from "@/types/utils";
 import { info } from "@/utils/logger";
 
-/** Type guard to validate if a string is a valid MinigameType */
+/**
+ * Type guard to validate if a string is a valid MinigameType
+ * @param value - The value to check
+ * @returns True if the value is a valid MinigameType
+ */
 function isMinigameType(value: string): value is MinigameType {
   return value in MINIGAMES;
 }
 
+/**
+ * Displays the minigame selection menu
+ * @param ctx - Bot context with language
+ */
 export async function handleMinigames(
   ctx: BotContextWithLanguage,
 ): Promise<void> {
@@ -36,6 +50,11 @@ export async function handleMinigames(
   });
 }
 
+/**
+ * Handles minigame selection and initiates the appropriate game flow
+ * @param ctx - Bot context with language
+ * @param gameType - The type of minigame selected
+ */
 export async function handleMinigameSelection(
   ctx: BotContextWithLanguage,
   gameType: string,
@@ -95,6 +114,11 @@ export async function handleMinigameSelection(
   }
 }
 
+/**
+ * Handles dice number selection for the dice minigame
+ * @param ctx - Bot context with language
+ * @param pickedNumber - The number selected (1-6)
+ */
 export async function handleDiceNumberPick(
   ctx: BotContextWithLanguage,
   pickedNumber: number,
@@ -130,6 +154,11 @@ export async function handleDiceNumberPick(
   );
 }
 
+/**
+ * Handles bet amount input for minigames
+ * @param ctx - Bot context with language
+ * @param amount - The bet amount entered by the user
+ */
 export async function handleBetAmount(
   ctx: BotContextWithLanguage,
   amount: number,
@@ -191,6 +220,74 @@ export async function handleBetAmount(
   );
 }
 
+/**
+ * Sends the quick play prompt with the appropriate keyboard
+ * @param ctx - Bot context with language
+ * @param gameState - Current minigame state
+ */
+async function sendQuickPlayPrompt(
+  ctx: BotContextWithLanguage,
+  gameState: MinigameState,
+): Promise<void> {
+  const promptMessage = getText(
+    ctx.dbUser.language,
+    "minigame_quick_play_prompt",
+  ).replace("{emoji}", gameState.expectedEmoji);
+
+  await ctx.reply(promptMessage, {
+    reply_markup: getQuickPlayKeyboard(
+      ctx.dbUser.language,
+      gameState.betAmount ?? BET_LIMITS.min,
+    ),
+  });
+}
+
+/**
+ * Processes and displays the minigame result (win/lose)
+ * @param ctx - Bot context with language
+ * @param gameState - Current minigame state
+ * @param result - Game result with winnings and multiplier
+ */
+async function processGameResult(
+  ctx: BotContextWithLanguage,
+  gameState: MinigameState,
+  result: ReturnType<typeof calculateGameResult>,
+): Promise<void> {
+  if (result.won) {
+    await addBalanceAndTransaction(
+      ctx.dbUser.telegram_id,
+      result.winnings,
+      "minigame_winning",
+      `Win in ${gameState.game}`,
+    );
+
+    let message = getText(ctx.dbUser.language, "minigame_result_win")
+      .replace("{amount}", formatWinnings(result.winnings))
+      .replace("{multiplier}", String(result.multiplier));
+
+    if (result.descriptionKey) {
+      message += `\n${getText(ctx.dbUser.language, result.descriptionKey)}`;
+    }
+
+    await ctx.reply(message);
+  } else {
+    await ctx.reply(getText(ctx.dbUser.language, "minigame_result_lose"));
+  }
+
+  const balanceMessage = getText(
+    ctx.dbUser.language,
+    "minigame_balance",
+  ).replace("{balance}", String(ctx.dbUser.balance + result.winnings));
+
+  await ctx.reply(balanceMessage);
+}
+
+/**
+ * Handles the completion of a minigame and displays results
+ * @param ctx - Bot context with language
+ * @param diceValue - The dice value rolled
+ * @param diceEmoji - The emoji that was sent
+ */
 export async function handleGameResult(
   ctx: BotContextWithLanguage,
   diceValue: number,
@@ -199,7 +296,11 @@ export async function handleGameResult(
   const { dbUser } = ctx;
   const gameState = getMinigameState(dbUser.telegram_id);
 
-  if (!gameState || gameState.phase !== "awaiting_emoji") {
+  if (
+    !gameState ||
+    (gameState.phase !== "awaiting_emoji" &&
+      gameState.phase !== "ready_to_play")
+  ) {
     return;
   }
 
@@ -212,6 +313,8 @@ export async function handleGameResult(
     );
     return;
   }
+
+  await Bun.sleep(ANIMATION_DELAY_MS);
 
   const result = calculateGameResult(
     gameState.game,
@@ -228,8 +331,6 @@ export async function handleGameResult(
     result.winnings,
   );
 
-  clearMinigameState(dbUser.telegram_id);
-
   info("Minigame result", {
     userId: dbUser.telegram_id,
     game: gameState.game,
@@ -237,35 +338,25 @@ export async function handleGameResult(
     winnings: result.winnings,
   });
 
-  if (result.won) {
-    await addBalanceAndTransaction(
-      dbUser.telegram_id,
-      result.winnings,
-      "minigame_winning",
-      `Win in ${gameState.game}`,
-    );
+  await processGameResult(ctx, gameState, result);
 
-    let message = getText(dbUser.language, "minigame_result_win")
-      .replace("{amount}", formatWinnings(result.winnings))
-      .replace("{multiplier}", String(result.multiplier));
-
-    if (result.descriptionKey) {
-      message += `\n${getText(dbUser.language, result.descriptionKey)}`;
-    }
-
-    await ctx.reply(message);
-  } else {
-    await ctx.reply(getText(dbUser.language, "minigame_result_lose"));
+  // Transition to ready_to_play phase and send prompt
+  if (gameState.phase === "awaiting_emoji") {
+    updateMinigameState(dbUser.telegram_id, {
+      phase: "ready_to_play",
+    });
   }
 
-  const balanceMessage = getText(dbUser.language, "minigame_balance").replace(
-    "{balance}",
-    String(dbUser.balance + result.winnings),
-  );
+  const gameStateUpdated = getMinigameState(dbUser.telegram_id);
+  if (!gameStateUpdated) return;
 
-  await ctx.reply(balanceMessage);
+  await sendQuickPlayPrompt(ctx, gameStateUpdated);
 }
 
+/**
+ * Handles minigame cancellation with refund if applicable
+ * @param ctx - Bot context with language
+ */
 export async function handleMinigameCancel(
   ctx: BotContextWithLanguage,
 ): Promise<void> {
@@ -282,6 +373,68 @@ export async function handleMinigameCancel(
   }
 
   clearMinigameState(dbUser.telegram_id);
+
+  await ctx.answerCbQuery();
+  await handleMinigames(ctx);
+}
+
+/**
+ * Handles bet adjustment requests from the quick play keyboard
+ * @param ctx - Bot context with language
+ * @param adjustment - Amount to adjust the bet (positive or negative)
+ */
+export async function handleBetAdjust(
+  ctx: BotContextWithLanguage,
+  adjustment: number,
+): Promise<void> {
+  const { dbUser } = ctx;
+  const gameState = getMinigameState(dbUser.telegram_id);
+
+  if (!gameState || gameState.phase !== "ready_to_play") {
+    await ctx.answerCbQuery("❌ No tienes un juego activo");
+    return;
+  }
+
+  if (adjustment === 0) {
+    await ctx.answerCbQuery();
+    return;
+  }
+
+  const newBet = (gameState.betAmount ?? BET_LIMITS.min) + adjustment;
+
+  if (newBet < BET_LIMITS.min) {
+    await ctx.answerCbQuery(
+      getText(dbUser.language, "minigame_bet_too_low").replace(
+        "{min}",
+        String(BET_LIMITS.min),
+      ),
+    );
+    return;
+  }
+
+  updateMinigameState(dbUser.telegram_id, {
+    betAmount: newBet,
+  });
+
+  await ctx.answerCbQuery();
+  await ctx.editMessageReplyMarkup(
+    getQuickPlayKeyboard(dbUser.language, newBet),
+  );
+}
+
+/**
+ * Handles exit from quick play mode, clearing the game state and returning to minigame menu
+ * @param ctx - Bot context with language
+ */
+export async function handleMinigameExit(
+  ctx: BotContextWithLanguage,
+): Promise<void> {
+  const { dbUser } = ctx;
+  const gameState = getMinigameState(dbUser.telegram_id);
+
+  if (gameState?.phase === "ready_to_play") {
+    clearMinigameState(dbUser.telegram_id);
+  }
 
   await ctx.answerCbQuery();
   await handleMinigames(ctx);
