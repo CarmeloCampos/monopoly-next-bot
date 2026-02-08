@@ -10,6 +10,8 @@ import {
   handleMinigameSelection,
   handleDiceNumberPick,
   handleMinigameCancel,
+  handleBetAdjust,
+  handleMinigameExit,
 } from "../commands/minigames-menu";
 
 export const registerMinigameCallbacks = (bot: Telegraf<BotContext>): void => {
@@ -73,5 +75,44 @@ export const registerMinigameCallbacks = (bot: Telegraf<BotContext>): void => {
     if (!hasLanguage(ctx)) return;
 
     await handleMinigameCancel(ctx);
+  });
+
+  bot.action(CALLBACK_PATTERNS.MINIGAME_BET_ADJUST, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    if (!hasLanguage(ctx)) return;
+
+    const result = extractCallbackMatch(
+      ctx,
+      CALLBACK_PATTERNS.MINIGAME_BET_ADJUST,
+    );
+    if (!result) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const [, adjustmentStr] = result.match;
+    if (!adjustmentStr) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const adjustment = Number.parseInt(adjustmentStr, 10);
+
+    await handleBetAdjust(ctx, adjustment);
+  });
+
+  bot.action(CALLBACK_DATA.MINIGAME_EXIT, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    if (!hasLanguage(ctx)) return;
+
+    await handleMinigameExit(ctx);
   });
 };
