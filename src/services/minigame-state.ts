@@ -4,7 +4,11 @@ import type { MinigameType, DiceEmoji } from "@/constants/minigames";
 export interface MinigameState {
   game: MinigameType;
   expectedEmoji: DiceEmoji;
-  phase: "selecting_number" | "awaiting_bet" | "awaiting_emoji";
+  phase:
+    | "selecting_number"
+    | "awaiting_bet"
+    | "awaiting_emoji"
+    | "ready_to_play";
   betAmount?: number;
   pickedNumber?: number;
 }
@@ -52,4 +56,9 @@ export function updateMinigameState(
 export function isAwaitingBet(userId: TelegramId): boolean {
   const state = activeGames.get(userId);
   return state?.phase === "awaiting_bet";
+}
+
+export function isReadyToPlay(userId: TelegramId): boolean {
+  const state = activeGames.get(userId);
+  return state?.phase === "ready_to_play";
 }

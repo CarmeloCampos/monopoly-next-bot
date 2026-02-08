@@ -141,3 +141,7 @@ export const BET_LIMITS = {
   min: 1 as MonopolyCoins,
   max: Infinity,
 } as const;
+
+export const ANIMATION_DELAY_MS = 3000 as const;
+
+export const BET_ADJUSTMENTS = [-10, -5, 5, 10] as const;
