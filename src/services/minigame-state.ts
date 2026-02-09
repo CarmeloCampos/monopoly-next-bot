@@ -57,8 +57,3 @@ export function isAwaitingBet(userId: TelegramId): boolean {
   const state = activeGames.get(userId);
   return state?.phase === "awaiting_bet";
 }
-
-export function isReadyToPlay(userId: TelegramId): boolean {
-  const state = activeGames.get(userId);
-  return state?.phase === "ready_to_play";
-}
