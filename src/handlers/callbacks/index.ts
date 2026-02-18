@@ -141,6 +141,77 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
     );
   });
 
+  bot.action(CALLBACK_DATA.TERMS_ACCEPT, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    const { dbUser } = ctx;
+
+    try {
+      await db
+        .update(users)
+        .set({
+          terms_accepted_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where(eq(users.telegram_id, dbUser.telegram_id));
+
+      info("Terms accepted", {
+        userId: dbUser.telegram_id,
+      });
+
+      await ctx.answerCbQuery();
+      await ctx.reply(getText(dbUser.language, "terms_accepted"));
+      await ctx.reply(getText(dbUser.language, "language_selected"));
+
+      const hasStarterProperty = await userHasProperty(
+        dbUser.telegram_id,
+        STARTER_PROPERTY_INDEX,
+      );
+
+      if (!hasStarterProperty) {
+        await buyProperty({
+          userId: dbUser.telegram_id,
+          propertyIndex: STARTER_PROPERTY_INDEX,
+          level: DEFAULT_PROPERTY_LEVEL,
+          cost: asMonopolyCoins(0),
+        });
+      }
+
+      const welcomeMsg = hasStarterProperty
+        ? buildWelcomeExistingUserMessage(dbUser.language)
+        : getText(dbUser.language, "welcome_new_user");
+      await ctx.reply(welcomeMsg, {
+        parse_mode: "Markdown",
+        reply_markup: getMainMenuKeyboard(dbUser.language, ctx.isAdmin),
+      });
+
+      if (ctx.callbackQuery && "message" in ctx.callbackQuery) {
+        await ctx.deleteMessage();
+      }
+    } catch (err) {
+      error("Error accepting terms", {
+        userId: dbUser.telegram_id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      await ctx.answerCbQuery(getText(dbUser.language, "error_generic_retry"));
+    }
+  });
+
+  bot.action(CALLBACK_DATA.TERMS_DECLINE, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    const { dbUser } = ctx;
+
+    await ctx.answerCbQuery();
+    await ctx.reply(getText(dbUser.language, "terms_required"));
+  });
+
   bot.action(CALLBACK_DATA.SETTINGS_CHANNELS, async (ctx: BotContext) => {
     if (!hasDbUser(ctx)) {
       await answerUserNotFound(ctx);
