@@ -33,6 +33,10 @@ export const CALLBACK_DATA = {
   DEPOSIT_HISTORY: "deposit_history",
   DEPOSIT_CANCEL: "deposit_cancel",
   DEPOSIT_CRYPTO_BACK: "deposit_crypto_back",
+  TERMS_ACCEPT: "terms_accept",
+  TERMS_DECLINE: "terms_decline",
+  DEPOSIT_SECURITY_CONFIRM: "deposit_security_confirm",
+  DEPOSIT_SECURITY_CANCEL: "deposit_security_cancel",
 } as const;
 
 export const CALLBACK_PATTERNS = {
@@ -58,6 +62,10 @@ export const CALLBACK_PATTERNS = {
   DEPOSIT_HISTORY: /^deposit_history_(\d+)$/,
   DEPOSIT_CRYPTO:
     /^deposit_crypto_(btc|eth|usdttrc20|usdc|ltc|bch|bnbbsc|sol)$/,
+  TERMS_ACCEPT: /^terms_accept$/,
+  TERMS_DECLINE: /^terms_decline$/,
+  DEPOSIT_SECURITY_CONFIRM: /^deposit_security_confirm$/,
+  DEPOSIT_SECURITY_CANCEL: /^deposit_security_cancel$/,
 } as const;
 
 export const WITHDRAWAL_CURRENCIES = [
