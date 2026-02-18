@@ -30,6 +30,7 @@ export const users = sqliteTable(
     balance: integer("balance").notNull().default(0).$type<MonopolyCoins>(),
     referral_code: text("referral_code").notNull().unique(),
     language: text("language").$type<Language>(),
+    terms_accepted_at: integer("terms_accepted_at", { mode: "timestamp" }),
     created_at: integer("created_at", { mode: "timestamp" }).notNull(),
     updated_at: integer("updated_at", { mode: "timestamp" }).notNull(),
   },

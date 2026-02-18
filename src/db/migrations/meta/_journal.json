@@ -43,6 +43,13 @@
       "when": 1769737918521,
       "tag": "0005_chunky_puma",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1771392009473,
+      "tag": "0006_perfect_wolfpack",
+      "breakpoints": true
     }
   ]
 }
