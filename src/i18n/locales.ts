@@ -6,6 +6,7 @@ import {
   DEFAULT_LANGUAGE,
   BOT_CONFIG,
 } from "@/constants";
+import { env } from "@/config";
 
 interface Locales {
   ru: Record<string, string>;
@@ -355,6 +356,21 @@ const locales: Locales = {
       "❌ *Слишком маленькая сумма*\n\nЭта криптовалюта имеет минимальный лимит для данной суммы депозита.\n\nПожалуйста, выберите другую криптовалюту или увеличьте сумму депозита.",
     deposit_crypto_estimate_error:
       "❌ *Курс недоступен*\n\nНе удалось получить курс обмена для этой криптовалюты.\n\nПожалуйста, выберите другую криптовалюту или попробуйте позже.",
+    // Terms & Conditions
+    terms_title: "📜 Условия использования",
+    terms_message:
+      "📜 *Условия использования*\n\nЧтобы продолжить использование бота, вы должны принять наши условия использования.\n\n🔗 [Прочитать условия]({terms_url})\n\n⚠️ Нажав кнопку 'Принять', вы соглашаетесь с нашими условиями использования.",
+    terms_accept: "✅ Принять",
+    terms_decline: "❌ Отклонить",
+    terms_required:
+      "❌ Вы должны принять условия использования, чтобы продолжить.",
+    terms_accepted: "✅ Вы приняли условия использования!",
+    // Deposit Security
+    deposit_security_title: "🔒 Безопасность инвестиций",
+    deposit_security_message:
+      "🔒 *Безопасность ваших инвестиций*\n\n🎉 Это отличная возможность увеличить ваш капитал!\n\n✅ Все транзакции защищены\n✅ Мгновенное зачисление средств\n✅ Прозрачная система выплат\n\n💰 Сумма депозита: {amount_usd} USD\n💎 Вы получите: {amount_mc} MC\n\nПродолжить?",
+    deposit_security_confirm: "✅ Продолжить",
+    deposit_security_cancel: "❌ Отмена",
   },
   en: {
     language_selection: "Please select your language",
@@ -696,6 +712,20 @@ const locales: Locales = {
       "❌ *Amount Too Low*\n\nThis cryptocurrency has a minimum limit for this deposit amount.\n\nPlease choose another cryptocurrency or increase your deposit amount.",
     deposit_crypto_estimate_error:
       "❌ *Rate Unavailable*\n\nCould not get exchange rate for this cryptocurrency.\n\nPlease choose another cryptocurrency or try again later.",
+    // Terms & Conditions
+    terms_title: "📜 Terms of Use",
+    terms_message:
+      "📜 *Terms of Use*\n\nTo continue using the bot, you must accept our terms of use.\n\n🔗 [Read Terms]({terms_url})\n\n⚠️ By clicking 'Accept', you agree to our terms of use.",
+    terms_accept: "✅ Accept",
+    terms_decline: "❌ Decline",
+    terms_required: "❌ You must accept the terms of use to continue.",
+    terms_accepted: "✅ You have accepted the terms of use!",
+    // Deposit Security
+    deposit_security_title: "🔒 Investment Security",
+    deposit_security_message:
+      "🔒 *Your Investment Security*\n\n🎉 This is a great opportunity to grow your capital!\n\n✅ All transactions are protected\n✅ Instant fund crediting\n✅ Transparent payment system\n\n💰 Deposit amount: {amount_usd} USD\n💎 You will receive: {amount_mc} MC\n\nProceed?",
+    deposit_security_confirm: "✅ Proceed",
+    deposit_security_cancel: "❌ Cancel",
   },
   es: {
     language_selection: "Por favor, selecciona tu idioma",
@@ -1047,6 +1077,20 @@ const locales: Locales = {
       "❌ *Monto muy bajo*\n\nEsta criptomoneda tiene un límite mínimo para este monto de depósito.\n\nPor favor, elige otra criptomoneda o aumenta el monto del depósito.",
     deposit_crypto_estimate_error:
       "❌ *Tasa no disponible*\n\nNo se pudo obtener la tasa de cambio para esta criptomoneda.\n\nPor favor, elige otra criptomoneda o inténtalo de nuevo más tarde.",
+    // Terms & Conditions
+    terms_title: "📜 Términos de Uso",
+    terms_message:
+      "📜 *Términos de Uso*\n\nPara continuar usando el bot, debes aceptar nuestros términos de uso.\n\n🔗 [Leer Términos]({terms_url})\n\n⚠️ Al hacer clic en 'Aceptar', aceptas nuestros términos de uso.",
+    terms_accept: "✅ Aceptar",
+    terms_decline: "❌ Rechazar",
+    terms_required: "❌ Debes aceptar los términos de uso para continuar.",
+    terms_accepted: "✅ ¡Has aceptado los términos de uso!",
+    // Deposit Security
+    deposit_security_title: "🔒 Seguridad de Inversión",
+    deposit_security_message:
+      "🔒 *Seguridad de tu Inversión*\n\n🎉 ¡Esta es una excelente oportunidad para hacer crecer tu capital!\n\n✅ Todas las transacciones están protegidas\n✅ Acreditación instantánea de fondos\n✅ Sistema de pagos transparente\n\n💰 Monto del depósito: {amount_usd} USD\n💎 Recibirás: {amount_mc} MC\n\n¿Continuar?",
+    deposit_security_confirm: "✅ Continuar",
+    deposit_security_cancel: "❌ Cancelar",
   },
   pt: {
     language_selection: "Por favor, selecione seu idioma",
@@ -1398,6 +1442,20 @@ const locales: Locales = {
       "❌ *Valor muito baixo*\n\nEsta criptomoeda tem um limite mínimo para este valor de depósito.\n\nPor favor, escolha outra criptomoeda ou aumente o valor do depósito.",
     deposit_crypto_estimate_error:
       "❌ *Taxa indisponível*\n\nNão foi possível obter a taxa de câmbio para esta criptomoeda.\n\nPor favor, escolha outra criptomoeda ou tente novamente mais tarde.",
+    // Terms & Conditions
+    terms_title: "📜 Termos de Uso",
+    terms_message:
+      "📜 *Termos de Uso*\n\nPara continuar usando o bot, você deve aceitar nossos termos de uso.\n\n🔗 [Ler Termos]({terms_url})\n\n⚠️ Ao clicar em 'Aceitar', você concorda com nossos termos de uso.",
+    terms_accept: "✅ Aceitar",
+    terms_decline: "❌ Recusar",
+    terms_required: "❌ Você deve aceitar os termos de uso para continuar.",
+    terms_accepted: "✅ Você aceitou os termos de uso!",
+    // Deposit Security
+    deposit_security_title: "🔒 Segurança de Investimento",
+    deposit_security_message:
+      "🔒 *Segurança do seu Investimento*\n\n🎉 Esta é uma ótima oportunidade para crescer seu capital!\n\n✅ Todas as transações são protegidas\n✅ Crédito instantâneo de fundos\n✅ Sistema de pagamentos transparente\n\n💰 Valor do depósito: {amount_usd} USD\n💎 Você receberá: {amount_mc} MC\n\nProsseguir?",
+    deposit_security_confirm: "✅ Prosseguir",
+    deposit_security_cancel: "❌ Cancelar",
   },
 };
 
@@ -1417,7 +1475,8 @@ export function getText(
   return translation
     .replace(/{botName}/g, BOT_CONFIG.displayName)
     .replace(/{botUsername}/g, BOT_CONFIG.username)
-    .replace(/{supportUsername}/g, BOT_CONFIG.supportUsername);
+    .replace(/{supportUsername}/g, BOT_CONFIG.supportUsername)
+    .replace(/{terms_url}/g, env.TERMS_URL);
 }
 
 export function getSupportedLanguages(): readonly Language[] {
