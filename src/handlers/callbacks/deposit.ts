@@ -88,6 +88,65 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
     );
   });
 
+  // Security confirmation
+  bot.action(
+    CALLBACK_DATA.DEPOSIT_SECURITY_CONFIRM,
+    async (ctx: BotContext) => {
+      if (!hasDbUser(ctx) || !hasLanguage(ctx)) {
+        await answerUserNotFound(ctx);
+        return;
+      }
+
+      const userId = ctx.dbUser.telegram_id;
+      const depositState = getDepositState(userId);
+
+      if (
+        !depositState ||
+        depositState.step !== "security" ||
+        !depositState.amountUsd
+      ) {
+        await ctx.answerCbQuery(
+          getText(ctx.dbUser.language, "error_invalid_callback"),
+        );
+        clearDepositState(userId);
+        return;
+      }
+
+      const { amountUsd } = depositState;
+
+      // Update state to crypto selection step
+      setDepositState(userId, { step: "crypto", amountUsd });
+
+      await ctx.answerCbQuery();
+
+      // Show crypto selection keyboard with all available currencies
+      await ctx.reply(
+        getText(ctx.dbUser.language, "deposit_select_crypto").replace(
+          "{amount_usd}",
+          String(amountUsd),
+        ),
+        {
+          parse_mode: "Markdown",
+          reply_markup: getCryptoSelectionKeyboard(ctx.dbUser.language),
+        },
+      );
+    },
+  );
+
+  // Security cancel
+  bot.action(CALLBACK_DATA.DEPOSIT_SECURITY_CANCEL, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx) || !hasLanguage(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    const userId = ctx.dbUser.telegram_id;
+    clearDepositState(userId);
+
+    await ctx.answerCbQuery();
+    await ctx.reply(getText(ctx.dbUser.language, "deposit_cancelled"));
+  });
+
   // Cancel deposit creation
   bot.action(CALLBACK_DATA.DEPOSIT_CANCEL, async (ctx: BotContext) => {
     const userLanguage = hasDbUser(ctx) ? ctx.dbUser.language : undefined;
@@ -163,11 +222,7 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
     const userId = ctx.dbUser.telegram_id;
     const depositState = getDepositState(userId);
 
-    if (
-      !depositState ||
-      depositState.step !== "crypto" ||
-      !depositState.amountUsd
-    ) {
+    if (!depositState || !depositState.amountUsd) {
       await ctx.answerCbQuery(
         getText(ctx.dbUser.language, "error_invalid_callback"),
       );
@@ -377,18 +432,35 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
         return;
       }
 
-      // Update state to crypto selection step
-      setDepositState(userId, { step: "crypto", amountUsd });
+      // Update state to security step
+      setDepositState(userId, { step: "security", amountUsd });
 
-      // Show crypto selection keyboard with all available currencies
+      // Show security message
+      const amountMc = calculateMcAmount(amountUsd);
+      await ctx.reply(getText(ctx.dbUser.language, "deposit_security_title"));
       await ctx.reply(
-        getText(ctx.dbUser.language, "deposit_select_crypto").replace(
-          "{amount_usd}",
-          String(amountUsd),
-        ),
+        getText(ctx.dbUser.language, "deposit_security_message")
+          .replace("{amount_usd}", String(amountUsd))
+          .replace("{amount_mc}", String(amountMc)),
         {
           parse_mode: "Markdown",
-          reply_markup: getCryptoSelectionKeyboard(ctx.dbUser.language),
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: getText(
+                    ctx.dbUser.language,
+                    "deposit_security_confirm",
+                  ),
+                  callback_data: CALLBACK_DATA.DEPOSIT_SECURITY_CONFIRM,
+                },
+                {
+                  text: getText(ctx.dbUser.language, "deposit_security_cancel"),
+                  callback_data: CALLBACK_DATA.DEPOSIT_SECURITY_CANCEL,
+                },
+              ],
+            ],
+          },
         },
       );
     } catch (err) {
