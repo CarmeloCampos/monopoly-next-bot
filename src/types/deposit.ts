@@ -51,4 +51,4 @@ export interface DepositState {
 /**
  * Valid steps in the deposit flow
  */
-export type DepositStep = "amount" | "crypto" | "confirm";
+export type DepositStep = "amount" | "security" | "crypto" | "confirm";

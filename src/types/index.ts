@@ -21,6 +21,14 @@ interface SelectUserWithLanguage extends SelectUser {
 }
 
 /**
+ * SelectUser with terms_accepted_at guaranteed to be non-null.
+ * Used for contexts where user has already accepted the terms.
+ */
+interface SelectUserWithTerms extends SelectUserWithLanguage {
+  terms_accepted_at: Date;
+}
+
+/**
  * User property data returned from database queries.
  * Uses raw number types as returned by Drizzle ORM.
  */
@@ -50,6 +58,10 @@ interface BotContextWithLanguage extends BotContextWithUser {
   dbUser: SelectUserWithLanguage;
 }
 
+interface BotContextWithTerms extends BotContextWithLanguage {
+  dbUser: SelectUserWithTerms;
+}
+
 function hasDbUser(ctx: BotContext): ctx is BotContextWithUser {
   return ctx.dbUser !== null && ctx.dbUser !== undefined;
 }
@@ -57,6 +69,14 @@ function hasDbUser(ctx: BotContext): ctx is BotContextWithUser {
 function hasLanguage(ctx: BotContext): ctx is BotContextWithLanguage {
   if (!hasDbUser(ctx)) return false;
   return ctx.dbUser.language !== null && ctx.dbUser.language !== undefined;
+}
+
+function hasTerms(ctx: BotContext): ctx is BotContextWithTerms {
+  if (!hasLanguage(ctx)) return false;
+  return (
+    ctx.dbUser.terms_accepted_at !== null &&
+    ctx.dbUser.terms_accepted_at !== undefined
+  );
 }
 
 export type {
@@ -69,7 +89,7 @@ export type {
   BuyResult,
   UpgradeFailure,
 };
-export { hasDbUser, hasLanguage };
+export { hasDbUser, hasLanguage, hasTerms };
 export * from "./utils";
 export * from "./db";
 export * from "./branded";
