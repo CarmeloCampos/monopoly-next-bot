@@ -55,6 +55,9 @@ const envSchema = z.object({
   BOT_USERNAME: z.string().default("MonopolyFunBot"),
   BOT_DISPLAY_NAME: z.string().default("Monopoly Bot"),
 
+  // Terms & Conditions
+  TERMS_URL: z.string().url(),
+
   // Support Contact
   SUPPORT_USERNAME: z.string().default("MonopolyFunBotSupport"),
 
