@@ -22,6 +22,10 @@ const envSchema = z.object({
   // Debug logs
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 
+  // Cron Server Configuration
+  CRON_PORT: z.coerce.number().default(3001),
+  CRON_SECRET: z.string(),
+
   // Admin Configuration
   ADMIN_USER_IDS: z
     .string()
