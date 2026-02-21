@@ -253,6 +253,18 @@ export async function getPaymentStatus(
   }
 
   const rawData = await response.json();
+  const record = rawData as Record<string, unknown>;
+
+  // Debug: log raw response
+  info("NOWPayments API raw response", {
+    paymentId,
+    status: response.status,
+    hasPaymentStatus: "payment_status" in record,
+    hasStatus: "status" in record,
+    paymentStatusValue: record["payment_status"],
+    statusValue: record["status"],
+  });
+
   const data = validatePaymentStatusResponse(rawData);
 
   info("Payment status fetched", {
