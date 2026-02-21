@@ -4,11 +4,16 @@
 
 import { db } from "@/db";
 import { deposits, users, transactions } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { env } from "@/config/env";
 import { error, info } from "@/utils/logger";
-import { createNowPaymentsPayment, verifyIpnSignature } from "./nowpayments";
+import {
+  createNowPaymentsPayment,
+  verifyIpnSignature,
+  getPaymentStatus,
+} from "./nowpayments";
 import type { TelegramId, MonopolyCoins, DepositStatus } from "@/types";
+import { asDepositId } from "@/types/utils";
 import type {
   CreateDepositInput,
   CreateDepositResult,
@@ -34,6 +39,27 @@ export function calculateMcAmount(usdAmount: number): MonopolyCoins {
 function generateOrderId(userId: TelegramId): string {
   const timestamp = Date.now();
   return `deposit_${userId}_${timestamp}`;
+}
+
+/**
+ * Maps NOWPayments status to DepositStatus
+ * Returns the mapped DepositStatus or null if payment is still pending
+ */
+function mapPaymentStatusToDepositStatus(
+  paymentStatus: NowPaymentsIpnPayload["payment_status"],
+): DepositStatus | null {
+  if (paymentStatus === "finished" || paymentStatus === "confirmed") {
+    return "paid";
+  }
+  if (
+    paymentStatus === "failed" ||
+    paymentStatus === "expired" ||
+    paymentStatus === "refunded"
+  ) {
+    return paymentStatus === "expired" ? "expired" : "failed";
+  }
+  // Still pending
+  return null;
 }
 
 /**
@@ -109,10 +135,10 @@ export async function createDeposit(
       paymentId: paymentResponse.payment_id,
     });
 
-    // Cast to SelectDeposit - validated by database schema and branded type
+    // Validate and convert id to branded DepositId type
     const selectDeposit: SelectDeposit = {
       ...deposit,
-      id: deposit.id as SelectDeposit["id"],
+      id: asDepositId(deposit.id),
     };
 
     return {
@@ -174,10 +200,10 @@ export async function getUserDeposits(
       limit,
     });
 
-    // Cast results to SelectDeposit - validated by database schema
+    // Validate and convert ids to branded DepositId type
     return results.map((result) => ({
       ...result,
-      id: result.id as SelectDeposit["id"],
+      id: asDepositId(result.id),
     }));
   } catch (err) {
     error("Error fetching user deposits", {
@@ -266,25 +292,10 @@ export async function processIpnPayment(
       return { success: false, error: "insufficient_payment" };
     }
 
-    // Determine new status based on payment status
-    let newStatus: DepositStatus;
-    if (
-      payload.payment_status === "finished" ||
-      payload.payment_status === "confirmed"
-    ) {
-      newStatus = "paid";
-    } else if (
-      payload.payment_status === "failed" ||
-      payload.payment_status === "expired" ||
-      payload.payment_status === "refunded"
-    ) {
-      newStatus =
-        payload.payment_status === "failed"
-          ? "failed"
-          : payload.payment_status === "expired"
-            ? "expired"
-            : "failed";
-    } else {
+    // Determine new status based on payment status using helper
+    const newStatus = mapPaymentStatusToDepositStatus(payload.payment_status);
+
+    if (newStatus === null) {
       // Still pending, don't update yet
       info("Payment still pending", {
         depositId: deposit.id,
@@ -305,12 +316,12 @@ export async function processIpnPayment(
         })
         .where(eq(deposits.id, deposit.id));
 
-      // If paid, credit user balance
+      // If paid, credit user balance (add to existing balance, not replace)
       if (newStatus === "paid") {
         await tx
           .update(users)
           .set({
-            balance: deposit.amount_mc,
+            balance: sql`${users.balance} + ${deposit.amount_mc}`,
             updated_at: new Date(),
           })
           .where(eq(users.telegram_id, deposit.user_id));
@@ -350,6 +361,145 @@ export async function processIpnPayment(
       error: err instanceof Error ? err.message : String(err),
     });
     return { success: false, error: "database_error" };
+  }
+}
+
+/**
+ * Check and update status of a single pending deposit by querying NOWPayments API
+ * Returns the result of the update attempt
+ */
+export async function checkAndUpdateDepositStatus(
+  deposit: SelectDeposit,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const paymentStatus = await getPaymentStatus(
+      deposit.nowpayments_payment_id,
+    );
+
+    info("Checking deposit status via API", {
+      depositId: deposit.id,
+      paymentId: deposit.nowpayments_payment_id,
+      apiStatus: paymentStatus.status,
+      currentStatus: deposit.status,
+    });
+
+    // Skip if deposit is already in terminal state
+    if (deposit.status === "paid") {
+      return { success: true };
+    }
+
+    if (deposit.status === "failed" || deposit.status === "expired") {
+      return { success: false, error: "already_processed" };
+    }
+
+    // Determine new status based on API payment status using helper
+    const newStatus = mapPaymentStatusToDepositStatus(paymentStatus.status);
+
+    if (newStatus === null) {
+      // Still pending or confirming, don't update
+      info("Payment still pending or confirming", {
+        depositId: deposit.id,
+        paymentStatus: paymentStatus.status,
+      });
+      return { success: true };
+    }
+
+    // Update deposit and credit user balance in transaction
+    await db.transaction(async (tx) => {
+      await tx
+        .update(deposits)
+        .set({
+          status: newStatus,
+          updated_at: new Date(),
+          paid_at: newStatus === "paid" ? new Date() : null,
+        })
+        .where(eq(deposits.id, deposit.id));
+
+      if (newStatus === "paid") {
+        await tx
+          .update(users)
+          .set({
+            balance: sql`${users.balance} + ${deposit.amount_mc}`,
+            updated_at: new Date(),
+          })
+          .where(eq(users.telegram_id, deposit.user_id));
+
+        await tx.insert(transactions).values({
+          user_id: deposit.user_id,
+          type: "deposit",
+          amount: deposit.amount_mc,
+          description: `Deposit: ${deposit.amount_usd} USD = ${deposit.amount_mc} MC`,
+          metadata: {
+            deposit_id: deposit.id,
+            payment_id: deposit.nowpayments_payment_id,
+            order_id: deposit.nowpayments_order_id,
+          },
+          created_at: new Date(),
+        });
+      }
+    });
+
+    info("Deposit status updated via API check", {
+      depositId: deposit.id,
+      userId: deposit.user_id,
+      oldStatus: deposit.status,
+      newStatus,
+      amountUsd: deposit.amount_usd,
+      amountMc: deposit.amount_mc,
+    });
+
+    return { success: true };
+  } catch (err) {
+    error("Error checking deposit status via API", {
+      depositId: deposit.id,
+      paymentId: deposit.nowpayments_payment_id,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return { success: false, error: "api_error" };
+  }
+}
+
+/**
+ * Check all pending deposits and update their statuses by querying NOWPayments API
+ * Returns the number of deposits processed
+ */
+export async function checkAllPendingDeposits(): Promise<number> {
+  try {
+    const pendingDeposits = await db.query.deposits.findMany({
+      where: eq(deposits.status, "pending"),
+    });
+
+    if (pendingDeposits.length === 0) {
+      info("No pending deposits to check");
+      return 0;
+    }
+
+    info("Checking pending deposits", { count: pendingDeposits.length });
+
+    let processedCount = 0;
+    for (const deposit of pendingDeposits) {
+      // Validate and convert id to branded DepositId type
+      const typedDeposit: SelectDeposit = {
+        ...deposit,
+        id: asDepositId(deposit.id),
+      };
+      const result = await checkAndUpdateDepositStatus(typedDeposit);
+      if (result.success) {
+        processedCount++;
+      }
+    }
+
+    info("Pending deposits check completed", {
+      total: pendingDeposits.length,
+      processed: processedCount,
+    });
+
+    return processedCount;
+  } catch (err) {
+    error("Error checking pending deposits", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return 0;
   }
 }
 
