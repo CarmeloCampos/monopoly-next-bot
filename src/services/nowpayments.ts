@@ -185,8 +185,8 @@ function validatePaymentStatusResponse(
   if (!isString(record["payment_id"]) && !isNumber(record["payment_id"])) {
     throw new Error("Invalid response: missing or invalid payment_id");
   }
-  if (!isNowPaymentsStatus(record["status"])) {
-    throw new Error("Invalid response: missing or invalid status");
+  if (!isNowPaymentsStatus(record["payment_status"])) {
+    throw new Error("Invalid response: missing or invalid payment_status");
   }
   if (!isString(record["order_id"])) {
     throw new Error("Invalid response: missing or invalid order_id");
@@ -212,7 +212,7 @@ function validatePaymentStatusResponse(
       ? record["order_description"]
       : "",
     success_url: isString(record["success_url"]) ? record["success_url"] : null,
-    status: record["status"],
+    status: record["payment_status"],
   };
 
   return validated;
