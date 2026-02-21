@@ -8,7 +8,50 @@ import type {
   NowPaymentsCreatePaymentRequest,
   NowPaymentsCreatePaymentResponse,
   NowPaymentsIpnPayload,
+  NowPaymentsPaymentStatus,
 } from "@/types/nowpayments";
+
+/**
+ * Type guard for checking if a value is a valid object
+ */
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * Type guard for checking if a value is a valid string
+ */
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+/**
+ * Type guard for checking if a value is a valid number
+ */
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
+ * Type guard for checking if a value is a valid NowPaymentsStatus
+ */
+function isNowPaymentsStatus(
+  value: unknown,
+): value is import("@/types/nowpayments").NowPaymentsStatus {
+  if (!isString(value)) return false;
+  const validStatuses = [
+    "waiting",
+    "confirming",
+    "confirmed",
+    "sending",
+    "partially_paid",
+    "finished",
+    "failed",
+    "refunded",
+    "expired",
+  ];
+  return validStatuses.includes(value);
+}
 
 /**
  * Validates the payment response from NOWPayments API
@@ -16,64 +59,59 @@ import type {
  */
 function validatePaymentResponse(
   data: unknown,
-): NowPaymentsCreatePaymentResponse {
-  if (typeof data !== "object" || data === null) {
+): import("@/types/nowpayments").NowPaymentsCreatePaymentResponse {
+  if (!isObject(data)) {
     throw new Error("Invalid response: expected object");
   }
 
-  const record = data as Record<string, unknown>;
+  const record = data;
 
   // Validate required fields
-  if (typeof record["payment_id"] !== "string") {
+  if (!isString(record["payment_id"])) {
     throw new Error("Invalid response: missing or invalid payment_id");
   }
-  if (typeof record["payment_status"] !== "string") {
+  if (!isString(record["payment_status"])) {
     throw new Error("Invalid response: missing or invalid payment_status");
   }
-  if (typeof record["order_id"] !== "string") {
+  if (!isString(record["order_id"])) {
     throw new Error("Invalid response: missing or invalid order_id");
   }
 
   // Build validated response object
-  const validated: NowPaymentsCreatePaymentResponse = {
-    payment_id: record["payment_id"],
-    payment_status: record["payment_status"],
-    pay_address:
-      typeof record["pay_address"] === "string" ? record["pay_address"] : "",
-    pay_amount:
-      typeof record["pay_amount"] === "string"
+  const validated: import("@/types/nowpayments").NowPaymentsCreatePaymentResponse =
+    {
+      payment_id: record["payment_id"],
+      payment_status: record["payment_status"],
+      pay_address: isString(record["pay_address"]) ? record["pay_address"] : "",
+      pay_amount: isString(record["pay_amount"])
         ? record["pay_amount"]
-        : typeof record["pay_amount"] === "number"
+        : isNumber(record["pay_amount"])
           ? String(record["pay_amount"])
           : "0",
-    pay_currency:
-      typeof record["pay_currency"] === "string" ? record["pay_currency"] : "",
-    price_amount:
-      typeof record["price_amount"] === "string" ? record["price_amount"] : "0",
-    price_currency:
-      typeof record["price_currency"] === "string"
+      pay_currency: isString(record["pay_currency"])
+        ? record["pay_currency"]
+        : "",
+      price_amount: isString(record["price_amount"])
+        ? record["price_amount"]
+        : "0",
+      price_currency: isString(record["price_currency"])
         ? record["price_currency"]
         : "",
-    payment_url:
-      typeof record["payment_url"] === "string"
+      payment_url: isString(record["payment_url"])
         ? record["payment_url"]
         : undefined,
-    order_id: record["order_id"],
-    order_description:
-      typeof record["order_description"] === "string"
+      order_id: record["order_id"],
+      order_description: isString(record["order_description"])
         ? record["order_description"]
         : "",
-    created_at:
-      typeof record["created_at"] === "string"
+      created_at: isString(record["created_at"])
         ? record["created_at"]
         : new Date().toISOString(),
-    updated_at:
-      typeof record["updated_at"] === "string"
+      updated_at: isString(record["updated_at"])
         ? record["updated_at"]
         : new Date().toISOString(),
-    purchase_id:
-      typeof record["purchase_id"] === "string" ? record["purchase_id"] : "",
-  };
+      purchase_id: isString(record["purchase_id"]) ? record["purchase_id"] : "",
+    };
 
   return validated;
 }
@@ -127,6 +165,97 @@ export async function createNowPaymentsPayment(
     paymentId: data.payment_id,
     orderId: data.order_id,
     status: data.payment_status,
+  });
+
+  return data;
+}
+
+/**
+ * Validate payment status response from NOWPayments API
+ */
+function validatePaymentStatusResponse(
+  data: unknown,
+): import("@/types/nowpayments").NowPaymentsPaymentStatus {
+  if (!isObject(data)) {
+    throw new Error("Invalid payment status response: expected object");
+  }
+
+  const record = data;
+
+  if (!isString(record["payment_id"])) {
+    throw new Error("Invalid response: missing or invalid payment_id");
+  }
+  if (!isNowPaymentsStatus(record["status"])) {
+    throw new Error("Invalid response: missing or invalid status");
+  }
+  if (!isString(record["order_id"])) {
+    throw new Error("Invalid response: missing or invalid order_id");
+  }
+
+  const validated: import("@/types/nowpayments").NowPaymentsPaymentStatus = {
+    payment_id: record["payment_id"],
+    created_at: isString(record["created_at"])
+      ? record["created_at"]
+      : new Date().toISOString(),
+    amount_to_pay: isNumber(record["amount_to_pay"])
+      ? record["amount_to_pay"]
+      : 0,
+    currency_to: isString(record["currency_to"]) ? record["currency_to"] : "",
+    currency_from: isString(record["currency_from"])
+      ? record["currency_from"]
+      : "",
+    address: isString(record["address"]) ? record["address"] : "",
+    order_id: record["order_id"],
+    order_description: isString(record["order_description"])
+      ? record["order_description"]
+      : "",
+    success_url: isString(record["success_url"]) ? record["success_url"] : null,
+    status: record["status"],
+  };
+
+  return validated;
+}
+
+/**
+ * Get payment status from NOWPayments API
+ */
+export async function getPaymentStatus(
+  paymentId: string,
+): Promise<NowPaymentsPaymentStatus> {
+  const url = `${NOWPAYMENTS_API_URL}/payment/${paymentId}`;
+
+  info("Fetching payment status from NOWPayments", { paymentId });
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "x-api-key": NOWPAYMENTS_API_KEY,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const errorMessage =
+      typeof errorData === "object" &&
+      errorData !== null &&
+      "message" in errorData &&
+      typeof errorData.message === "string"
+        ? errorData.message
+        : response.statusText;
+    error("NOWPayments API error fetching payment status", {
+      status: response.status,
+      message: errorMessage,
+      paymentId,
+    });
+    throw new Error(`NOWPayments API error: ${errorMessage}`);
+  }
+
+  const rawData = await response.json();
+  const data = validatePaymentStatusResponse(rawData);
+
+  info("Payment status fetched", {
+    paymentId: data.payment_id,
+    status: data.status,
   });
 
   return data;
