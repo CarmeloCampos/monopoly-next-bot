@@ -5,6 +5,8 @@ import type {
   NowPaymentsIpnPayload,
   NowPaymentsStatus,
 } from "@/types/nowpayments";
+import { Telegraf } from "telegraf";
+import config from "@/config";
 
 /**
  * Type guard for checking if a value is a valid object
@@ -172,7 +174,8 @@ Bun.serve({
       info("Starting payment status check cronjob");
 
       try {
-        const processedCount = await checkAllPendingDeposits();
+        const bot = new Telegraf(config.botToken);
+        const processedCount = await checkAllPendingDeposits(bot.telegram);
         info("Payment status check completed", { processedCount });
         return new Response(JSON.stringify({ success: true, processedCount }), {
           status: 200,

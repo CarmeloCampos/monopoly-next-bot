@@ -12,7 +12,12 @@ import {
   verifyIpnSignature,
   getPaymentStatus,
 } from "./nowpayments";
-import type { TelegramId, MonopolyCoins, DepositStatus } from "@/types";
+import type {
+  TelegramId,
+  MonopolyCoins,
+  DepositStatus,
+  Language,
+} from "@/types";
 import { asDepositId } from "@/types/utils";
 import type {
   CreateDepositInput,
@@ -20,6 +25,8 @@ import type {
   SelectDeposit,
 } from "@/types/deposit";
 import type { NowPaymentsIpnPayload } from "@/types/nowpayments";
+import type { Telegram } from "telegraf";
+import { notifyUserDepositPaid } from "@/utils/deposit-notifications";
 
 const { MINIMUM_DEPOSIT_USD, NOWPAYMENTS_IPN_URL, NOWPAYMENTS_IPN_SECRET } =
   env;
@@ -370,6 +377,7 @@ export async function processIpnPayment(
  */
 export async function checkAndUpdateDepositStatus(
   deposit: SelectDeposit,
+  telegram?: Telegram,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const paymentStatus = await getPaymentStatus(
@@ -439,6 +447,28 @@ export async function checkAndUpdateDepositStatus(
       }
     });
 
+    // Notify user if deposit was paid
+    if (newStatus === "paid" && telegram) {
+      const user = await db.query.users.findFirst({
+        where: eq(users.telegram_id, deposit.user_id),
+      });
+      if (user) {
+        await notifyUserDepositPaid(
+          telegram,
+          deposit.user_id,
+          user.language as Language,
+          {
+            amountUsd: deposit.amount_usd,
+            amountMc: deposit.amount_mc,
+          },
+        );
+        info("Deposit paid notification sent", {
+          userId: deposit.user_id,
+          amountUsd: deposit.amount_usd,
+        });
+      }
+    }
+
     info("Deposit status updated via API check", {
       depositId: deposit.id,
       userId: deposit.user_id,
@@ -463,7 +493,9 @@ export async function checkAndUpdateDepositStatus(
  * Check all pending deposits and update their statuses by querying NOWPayments API
  * Returns the number of deposits processed
  */
-export async function checkAllPendingDeposits(): Promise<number> {
+export async function checkAllPendingDeposits(
+  telegram?: Telegram,
+): Promise<number> {
   try {
     const pendingDeposits = await db.query.deposits.findMany({
       where: eq(deposits.status, "pending"),
@@ -483,7 +515,7 @@ export async function checkAllPendingDeposits(): Promise<number> {
         ...deposit,
         id: asDepositId(deposit.id),
       };
-      const result = await checkAndUpdateDepositStatus(typedDeposit);
+      const result = await checkAndUpdateDepositStatus(typedDeposit, telegram);
       if (result.success) {
         processedCount++;
       }
