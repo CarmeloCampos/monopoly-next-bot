@@ -24,6 +24,9 @@ export async function notifyUserDepositPaid(
       getText(finalLanguage, "deposit_paid_notification")
         .replace("{amount_usd}", String(deposit.amountUsd))
         .replace("{amount_mc}", String(deposit.amountMc)),
+      {
+        parse_mode: "Markdown",
+      },
     );
   } catch (err) {
     error("Failed to notify user about paid deposit", {
