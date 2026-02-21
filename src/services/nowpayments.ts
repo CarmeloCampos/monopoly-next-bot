@@ -182,7 +182,7 @@ function validatePaymentStatusResponse(
 
   const record = data;
 
-  if (!isString(record["payment_id"])) {
+  if (!isString(record["payment_id"]) && !isNumber(record["payment_id"])) {
     throw new Error("Invalid response: missing or invalid payment_id");
   }
   if (!isNowPaymentsStatus(record["status"])) {
@@ -193,7 +193,9 @@ function validatePaymentStatusResponse(
   }
 
   const validated: import("@/types/nowpayments").NowPaymentsPaymentStatus = {
-    payment_id: record["payment_id"],
+    payment_id: isNumber(record["payment_id"])
+      ? record["payment_id"]
+      : Number.parseInt(record["payment_id"] as string, 10),
     created_at: isString(record["created_at"])
       ? record["created_at"]
       : new Date().toISOString(),

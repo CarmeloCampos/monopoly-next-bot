@@ -79,7 +79,7 @@ export interface NowPaymentsIpnPayload {
  * Payment status response from NOWPayments API
  */
 export interface NowPaymentsPaymentStatus {
-  payment_id: string;
+  payment_id: number;
   created_at: string;
   amount_to_pay: number;
   currency_to: string;
