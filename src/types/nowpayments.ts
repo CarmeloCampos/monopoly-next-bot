@@ -3,6 +3,20 @@
  */
 
 /**
+ * NOWPayments API payment status values
+ */
+export type NowPaymentsStatus =
+  | "waiting"
+  | "confirming"
+  | "confirmed"
+  | "sending"
+  | "partially_paid"
+  | "finished"
+  | "failed"
+  | "refunded"
+  | "expired";
+
+/**
  * Request body for creating a payment
  */
 export interface NowPaymentsCreatePaymentRequest {
@@ -45,16 +59,7 @@ export interface NowPaymentsCreatePaymentResponse {
  */
 export interface NowPaymentsIpnPayload {
   payment_id: string;
-  payment_status:
-    | "waiting"
-    | "confirming"
-    | "confirmed"
-    | "sending"
-    | "partially_paid"
-    | "finished"
-    | "failed"
-    | "refunded"
-    | "expired";
+  payment_status: NowPaymentsStatus;
   pay_address: string;
   price_amount: number;
   price_currency: string;
@@ -68,4 +73,20 @@ export interface NowPaymentsIpnPayload {
   updated_at: string;
   outcome_amount?: number;
   outcome_currency?: string;
+}
+
+/**
+ * Payment status response from NOWPayments API
+ */
+export interface NowPaymentsPaymentStatus {
+  payment_id: string;
+  created_at: string;
+  amount_to_pay: number;
+  currency_to: string;
+  currency_from: string;
+  address: string;
+  order_id: string;
+  order_description: string;
+  success_url: string | null;
+  status: NowPaymentsStatus;
 }
