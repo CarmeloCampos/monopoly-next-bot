@@ -1,73 +1,109 @@
 import { generateEarningsForAllUsers } from "./generate-earnings";
-import { processIpnPayment } from "@/services/deposit";
+import { processIpnPayment, checkAllPendingDeposits } from "@/services/deposit";
 import { info, error } from "@/utils/logger";
-import type { NowPaymentsIpnPayload } from "@/types/nowpayments";
+import type {
+  NowPaymentsIpnPayload,
+  NowPaymentsStatus,
+} from "@/types/nowpayments";
+
+/**
+ * Type guard for checking if a value is a valid object
+ */
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * Type guard for checking if a value is a valid string
+ */
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+/**
+ * Type guard for checking if a value is a valid number
+ */
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+/**
+ * Type guard for checking if a value is a valid NowPaymentsStatus
+ */
+function isNowPaymentsStatus(value: unknown): value is NowPaymentsStatus {
+  if (!isString(value)) return false;
+  const validStatuses = [
+    "waiting",
+    "confirming",
+    "confirmed",
+    "sending",
+    "partially_paid",
+    "finished",
+    "failed",
+    "refunded",
+    "expired",
+  ];
+  return validStatuses.includes(value);
+}
 
 /**
  * Validates and returns NowPayments IPN payload
  * @throws Error if payload structure is invalid
  */
 function validateIpnPayload(payload: unknown): NowPaymentsIpnPayload {
-  if (typeof payload !== "object" || payload === null) {
+  if (!isObject(payload)) {
     throw new Error("Invalid IPN payload: expected object");
   }
 
-  const record = payload as Record<string, unknown>;
+  const record = payload;
 
   // Validate required string fields
-  if (typeof record["payment_id"] !== "string") {
+  if (!isString(record["payment_id"])) {
     throw new Error("Invalid IPN payload: missing payment_id");
   }
-  if (typeof record["payment_status"] !== "string") {
+  if (!isString(record["payment_status"])) {
     throw new Error("Invalid IPN payload: missing payment_status");
   }
-  if (typeof record["order_id"] !== "string") {
+  if (!isNowPaymentsStatus(record["payment_status"])) {
+    throw new Error("Invalid IPN payload: invalid payment_status");
+  }
+  if (!isString(record["order_id"])) {
     throw new Error("Invalid IPN payload: missing order_id");
   }
 
   // Build validated payload with proper type checking
   const validated: NowPaymentsIpnPayload = {
     payment_id: record["payment_id"],
-    payment_status: record[
-      "payment_status"
-    ] as NowPaymentsIpnPayload["payment_status"],
-    pay_address:
-      typeof record["pay_address"] === "string" ? record["pay_address"] : "",
-    price_amount:
-      typeof record["price_amount"] === "number" ? record["price_amount"] : 0,
-    price_currency:
-      typeof record["price_currency"] === "string"
-        ? record["price_currency"]
-        : "",
-    pay_amount:
-      typeof record["pay_amount"] === "number" ? record["pay_amount"] : 0,
-    actually_paid:
-      typeof record["actually_paid"] === "number" ? record["actually_paid"] : 0,
-    pay_currency:
-      typeof record["pay_currency"] === "string" ? record["pay_currency"] : "",
+    payment_status: record["payment_status"],
+    pay_address: isString(record["pay_address"]) ? record["pay_address"] : "",
+    price_amount: isNumber(record["price_amount"]) ? record["price_amount"] : 0,
+    price_currency: isString(record["price_currency"])
+      ? record["price_currency"]
+      : "",
+    pay_amount: isNumber(record["pay_amount"]) ? record["pay_amount"] : 0,
+    actually_paid: isNumber(record["actually_paid"])
+      ? record["actually_paid"]
+      : 0,
+    pay_currency: isString(record["pay_currency"])
+      ? record["pay_currency"]
+      : "",
     order_id: record["order_id"],
-    order_description:
-      typeof record["order_description"] === "string"
-        ? record["order_description"]
-        : "",
-    purchase_id:
-      typeof record["purchase_id"] === "string" ? record["purchase_id"] : "",
-    created_at:
-      typeof record["created_at"] === "string"
-        ? record["created_at"]
-        : new Date().toISOString(),
-    updated_at:
-      typeof record["updated_at"] === "string"
-        ? record["updated_at"]
-        : new Date().toISOString(),
-    outcome_amount:
-      typeof record["outcome_amount"] === "number"
-        ? record["outcome_amount"]
-        : undefined,
-    outcome_currency:
-      typeof record["outcome_currency"] === "string"
-        ? record["outcome_currency"]
-        : undefined,
+    order_description: isString(record["order_description"])
+      ? record["order_description"]
+      : "",
+    purchase_id: isString(record["purchase_id"]) ? record["purchase_id"] : "",
+    created_at: isString(record["created_at"])
+      ? record["created_at"]
+      : new Date().toISOString(),
+    updated_at: isString(record["updated_at"])
+      ? record["updated_at"]
+      : new Date().toISOString(),
+    outcome_amount: isNumber(record["outcome_amount"])
+      ? record["outcome_amount"]
+      : undefined,
+    outcome_currency: isString(record["outcome_currency"])
+      ? record["outcome_currency"]
+      : undefined,
   };
 
   return validated;
@@ -79,10 +115,35 @@ const CRON_PORT = Number.parseInt(process.env["CRON_PORT"] || "3001", 10);
 Bun.serve({
   port: CRON_PORT,
   async fetch(req) {
-    const url = new URL(req.url);
+    const { pathname } = new URL(req.url);
+    const { method } = req;
+
+    const headersObj: Record<string, string> = {};
+    req.headers.forEach((value, key) => {
+      headersObj[key] = value;
+    });
+
+    let bodyContent: unknown;
+    if (method !== "GET" && method !== "HEAD") {
+      const clonedReq = req.clone();
+      try {
+        bodyContent = await clonedReq.json();
+      } catch {
+        bodyContent = await clonedReq.text();
+      }
+    } else {
+      bodyContent = undefined;
+    }
+
+    info("Incoming request", {
+      method,
+      path: pathname,
+      headers: headersObj,
+      body: bodyContent,
+    });
 
     // Generate earnings endpoint
-    if (url.pathname === "/generate-earnings") {
+    if (pathname === "/generate-earnings") {
       const authHeader = req.headers.get("Authorization");
       if (authHeader !== `Bearer ${CRON_SECRET}`) {
         error("Unauthorized cron job request", {
@@ -98,8 +159,38 @@ Bun.serve({
       return new Response("OK", { status: 200 });
     }
 
+    // Check payment statuses endpoint (for cronjob)
+    if (pathname === "/check-payment-statuses") {
+      const authHeader = req.headers.get("Authorization");
+      if (authHeader !== `Bearer ${CRON_SECRET}`) {
+        error("Unauthorized payment status check request", {
+          authHeaderReceived: authHeader ? "exists" : "none",
+        });
+        return new Response("Unauthorized", { status: 401 });
+      }
+
+      info("Starting payment status check cronjob");
+
+      try {
+        const processedCount = await checkAllPendingDeposits();
+        info("Payment status check completed", { processedCount });
+        return new Response(JSON.stringify({ success: true, processedCount }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err) {
+        error("Error in payment status check cronjob", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+        return new Response(
+          JSON.stringify({ success: false, error: "internal_error" }),
+          { status: 500, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     // NOWPayments IPN webhook endpoint
-    if (url.pathname === "/webhook/nowpayments" && req.method === "POST") {
+    if (pathname === "/webhook/nowpayments" && req.method === "POST") {
       try {
         const signature = req.headers.get("x-nowpayments-sig");
 
@@ -160,6 +251,11 @@ Bun.serve({
         return new Response("Internal Server Error", { status: 500 });
       }
     }
+
+    info("Route not found", {
+      method: req.method,
+      path: pathname,
+    });
 
     return new Response("Not Found", { status: 404 });
   },
