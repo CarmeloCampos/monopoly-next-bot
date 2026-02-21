@@ -140,7 +140,7 @@ export const MINIGAME_MULTIPLIERS: Record<MinigameType, MinigameMultiplier[]> =
 export const BET_LIMITS = {
   min: 1 as MonopolyCoins,
   max: Infinity,
-} as const;
+} as const satisfies { min: MonopolyCoins; max: number };
 
 export const ANIMATION_DELAY_MS = 3000 as const;
 

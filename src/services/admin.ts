@@ -7,8 +7,10 @@ import type {
   SelectWithdrawal,
   MaybeNull,
 } from "@/types";
+import { asWithdrawalId } from "@/types/utils";
 import { env } from "@/config/env";
 import { error, debug } from "@/utils/logger";
+import { isTelegramId } from "@/utils/guards";
 
 export function isAdmin(userId: TelegramId): boolean {
   const result = env.ADMIN_USER_IDS.includes(userId);
@@ -43,7 +45,7 @@ export async function getTopUsersByBalance(limit = 20): Promise<TopUser[]> {
       .orderBy(desc(users.balance))
       .limit(limit);
 
-    return results as TopUser[];
+    return results satisfies TopUser[];
   } catch (err) {
     error("Error fetching top users", {
       error: err instanceof Error ? err.message : String(err),
@@ -112,7 +114,7 @@ export async function getAllUsers(
     });
 
     return {
-      users: results as SelectUser[],
+      users: results,
       total: countResult?.count ?? 0,
     };
   } catch (err) {
@@ -171,16 +173,34 @@ export async function getPendingWithdrawalsWithUsers(): Promise<
       .where(eq(withdrawals.status, "pending"))
       .orderBy(desc(withdrawals.created_at));
 
-    return results.map((row) => ({
-      ...row.withdrawal,
-      user: {
-        telegram_id: row.user_telegram_id as TelegramId,
-        username: row.user_username,
-        first_name: row.user_first_name,
-        last_name: row.user_last_name,
-        language: row.user_language,
-      },
-    })) as WithdrawalWithUser[];
+    const mapped: WithdrawalWithUser[] = results
+      .map((row) => {
+        if (!isTelegramId(row.user_telegram_id)) {
+          error("Invalid telegram_id in withdrawal join", {
+            userTelegramId: row.user_telegram_id,
+          });
+          return null;
+        }
+
+        const telegramId: TelegramId = row.user_telegram_id;
+        const withdrawalId = asWithdrawalId(row.withdrawal.id);
+        const languageValue: MaybeNull<string> = row.user_language;
+
+        return {
+          ...row.withdrawal,
+          id: withdrawalId,
+          user: {
+            telegram_id: telegramId,
+            username: row.user_username,
+            first_name: row.user_first_name,
+            last_name: row.user_last_name,
+            language: languageValue,
+          },
+        };
+      })
+      .filter((item): item is WithdrawalWithUser => item !== null);
+
+    return mapped;
   } catch (err) {
     error("Error fetching pending withdrawals with users", {
       error: err instanceof Error ? err.message : String(err),

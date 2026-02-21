@@ -12,7 +12,6 @@ import type {
 } from "@/types/branded";
 import type { PropertyIndex, PropertyLevel } from "@/constants/properties";
 import type { ServiceIndex } from "@/constants/services";
-import { WITHDRAWAL_CURRENCIES, WITHDRAWAL_STATUSES } from "@/constants/bot";
 
 export function isTelegramId(value: unknown): value is TelegramId {
   return typeof value === "number" && value > 0 && Number.isInteger(value);
@@ -64,13 +63,20 @@ export function isUpgradeErrorCode(value: unknown): value is UpgradeErrorCode {
 export function isWithdrawalCurrency(
   value: unknown,
 ): value is WithdrawalCurrency {
-  if (typeof value !== "string") return false;
-  return WITHDRAWAL_CURRENCIES.includes(value as WithdrawalCurrency);
+  return (
+    typeof value === "string" &&
+    (value === "bitcoin" || value === "usdt_tron" || value === "monero")
+  );
 }
 
 export function isWithdrawalStatus(value: unknown): value is WithdrawalStatus {
-  if (typeof value !== "string") return false;
-  return WITHDRAWAL_STATUSES.includes(value as WithdrawalStatus);
+  return (
+    typeof value === "string" &&
+    (value === "pending" ||
+      value === "processed" ||
+      value === "cancelled" ||
+      value === "refunded")
+  );
 }
 
 export function isWithdrawalId(value: unknown): value is WithdrawalId {

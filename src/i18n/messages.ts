@@ -61,7 +61,7 @@ export function buildReferralDashboardMessage(
     String(stats.totalEarnings),
   );
 
-  const levels = [
+  const levels: { level: ReferralLevel; emoji: string }[] = [
     { level: 1, emoji: "🥇" },
     { level: 2, emoji: "🥈" },
     { level: 3, emoji: "🥉" },
@@ -74,7 +74,7 @@ export function buildReferralDashboardMessage(
       const key = `referral_level_${level}` as const;
       return `${emoji} ${getText(language, key).replace(
         "{count}",
-        String(stats.referralsByLevel[level as ReferralLevel]),
+        String(stats.referralsByLevel[level]),
       )}`;
     })
     .join("\n");

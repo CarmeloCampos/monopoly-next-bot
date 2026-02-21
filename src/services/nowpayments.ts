@@ -195,7 +195,9 @@ function validatePaymentStatusResponse(
   const validated: import("@/types/nowpayments").NowPaymentsPaymentStatus = {
     payment_id: isNumber(record["payment_id"])
       ? record["payment_id"]
-      : Number.parseInt(record["payment_id"] as string, 10),
+      : isString(record["payment_id"])
+        ? Number.parseInt(record["payment_id"], 10)
+        : 0,
     created_at: isString(record["created_at"])
       ? record["created_at"]
       : new Date().toISOString(),
@@ -253,7 +255,7 @@ export async function getPaymentStatus(
   }
 
   const rawData = await response.json();
-  const record = rawData as Record<string, unknown>;
+  const record = isObject(rawData) ? rawData : {};
 
   // Debug: log raw response
   info("NOWPayments API raw response", {
@@ -288,11 +290,13 @@ function sortObjectKeys(obj: unknown): unknown {
     return obj.map(sortObjectKeys);
   }
 
+  // Create a properly typed object from the unknown object
+  const typedObj = obj as Record<string, unknown>;
   const sorted: Record<string, unknown> = {};
-  const keys = Object.keys(obj as Record<string, unknown>).sort();
+  const keys = Object.keys(typedObj).sort();
 
   for (const key of keys) {
-    sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);
+    sorted[key] = sortObjectKeys(typedObj[key]);
   }
 
   return sorted;

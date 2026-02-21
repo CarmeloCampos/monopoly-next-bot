@@ -9,6 +9,7 @@ import type {
   WithdrawalId,
   SelectWithdrawal,
 } from "@/types";
+import { asMonopolyCoins, asWithdrawalId } from "@/types/utils";
 import { env } from "@/config/env";
 import { error, info } from "@/utils/logger";
 
@@ -44,7 +45,7 @@ export async function createWithdrawal(
       return {
         success: false,
         error: "minimum_amount",
-        needed: MINIMUM_WITHDRAWAL_MC as MonopolyCoins,
+        needed: asMonopolyCoins(MINIMUM_WITHDRAWAL_MC),
       };
     }
 
@@ -62,7 +63,7 @@ export async function createWithdrawal(
       return {
         success: false,
         error: "insufficient_balance",
-        needed: (amount - userBalance) as MonopolyCoins,
+        needed: asMonopolyCoins(amount - userBalance),
       };
     }
 
@@ -112,7 +113,7 @@ export async function createWithdrawal(
           amount,
           currency,
           wallet_address: walletAddress,
-          status: "pending" as WithdrawalStatus,
+          status: "pending" satisfies WithdrawalStatus,
           created_at: new Date(),
           updated_at: new Date(),
         })
@@ -132,9 +133,13 @@ export async function createWithdrawal(
       currency,
     });
 
+    const withdrawalId = asWithdrawalId(result.id);
     return {
       success: true,
-      withdrawal: result satisfies typeof result as SelectWithdrawal,
+      withdrawal: {
+        ...result,
+        id: withdrawalId,
+      },
     };
   } catch (err) {
     error("Error creating withdrawal", {
@@ -158,7 +163,11 @@ export async function getUserWithdrawals(
       limit,
     });
 
-    return results as SelectWithdrawal[];
+    // Convert ids to branded WithdrawalId type
+    return results.map((r) => ({
+      ...r,
+      id: asWithdrawalId(r.id),
+    }));
   } catch (err) {
     error("Error fetching user withdrawals", {
       userId,
@@ -176,7 +185,12 @@ export async function getWithdrawalById(
       where: eq(withdrawals.id, withdrawalId),
     });
 
-    return result ? (result as SelectWithdrawal) : null;
+    if (!result) return null;
+
+    return {
+      ...result,
+      id: asWithdrawalId(result.id),
+    };
   } catch (err) {
     error("Error fetching withdrawal by id", {
       withdrawalId,
@@ -211,7 +225,7 @@ export async function processWithdrawal(
     await db
       .update(withdrawals)
       .set({
-        status: "processed" as WithdrawalStatus,
+        status: "processed" satisfies WithdrawalStatus,
         transaction_hash: transactionHash,
         processed_by: adminId,
         processed_at: new Date(),
@@ -285,8 +299,8 @@ export async function cancelWithdrawal(
         .update(withdrawals)
         .set({
           status: refund
-            ? ("refunded" as WithdrawalStatus)
-            : ("cancelled" as WithdrawalStatus),
+            ? ("refunded" satisfies WithdrawalStatus)
+            : ("cancelled" satisfies WithdrawalStatus),
           updated_at: new Date(),
         })
         .where(eq(withdrawals.id, withdrawalId));

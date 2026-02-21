@@ -12,13 +12,13 @@ import {
   verifyIpnSignature,
   getPaymentStatus,
 } from "./nowpayments";
-import type {
-  TelegramId,
-  MonopolyCoins,
-  DepositStatus,
-  Language,
+import {
+  type TelegramId,
+  type MonopolyCoins,
+  type DepositStatus,
+  isLanguage,
 } from "@/types";
-import { asDepositId } from "@/types/utils";
+import { asDepositId, asMonopolyCoins } from "@/types/utils";
 import type {
   CreateDepositInput,
   CreateDepositResult,
@@ -37,7 +37,8 @@ const MC_PER_USD = 1000; // 1 USD = 1,000 MC
  * Calculate MC amount from USD
  */
 export function calculateMcAmount(usdAmount: number): MonopolyCoins {
-  return Math.floor(usdAmount * MC_PER_USD) as MonopolyCoins;
+  const mcAmount = Math.floor(usdAmount * MC_PER_USD);
+  return asMonopolyCoins(mcAmount);
 }
 
 /**
@@ -453,15 +454,11 @@ export async function checkAndUpdateDepositStatus(
         where: eq(users.telegram_id, deposit.user_id),
       });
       if (user) {
-        await notifyUserDepositPaid(
-          telegram,
-          deposit.user_id,
-          user.language as Language,
-          {
-            amountUsd: deposit.amount_usd,
-            amountMc: deposit.amount_mc,
-          },
-        );
+        const language = isLanguage(user.language) ? user.language : "en";
+        await notifyUserDepositPaid(telegram, deposit.user_id, language, {
+          amountUsd: deposit.amount_usd,
+          amountMc: deposit.amount_mc,
+        });
         info("Deposit paid notification sent", {
           userId: deposit.user_id,
           amountUsd: deposit.amount_usd,

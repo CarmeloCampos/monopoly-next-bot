@@ -10,6 +10,8 @@ import {
   type UpgradeResult,
   type PropertyColor,
   asMonopolyCoins,
+  isPropertyIndex,
+  isPropertyLevel,
 } from "@/types";
 import {
   getPropertyByIndex,
@@ -19,7 +21,6 @@ import {
   PROPERTY_COUNT_BY_COLOR,
 } from "@/constants/properties";
 import { STARTER_PROPERTY_INDEX } from "@/constants/game";
-import { isPropertyIndex } from "@/utils/guards";
 
 interface UpgradePropertyParams {
   userId: TelegramId;
@@ -34,7 +35,12 @@ export function getUpgradeCost(
     return asMonopolyCoins(0);
   }
 
-  const nextLevel = (currentLevel + 1) as PropertyLevel;
+  const nextLevelValue = currentLevel + 1;
+  if (!isPropertyLevel(nextLevelValue)) {
+    return asMonopolyCoins(0);
+  }
+
+  const nextLevel: PropertyLevel = nextLevelValue;
   const cost = getPropertyCost(propertyIndex, nextLevel);
   const currentCost = getPropertyCost(propertyIndex, currentLevel);
 
@@ -161,7 +167,12 @@ export async function upgradeProperty(
     return { success: false, code: "max_level_reached" };
   }
 
-  const nextLevel = (userProperty.level + 1) as PropertyLevel;
+  const nextLevelValue = userProperty.level + 1;
+  if (!isPropertyLevel(nextLevelValue)) {
+    return { success: false, code: "max_level_reached" };
+  }
+
+  const nextLevel: PropertyLevel = nextLevelValue;
 
   if (nextLevel === 4) {
     const requirementResult = await canUpgradeToLevel4(userId, propertyIndex);
