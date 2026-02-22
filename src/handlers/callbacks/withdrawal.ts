@@ -33,6 +33,7 @@ import {
 } from "@/utils/callback-helpers";
 import { info, error } from "@/utils/logger";
 import { notifyAdminsNewWithdrawal } from "@/utils/notifications";
+import { formatTelegramText } from "@/utils/telegram-format";
 
 const WITHDRAWAL_PAGE_SIZE = 5;
 
@@ -224,19 +225,20 @@ export const registerWithdrawalCallbacks = (
           ? getCurrencyDisplayName(currency)
           : "";
 
-        await ctx.reply(
-          getText(ctx.dbUser.language, "withdrawal_confirm_text")
-            .replace("{amount}", String(amount))
-            .replace("{usd}", String(usdAmount))
-            .replace("{currency}", currencyDisplay)
-            .replace("{wallet}", walletAddress ?? ""),
+        const confirmMessage = formatTelegramText(
+          getText(ctx.dbUser.language, "withdrawal_confirm_text"),
           {
-            parse_mode: "Markdown",
-            reply_markup: getWithdrawalConfirmationKeyboard(
-              ctx.dbUser.language,
-            ),
+            amount: String(amount),
+            usd: String(usdAmount),
+            currency: currencyDisplay,
+            wallet: walletAddress ?? "",
           },
         );
+
+        await ctx.reply(confirmMessage, {
+          parse_mode: "Markdown",
+          reply_markup: getWithdrawalConfirmationKeyboard(ctx.dbUser.language),
+        });
       }
     } catch (err) {
       error("Error in withdrawal text handler", {
@@ -300,9 +302,13 @@ export const registerWithdrawalCallbacks = (
 
       await ctx.answerCbQuery();
       await ctx.editMessageText(
-        getText(ctx.dbUser.language, "withdrawal_created_success")
-          .replace("{amount}", String(result.withdrawal.amount))
-          .replace("{currency}", currencyDisplay),
+        formatTelegramText(
+          getText(ctx.dbUser.language, "withdrawal_created_success"),
+          {
+            amount: String(result.withdrawal.amount),
+            currency: currencyDisplay,
+          },
+        ),
       );
 
       info("Withdrawal created", {
@@ -392,12 +398,16 @@ async function showWithdrawalHistory(
       const status = getStatusDisplay(w.status, ctx.dbUser.language);
       const currencyDisplay = getCurrencyDisplayName(w.currency);
 
-      return getText(ctx.dbUser.language, "withdrawal_history_item")
-        .replace("{status}", status)
-        .replace("{amount}", String(w.amount))
-        .replace("{currency}", currencyDisplay)
-        .replace("{date}", date)
-        .replace("{wallet}", w.wallet_address);
+      return formatTelegramText(
+        getText(ctx.dbUser.language, "withdrawal_history_item"),
+        {
+          status,
+          amount: String(w.amount),
+          currency: currencyDisplay,
+          date,
+          wallet: w.wallet_address,
+        },
+      );
     })
     .join("\n\n");
 

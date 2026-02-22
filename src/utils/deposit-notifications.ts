@@ -3,6 +3,8 @@ import type { Language, MaybeOptional } from "@/types";
 import { isLanguage } from "@/utils/guards";
 import { error } from "@/utils/logger";
 import type { Telegram } from "telegraf";
+import { formatTelegramText } from "@/utils/telegram-format";
+import { sendMarkdownSafe } from "@/utils/telegram-send";
 
 export interface DepositNotificationData {
   amountUsd: number;
@@ -19,15 +21,15 @@ export async function notifyUserDepositPaid(
     userLanguage && isLanguage(userLanguage) ? userLanguage : "en";
 
   try {
-    await telegram.sendMessage(
-      userId,
-      getText(finalLanguage, "deposit_paid_notification")
-        .replace("{amount_usd}", String(deposit.amountUsd))
-        .replace("{amount_mc}", String(deposit.amountMc)),
+    const message = formatTelegramText(
+      getText(finalLanguage, "deposit_paid_notification"),
       {
-        parse_mode: "Markdown",
+        amount_usd: String(deposit.amountUsd),
+        amount_mc: String(deposit.amountMc),
       },
     );
+
+    await sendMarkdownSafe(telegram, userId, message);
   } catch (err) {
     error("Failed to notify user about paid deposit", {
       userId,

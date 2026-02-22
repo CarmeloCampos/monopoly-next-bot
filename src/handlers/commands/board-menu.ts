@@ -21,6 +21,7 @@ import {
   sendPhotoWithFallback,
   sendBackButton,
 } from "@/handlers/shared/photo-message";
+import { formatTelegramText } from "@/utils/telegram-format";
 
 export async function handleBoard(ctx: BotContextWithLanguage): Promise<void> {
   const { dbUser } = ctx;
@@ -133,12 +134,16 @@ async function showUnlockedProperty(
 
   const message =
     roll !== undefined
-      ? getText(dbUser.language, "board_rolled_property_simple")
-          .replace("{roll}", String(roll))
-          .replace(/{property}/g, propertyName)
-          .replace("{color}", color)
-          .replace("{cost}", String(cost1 ?? 0))
-          .replace("{income}", income1 ? String(income1) : "0")
+      ? formatTelegramText(
+          getText(dbUser.language, "board_rolled_property_simple"),
+          {
+            roll: String(roll),
+            property: propertyName,
+            color,
+            cost: String(cost1 ?? 0),
+            income: income1 ? String(income1) : "0",
+          },
+        )
       : buildFullPropertyMessage(dbUser.language, propertyName, color, {
           itemIndex,
           cost1,
@@ -178,17 +183,18 @@ function buildFullPropertyMessage(
   const income3 = getPropertyIncome(itemIndex, 3);
   const income4 = getPropertyIncome(itemIndex, 4);
 
-  return getText(language, "board_unlocked_property")
-    .replace("{property}", propertyName)
-    .replace("{color}", color)
-    .replace("{cost1}", String(cost1 ?? 0))
-    .replace("{cost2}", String(cost2 ?? 0))
-    .replace("{cost3}", String(cost3 ?? 0))
-    .replace("{cost4}", String(cost4 ?? 0))
-    .replace("{income1}", income1 ? String(income1) : "0")
-    .replace("{income2}", income2 ? String(income2) : "0")
-    .replace("{income3}", income3 ? String(income3) : "0")
-    .replace("{income4}", income4 ? String(income4) : "0");
+  return formatTelegramText(getText(language, "board_unlocked_property"), {
+    property: propertyName,
+    color,
+    cost1: String(cost1 ?? 0),
+    cost2: String(cost2 ?? 0),
+    cost3: String(cost3 ?? 0),
+    cost4: String(cost4 ?? 0),
+    income1: income1 ? String(income1) : "0",
+    income2: income2 ? String(income2) : "0",
+    income3: income3 ? String(income3) : "0",
+    income4: income4 ? String(income4) : "0",
+  });
 }
 
 async function showUnlockedService(
@@ -244,14 +250,15 @@ function buildServiceMessage(
   boostText: string,
   roll?: number,
 ): string {
-  let message = getText(language, messageKey)
-    .replace("{service}", serviceName)
-    .replace("{cost}", String(cost))
-    .replace("{boost}", boostText);
+  const replacements: { [key: string]: string } = {
+    service: serviceName,
+    cost: String(cost),
+    boost: boostText,
+  };
 
   if (roll !== undefined) {
-    message = message.replace("{roll}", String(roll));
+    replacements["roll"] = String(roll);
   }
 
-  return message;
+  return formatTelegramText(getText(language, messageKey), replacements);
 }

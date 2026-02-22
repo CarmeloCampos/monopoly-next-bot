@@ -9,6 +9,8 @@ import { getCurrencyDisplayName } from "@/services/withdrawal";
 import { isLanguage } from "@/utils/guards";
 import { error } from "@/utils/logger";
 import type { Telegram } from "telegraf";
+import { formatTelegramText } from "@/utils/telegram-format";
+import { sendMarkdownSafe } from "@/utils/telegram-send";
 
 export interface WithdrawalNotificationData {
   userId: number;
@@ -28,13 +30,16 @@ export async function notifyUserWithdrawalProcessed(
     userLanguage && isLanguage(userLanguage) ? userLanguage : "en";
 
   try {
-    await telegram.sendMessage(
-      userId,
-      getText(finalLanguage, "withdrawal_processed_notification")
-        .replace("{amount}", String(withdrawal.amount))
-        .replace("{currency}", getCurrencyDisplayName(withdrawal.currency))
-        .replace("{hash}", transactionHash),
+    const message = formatTelegramText(
+      getText(finalLanguage, "withdrawal_processed_notification"),
+      {
+        amount: String(withdrawal.amount),
+        currency: getCurrencyDisplayName(withdrawal.currency),
+        hash: transactionHash,
+      },
     );
+
+    await sendMarkdownSafe(telegram, userId, message);
   } catch (err) {
     error("Failed to notify user about processed withdrawal", {
       userId,
@@ -55,19 +60,17 @@ export async function notifyUserWithdrawalCancelled(
   const finalLanguage: Language =
     userLanguage && isLanguage(userLanguage) ? userLanguage : "en";
 
-  const messageKey = isRefund
-    ? "withdrawal_cancelled_notification"
-    : "withdrawal_cancelled_notification";
-
+  const messageKey = "withdrawal_cancelled_notification";
   const logMessage = isRefund
     ? "Failed to notify user about refunded withdrawal"
     : "Failed to notify user about cancelled withdrawal";
 
   try {
-    await telegram.sendMessage(
-      userId,
-      getText(finalLanguage, messageKey).replace("{amount}", String(amount)),
-    );
+    const message = formatTelegramText(getText(finalLanguage, messageKey), {
+      amount: String(amount),
+    });
+
+    await sendMarkdownSafe(telegram, userId, message);
   } catch (err) {
     error(logMessage, {
       userId,

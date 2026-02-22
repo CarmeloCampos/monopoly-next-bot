@@ -31,6 +31,7 @@ import {
 } from "@/utils/callback-helpers";
 import { info, error } from "@/utils/logger";
 import { env } from "@/config/env";
+import { formatTelegramText } from "@/utils/telegram-format";
 
 const DEPOSIT_PAGE_SIZE = 5;
 const { MINIMUM_DEPOSIT_USD } = env;
@@ -249,54 +250,60 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       // Check if we have a payment URL
       if (result.paymentUrl) {
         // Standard flow with payment URL
-        await ctx.editMessageText(
-          getText(ctx.dbUser.language, "deposit_created_success")
-            .replace("{amount_usd}", String(amountUsd))
-            .replace("{amount_mc}", String(amountMc))
-            .replace("{payment_url}", result.paymentUrl),
+        const successMessage = formatTelegramText(
+          getText(ctx.dbUser.language, "deposit_created_success"),
           {
-            parse_mode: "Markdown",
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: getText(ctx.dbUser.language, "btn_pay_now"),
-                    url: result.paymentUrl,
-                  },
-                ],
-                [
-                  {
-                    text: getText(ctx.dbUser.language, "btn_back"),
-                    callback_data: CALLBACK_DATA.DEPOSIT_MENU,
-                  },
-                ],
-              ],
-            },
+            amount_usd: String(amountUsd),
+            amount_mc: String(amountMc),
+            payment_url: result.paymentUrl,
           },
         );
+
+        await ctx.editMessageText(successMessage, {
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: getText(ctx.dbUser.language, "btn_pay_now"),
+                  url: result.paymentUrl,
+                },
+              ],
+              [
+                {
+                  text: getText(ctx.dbUser.language, "btn_back"),
+                  callback_data: CALLBACK_DATA.DEPOSIT_MENU,
+                },
+              ],
+            ],
+          },
+        });
       } else if (deposit.pay_address) {
         // Fallback: show payment address directly when no URL is available
-        await ctx.editMessageText(
-          getText(ctx.dbUser.language, "deposit_created_no_url")
-            .replace("{amount_usd}", String(amountUsd))
-            .replace("{amount_mc}", String(amountMc))
-            .replace("{pay_address}", deposit.pay_address)
-            .replace("{pay_amount}", String(deposit.pay_amount))
-            .replace("{pay_currency}", String(deposit.pay_currency)),
+        const noUrlMessage = formatTelegramText(
+          getText(ctx.dbUser.language, "deposit_created_no_url"),
           {
-            parse_mode: "Markdown",
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: getText(ctx.dbUser.language, "btn_back"),
-                    callback_data: CALLBACK_DATA.DEPOSIT_MENU,
-                  },
-                ],
-              ],
-            },
+            amount_usd: String(amountUsd),
+            amount_mc: String(amountMc),
+            pay_address: deposit.pay_address,
+            pay_amount: String(deposit.pay_amount),
+            pay_currency: String(deposit.pay_currency),
           },
         );
+
+        await ctx.editMessageText(noUrlMessage, {
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: getText(ctx.dbUser.language, "btn_back"),
+                  callback_data: CALLBACK_DATA.DEPOSIT_MENU,
+                },
+              ],
+            ],
+          },
+        });
       } else {
         // Neither URL nor address available - this shouldn't happen
         error("Deposit created but no payment method available", {
@@ -438,31 +445,30 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       // Show security message
       const amountMc = calculateMcAmount(amountUsd);
       await ctx.reply(getText(ctx.dbUser.language, "deposit_security_title"));
-      await ctx.reply(
-        getText(ctx.dbUser.language, "deposit_security_message")
-          .replace("{amount_usd}", String(amountUsd))
-          .replace("{amount_mc}", String(amountMc)),
+      const securityMessage = formatTelegramText(
+        getText(ctx.dbUser.language, "deposit_security_message"),
         {
-          parse_mode: "Markdown",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: getText(
-                    ctx.dbUser.language,
-                    "deposit_security_confirm",
-                  ),
-                  callback_data: CALLBACK_DATA.DEPOSIT_SECURITY_CONFIRM,
-                },
-                {
-                  text: getText(ctx.dbUser.language, "deposit_security_cancel"),
-                  callback_data: CALLBACK_DATA.DEPOSIT_SECURITY_CANCEL,
-                },
-              ],
-            ],
-          },
+          amount_usd: String(amountUsd),
+          amount_mc: String(amountMc),
         },
       );
+      await ctx.reply(securityMessage, {
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: getText(ctx.dbUser.language, "deposit_security_confirm"),
+                callback_data: CALLBACK_DATA.DEPOSIT_SECURITY_CONFIRM,
+              },
+              {
+                text: getText(ctx.dbUser.language, "deposit_security_cancel"),
+                callback_data: CALLBACK_DATA.DEPOSIT_SECURITY_CANCEL,
+              },
+            ],
+          ],
+        },
+      });
     } catch (err) {
       error("Error in deposit text handler", {
         userId,
@@ -508,11 +514,15 @@ async function showDepositHistory(
       );
       const status = getDepositStatusDisplay(d.status, ctx.dbUser.language);
 
-      return getText(ctx.dbUser.language, "deposit_history_item")
-        .replace("{status}", status)
-        .replace("{amount_usd}", String(d.amount_usd))
-        .replace("{amount_mc}", String(d.amount_mc))
-        .replace("{date}", date);
+      return formatTelegramText(
+        getText(ctx.dbUser.language, "deposit_history_item"),
+        {
+          status,
+          amount_usd: String(d.amount_usd),
+          amount_mc: String(d.amount_mc),
+          date,
+        },
+      );
     })
     .join("\n\n");
 

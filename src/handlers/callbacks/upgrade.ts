@@ -16,6 +16,7 @@ import { upgradeProperty } from "@/services/upgrade";
 import { getUserProperties } from "@/services/property";
 import { getPropertyByIndex, type PropertyIndex } from "@/constants/properties";
 import { sendPropertyCard } from "@/handlers/shared/property-display";
+import { formatTelegramText } from "@/utils/telegram-format";
 
 interface UpgradeFailureParams {
   ctx: BotContext;
@@ -39,16 +40,16 @@ async function handleUpgradeError(params: UpgradeFailureParams): Promise<void> {
       break;
     case "insufficient_balance":
       if (result.needed) {
-        const msg = getText(
-          language,
-          "property_upgrade_insufficient_balance",
-        ).replace("{needed}", String(result.needed));
+        const msg = formatTelegramText(
+          getText(language, "property_upgrade_insufficient_balance"),
+          { needed: String(result.needed) },
+        );
         await ctx.answerCbQuery(msg);
       } else {
         await ctx.answerCbQuery(
-          getText(language, "property_upgrade_insufficient_balance").replace(
-            "{needed}",
-            "0",
+          formatTelegramText(
+            getText(language, "property_upgrade_insufficient_balance"),
+            { needed: "0" },
           ),
         );
       }
@@ -61,10 +62,10 @@ async function handleUpgradeError(params: UpgradeFailureParams): Promise<void> {
       const colorKey = property?.color ?? "unknown";
 
       // Basic message in callback
-      const basicMsg = getText(
-        language,
-        "property_upgrade_color_requirement",
-      ).replace("{color}", color);
+      const basicMsg = formatTelegramText(
+        getText(language, "property_upgrade_color_requirement"),
+        { color },
+      );
       await ctx.answerCbQuery(basicMsg);
 
       // Detailed message in chat
@@ -74,26 +75,30 @@ async function handleUpgradeError(params: UpgradeFailureParams): Promise<void> {
         const colorName = getText(language, `color_${colorKey}`);
 
         const messageParts: string[] = [
-          getText(language, "property_upgrade_color_requirement_detailed")
-            .replace("{color}", colorName)
-            .replace("{owned}", String(owned))
-            .replace("{required}", String(required)),
+          formatTelegramText(
+            getText(language, "property_upgrade_color_requirement_detailed"),
+            {
+              color: colorName,
+              owned: String(owned),
+              required: String(required),
+            },
+          ),
         ];
 
         if (missingCount > 0) {
           messageParts.push(
-            getText(language, "property_upgrade_missing_properties").replace(
-              "{count}",
-              String(missingCount),
+            formatTelegramText(
+              getText(language, "property_upgrade_missing_properties"),
+              { count: String(missingCount) },
             ),
           );
         }
 
         if (lowLevelCount > 0) {
           messageParts.push(
-            getText(language, "property_upgrade_low_level_properties").replace(
-              "{count}",
-              String(lowLevelCount),
+            formatTelegramText(
+              getText(language, "property_upgrade_low_level_properties"),
+              { count: String(lowLevelCount) },
             ),
           );
         }
@@ -156,15 +161,23 @@ export function registerUpgradeCallbacks(bot: Telegraf<BotContext>): void {
       const upgradedProperty =
         currentIndex >= 0 ? properties[currentIndex] : undefined;
       const newLevel = upgradedProperty ? upgradedProperty.level : 0;
-      const msg = getText(ctx.dbUser.language, "property_upgrade_success")
-        .replace("{property}", propertyName)
-        .replace("{level}", String(newLevel));
+      const msg = formatTelegramText(
+        getText(ctx.dbUser.language, "property_upgrade_success"),
+        {
+          property: propertyName,
+          level: String(newLevel),
+        },
+      );
       await ctx.answerCbQuery(msg);
     } else {
       await ctx.answerCbQuery(
-        getText(ctx.dbUser.language, "property_upgrade_success")
-          .replace("{property}", "Property")
-          .replace("{level}", "2"),
+        formatTelegramText(
+          getText(ctx.dbUser.language, "property_upgrade_success"),
+          {
+            property: "Property",
+            level: "2",
+          },
+        ),
       );
     }
 

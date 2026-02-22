@@ -2,6 +2,7 @@ import type { BotContextWithLanguage } from "@/types";
 import { getText } from "@/i18n";
 import { getAdminPanelKeyboard } from "@/keyboards/admin";
 import { getUserStats } from "@/services/admin";
+import { formatTelegramText } from "@/utils/telegram-format";
 
 /**
  * Displays the admin panel with system statistics.
@@ -14,11 +15,15 @@ export async function showAdminPanel(
 ): Promise<void> {
   const stats = await getUserStats();
 
-  const message = getText(ctx.dbUser.language, "admin_stats_text")
-    .replace("{totalUsers}", String(stats.totalUsers))
-    .replace("{totalBalance}", String(stats.totalBalance))
-    .replace("{pendingWithdrawals}", String(stats.pendingWithdrawals))
-    .replace("{totalWithdrawals}", String(stats.totalWithdrawals));
+  const message = formatTelegramText(
+    getText(ctx.dbUser.language, "admin_stats_text"),
+    {
+      totalUsers: String(stats.totalUsers),
+      totalBalance: String(stats.totalBalance),
+      pendingWithdrawals: String(stats.pendingWithdrawals),
+      totalWithdrawals: String(stats.totalWithdrawals),
+    },
+  );
 
   await ctx.reply(message, {
     parse_mode: "Markdown",

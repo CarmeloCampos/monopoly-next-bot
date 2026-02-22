@@ -11,6 +11,7 @@ import {
   type PropertyColor,
 } from "@/constants/properties";
 import { PROPERTY_IMAGES, SERVICE_IMAGES } from "@/constants/images";
+import { formatTelegramText } from "@/utils/telegram-format";
 
 const COLOR_EMOJIS: Record<PropertyColor, string> = {
   brown: "🟤",
@@ -146,26 +147,42 @@ export function buildPropertyDetailMessage(
 
   // Add progress indicator if available
   if (progressInfo) {
-    const progressText = getText(language, "property_progress")
-      .replace("{current}", String(progressInfo.currentIndex + 1))
-      .replace("{total}", String(progressInfo.totalProperties));
+    const progressText = formatTelegramText(
+      getText(language, "property_progress"),
+      {
+        current: String(progressInfo.currentIndex + 1),
+        total: String(progressInfo.totalProperties),
+      },
+    );
     message += `${progressText}\n`;
 
-    const setProgressText = getText(language, "property_set_progress")
-      .replace("{color}", colorName)
-      .replace("{owned}", String(progressInfo.colorOwned))
-      .replace("{total}", String(progressInfo.colorTotal))
-      .replace("{minLevel}", String(progressInfo.colorMinLevel));
+    const setProgressText = formatTelegramText(
+      getText(language, "property_set_progress"),
+      {
+        color: colorName,
+        owned: String(progressInfo.colorOwned),
+        total: String(progressInfo.colorTotal),
+        minLevel: String(progressInfo.colorMinLevel),
+      },
+    );
     message += `${setProgressText}\n\n`;
   }
 
-  message +=
-    `${getText(language, "property_color_label")}: ${colorEmoji} ${colorName}\n` +
-    `${getText(language, "property_level").replace("{level}", String(property.level))}\n` +
-    `${getText(language, "property_hourly_income").replace("{income}", hourlyIncome.toFixed(2))}\n` +
-    `${getText(language, "property_monthly_income").replace("{income}", monthlyIncome.toFixed(0))}\n` +
-    `${getText(language, "property_accumulated").replace("{amount}", property.accumulated_unclaimed.toFixed(2))}\n\n` +
-    `${getText(language, "property_last_updated").replace("{time}", lastUpdated)}`;
+  message += `${getText(
+    language,
+    "property_color_label",
+  )}: ${colorEmoji} ${colorName}\n${formatTelegramText(
+    getText(language, "property_level"),
+    { level: String(property.level) },
+  )}\n${formatTelegramText(getText(language, "property_hourly_income"), {
+    income: hourlyIncome.toFixed(2),
+  })}\n${formatTelegramText(getText(language, "property_monthly_income"), {
+    income: String(monthlyIncome.toFixed(0)),
+  })}\n${formatTelegramText(getText(language, "property_accumulated"), {
+    amount: property.accumulated_unclaimed.toFixed(2),
+  })}\n\n${formatTelegramText(getText(language, "property_last_updated"), {
+    time: lastUpdated,
+  })}`;
 
   return message;
 }

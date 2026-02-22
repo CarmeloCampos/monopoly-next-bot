@@ -11,6 +11,8 @@ import { info, warn } from "@/utils/logger";
 import { env } from "@/config/env";
 import { getCurrencyDisplayName } from "@/services/withdrawal";
 import { buildUserDisplayName } from "@/utils/user-display";
+import { formatTelegramText } from "@/utils/telegram-format";
+import { sendMarkdownSafe } from "@/utils/telegram-send";
 
 export async function sendReferralNotification(
   telegram: Telegram,
@@ -76,16 +78,17 @@ export async function notifyAdminsNewWithdrawal(
 
   for (const adminId of adminIds) {
     try {
-      const message = getText(
-        DEFAULT_LANGUAGE,
-        "admin_new_withdrawal_notification",
-      )
-        .replace("{user}", userDisplayName)
-        .replace("{amount}", String(withdrawal.amount))
-        .replace("{currency}", currencyDisplay)
-        .replace("{wallet}", withdrawal.walletAddress);
+      const message = formatTelegramText(
+        getText(DEFAULT_LANGUAGE, "admin_new_withdrawal_notification"),
+        {
+          user: userDisplayName,
+          amount: String(withdrawal.amount),
+          currency: currencyDisplay,
+          wallet: withdrawal.walletAddress,
+        },
+      );
 
-      await telegram.sendMessage(adminId, message, { parse_mode: "Markdown" });
+      await sendMarkdownSafe(telegram, adminId, message);
 
       info("Admin notification sent for new withdrawal", {
         adminId,
