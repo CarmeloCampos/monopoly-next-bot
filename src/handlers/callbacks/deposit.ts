@@ -53,6 +53,7 @@ async function showDepositMenu(
     ),
     {
       reply_markup: getDepositMenuKeyboard(ctx.dbUser.language),
+      parse_mode: "Markdown",
     },
   );
 }

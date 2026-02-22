@@ -83,6 +83,7 @@ export async function handleMinigameSelection(
       )}`,
       {
         reply_markup: getDicePickKeyboard(dbUser.language),
+        parse_mode: "Markdown",
       },
     );
   } else {
@@ -109,6 +110,7 @@ export async function handleMinigameSelection(
             ],
           ],
         },
+        parse_mode: "Markdown",
       },
     );
   }
@@ -150,6 +152,7 @@ export async function handleDiceNumberPick(
           ],
         ],
       },
+      parse_mode: "Markdown",
     },
   );
 }
