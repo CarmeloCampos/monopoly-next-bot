@@ -132,23 +132,20 @@ async function showUnlockedProperty(
   const cost1 = getPropertyCost(itemIndex, 1);
   const income1 = getPropertyIncome(itemIndex, 1);
 
+  const fullPropertyMessage = buildFullPropertyMessage(
+    dbUser.language,
+    propertyName,
+    color,
+    { itemIndex, cost1, income1 },
+  );
+
   const message =
     roll !== undefined
-      ? formatTelegramText(
-          getText(dbUser.language, "board_rolled_property_simple"),
-          {
-            roll: String(roll),
-            property: propertyName,
-            color,
-            cost: String(cost1 ?? 0),
-            income: income1 ? String(income1) : "0",
-          },
-        )
-      : buildFullPropertyMessage(dbUser.language, propertyName, color, {
-          itemIndex,
-          cost1,
-          income1,
-        });
+      ? `${formatTelegramText(
+          getText(dbUser.language, "board_rolled_property_full_header"),
+          { roll: String(roll) },
+        )}\n\n${fullPropertyMessage}`
+      : fullPropertyMessage;
 
   const imageUrl = getPropertyImageUrl(itemIndex, 1);
 
@@ -218,16 +215,22 @@ async function showUnlockedService(
   const serviceName = getText(dbUser.language, service.nameKey);
   const boostText = `${service.boostPercentage}%`;
 
-  const messageKey =
-    roll !== undefined ? "board_rolled_service" : "board_unlocked_service";
-  const message = buildServiceMessage(
-    dbUser.language,
-    messageKey,
-    serviceName,
-    service.cost,
-    boostText,
-    roll,
+  const fullServiceMessage = formatTelegramText(
+    getText(dbUser.language, "board_unlocked_service"),
+    {
+      service: serviceName,
+      cost: String(service.cost),
+      boost: boostText,
+    },
   );
+
+  const message =
+    roll !== undefined
+      ? `${formatTelegramText(
+          getText(dbUser.language, "board_rolled_service_full_header"),
+          { roll: String(roll) },
+        )}\n\n${fullServiceMessage}`
+      : fullServiceMessage;
 
   const imageUrl = getServiceImageUrl(itemIndex);
 
@@ -240,25 +243,4 @@ async function showUnlockedService(
   });
 
   await sendBackButton(ctx);
-}
-
-function buildServiceMessage(
-  language: Language,
-  messageKey: string,
-  serviceName: string,
-  cost: number,
-  boostText: string,
-  roll?: number,
-): string {
-  const replacements: { [key: string]: string } = {
-    service: serviceName,
-    cost: String(cost),
-    boost: boostText,
-  };
-
-  if (roll !== undefined) {
-    replacements["roll"] = String(roll);
-  }
-
-  return formatTelegramText(getText(language, messageKey), replacements);
 }

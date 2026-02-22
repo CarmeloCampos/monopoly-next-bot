@@ -143,11 +143,13 @@ const locales: Locales = {
     property_set_progress: "🎯 {color}: {owned}/{total} (уровень {minLevel})",
     welcome_existing_user: "👋 Добро пожаловать в {botName}!",
     board_roll_dice: "🎲 Бросить Кубик",
-    board_view_current: "👁️ Посмотреть Свойство",
+    board_view_current: "👁️ Показать текущее",
     board_welcome:
       "🎲 Добро пожаловать на доску!\n\nБросьте кубик, чтобы открыть новые свойства и услуги.",
     board_rolled_property: "🎲 Вы выбросили {roll} и открыли: {property}!",
     board_rolled_service: "🎲 Вы выбросили {roll} и открыли: {service}!",
+    board_rolled_property_full_header: "🎲 Вы выбросили {roll} и открыли:",
+    board_rolled_service_full_header: "🎲 Вы выбросили {roll} и открыли:",
     board_rolled_property_simple:
       "🎲 Вы выбросили {roll} и открыли: {property}!\n\n🏠 {property}\n🎨 Цвет: {color}\n💰 Стоимость: {cost} MC\n💵 Доход: {income}/ч",
     color_brown: "Коричневый",
@@ -499,11 +501,13 @@ const locales: Locales = {
     welcome_existing_user: "👋 Welcome back to {botName}!",
 
     board_roll_dice: "🎲 Roll Dice",
-    board_view_current: "👁️ View Property",
+    board_view_current: "👁️ View Current",
     board_welcome:
       "🎲 Welcome to Board!\n\nRoll dice to discover new properties and services.",
     board_rolled_property: "🎲 You rolled a {roll} and discovered: {property}!",
     board_rolled_service: "🎲 You rolled a {roll} and discovered: {service}!",
+    board_rolled_property_full_header: "🎲 You rolled a {roll} and discovered:",
+    board_rolled_service_full_header: "🎲 You rolled a {roll} and discovered:",
     board_rolled_property_simple:
       "🎲 You rolled a {roll} and discovered: {property}!\n\n🏠 {property}\n🎨 Color: {color}\n💰 Cost: {cost} MC\n💵 Income: {income}/h",
     color_brown: "Brown",
@@ -860,11 +864,13 @@ const locales: Locales = {
     property_set_progress: "🎯 {color}: {owned}/{total} (nivel {minLevel})",
     btn_buy: "✅ Comprar",
     board_roll_dice: "🎲 Tirar Dados",
-    board_view_current: "👁️ Ver Propiedad",
+    board_view_current: "👁️ Ver Actual",
     board_welcome:
       "🎲 ¡Bienvenido al Tablero!\n\nTira los dados para descubrir nuevas propiedades y servicios.",
     board_rolled_property: "🎲 ¡Sacaste un {roll} y descubriste: {property}!",
     board_rolled_service: "🎲 ¡Sacaste un {roll} y descubriste: {service}!",
+    board_rolled_property_full_header: "🎲 ¡Sacaste un {roll} y descubriste:",
+    board_rolled_service_full_header: "🎲 ¡Sacaste un {roll} y descubriste:",
     board_rolled_property_simple:
       "🎲 ¡Sacaste un {roll} y descubriste: {property}!\n\n🏠 {property}\n🎨 Color: {color}\n💰 Valor: {cost} MC\n💵 Genera: {income}/h",
     color_brown: "Marrón",
@@ -1225,11 +1231,13 @@ const locales: Locales = {
     property_set_progress: "🎯 {color}: {owned}/{total} (nível {minLevel})",
     welcome_existing_user: "👋 Bem-vindo ao {botName}!",
     board_roll_dice: "🎲 Lançar Dados",
-    board_view_current: "👁️ Ver Propriedade",
+    board_view_current: "👁️ Ver Atual",
     board_welcome:
       "🎲 Bem-vindo ao Tabuleiro!\n\nLance os dados para descobrir novas propriedades e serviços.",
     board_rolled_property: "🎲 Você tirou {roll} e descobriu: {property}!",
     board_rolled_service: "🎲 Você tirou {roll} e descobriu: {service}!",
+    board_rolled_property_full_header: "🎲 Você tirou um {roll} e descobriu:",
+    board_rolled_service_full_header: "🎲 Você tirou um {roll} e descobriu:",
     board_rolled_property_simple:
       "🎲 Você tirou {roll} e descobriu: {property}!\n\n🏠 {property}\n🎨 Cor: {color}\n💰 Custo: {cost} MC\n💵 Renda: {income}/h",
     color_brown: "Marrom",
