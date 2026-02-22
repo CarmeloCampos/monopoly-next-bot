@@ -6,6 +6,7 @@ import {
   getAdminUsersKeyboard,
   getAdminWithdrawalActionsKeyboard,
   getAdminBackKeyboard,
+  getAdminPendingWithdrawalsKeyboard,
 } from "@/keyboards/admin";
 import { CALLBACK_DATA, CALLBACK_PATTERNS } from "@/constants/bot";
 import {
@@ -297,6 +298,17 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
 
 // showAdminPanel is now imported from @/utils/admin-helpers
 
+async function replyWithEmptyMessage(
+  ctx: BotContext,
+  message: string,
+): Promise<void> {
+  if (!hasLanguage(ctx)) return;
+  await ctx.answerCbQuery();
+  await ctx.editMessageText(message, {
+    reply_markup: getAdminBackKeyboard(ctx.dbUser.language),
+  });
+}
+
 async function showUsersList(ctx: BotContext, page: number): Promise<void> {
   if (!hasLanguage(ctx)) return;
 
@@ -304,10 +316,7 @@ async function showUsersList(ctx: BotContext, page: number): Promise<void> {
   const totalPages = Math.ceil(total / USERS_PAGE_SIZE);
 
   if (users.length === 0) {
-    await ctx.answerCbQuery();
-    await ctx.editMessageText("No users found", {
-      reply_markup: getAdminBackKeyboard(ctx.dbUser.language),
-    });
+    await replyWithEmptyMessage(ctx, "No users found");
     return;
   }
 
@@ -342,10 +351,7 @@ async function showTopUsers(ctx: BotContext): Promise<void> {
   const users = await getTopUsersByBalance(20);
 
   if (users.length === 0) {
-    await ctx.answerCbQuery();
-    await ctx.editMessageText("No users found", {
-      reply_markup: getAdminBackKeyboard(ctx.dbUser.language),
-    });
+    await replyWithEmptyMessage(ctx, "No users found");
     return;
   }
 
@@ -414,10 +420,15 @@ async function showPendingWithdrawals(ctx: BotContext): Promise<void> {
 
   const message = `${getText(ctx.dbUser.language, "admin_pending_withdrawals_title")}\n\n${items}`;
 
+  const withdrawalIds = withdrawals.map((w) => w.id);
+
   await ctx.answerCbQuery();
   await ctx.editMessageText(message, {
     parse_mode: "Markdown",
-    reply_markup: getAdminBackKeyboard(ctx.dbUser.language),
+    reply_markup: getAdminPendingWithdrawalsKeyboard(
+      ctx.dbUser.language,
+      withdrawalIds,
+    ),
   });
 }
 

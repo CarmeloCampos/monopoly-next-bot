@@ -107,3 +107,28 @@ export function getAdminBackKeyboard(
     ],
   };
 }
+
+export function getAdminPendingWithdrawalsKeyboard(
+  language: MaybeOptional<Language>,
+  withdrawalIds: number[],
+): InlineKeyboardMarkup {
+  const rows: { text: string; callback_data: string }[][] = [];
+
+  for (const id of withdrawalIds) {
+    rows.push([
+      {
+        text: `👁 #${id}`,
+        callback_data: `withdrawal_admin_view_${id}`,
+      },
+    ]);
+  }
+
+  rows.push([
+    {
+      text: getText(language, "btn_back"),
+      callback_data: CALLBACK_DATA.ADMIN_PANEL,
+    },
+  ]);
+
+  return { inline_keyboard: rows };
+}
