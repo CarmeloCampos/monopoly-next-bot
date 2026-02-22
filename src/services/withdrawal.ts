@@ -200,6 +200,22 @@ export async function getWithdrawalById(
   }
 }
 
+async function getPendingWithdrawalOrError(
+  withdrawalId: WithdrawalId,
+): Promise<{ withdrawal: SelectWithdrawal | null; error?: string }> {
+  const withdrawal = await getWithdrawalById(withdrawalId);
+
+  if (!withdrawal) {
+    return { withdrawal: null, error: "Withdrawal not found" };
+  }
+
+  if (withdrawal.status !== "pending") {
+    return { withdrawal: null, error: "Withdrawal is not pending" };
+  }
+
+  return { withdrawal };
+}
+
 export interface ProcessWithdrawalInput {
   withdrawalId: WithdrawalId;
   adminId: TelegramId;
@@ -212,14 +228,11 @@ export async function processWithdrawal(
   const { withdrawalId, adminId, transactionHash } = input;
 
   try {
-    const withdrawal = await getWithdrawalById(withdrawalId);
+    const { withdrawal, error } =
+      await getPendingWithdrawalOrError(withdrawalId);
 
-    if (!withdrawal) {
-      return { success: false, error: "Withdrawal not found" };
-    }
-
-    if (withdrawal.status !== "pending") {
-      return { success: false, error: "Withdrawal is not pending" };
+    if (error || !withdrawal) {
+      return { success: false, error };
     }
 
     await db
@@ -261,14 +274,11 @@ export async function cancelWithdrawal(
   const { withdrawalId, refund = false } = input;
 
   try {
-    const withdrawal = await getWithdrawalById(withdrawalId);
+    const { withdrawal, error } =
+      await getPendingWithdrawalOrError(withdrawalId);
 
-    if (!withdrawal) {
-      return { success: false, error: "Withdrawal not found" };
-    }
-
-    if (withdrawal.status !== "pending") {
-      return { success: false, error: "Withdrawal is not pending" };
+    if (error || !withdrawal) {
+      return { success: false, error };
     }
 
     await db.transaction(async (tx) => {

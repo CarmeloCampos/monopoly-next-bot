@@ -376,7 +376,7 @@ export async function processIpnPayment(
  * Check and update status of a single pending deposit by querying NOWPayments API
  * Returns the result of the update attempt
  */
-export async function checkAndUpdateDepositStatus(
+async function checkAndUpdateDepositStatus(
   deposit: SelectDeposit,
   telegram?: Telegram,
 ): Promise<{ success: boolean; error?: string }> {

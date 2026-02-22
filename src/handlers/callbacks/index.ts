@@ -6,6 +6,7 @@ import {
   isLanguage,
   isPropertyIndex,
   asMonopolyCoins,
+  type Language,
 } from "@/types";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -47,6 +48,40 @@ import { registerDepositCallbacks } from "./deposit";
 
 /** Sentinel value indicating an item was not found in an array */
 const NOT_FOUND_INDEX = -1;
+
+/**
+ * Completes user onboarding by checking/giving starter property and sending welcome message
+ */
+async function completeUserOnboarding(
+  ctx: BotContext,
+  language: Language,
+): Promise<void> {
+  const { dbUser } = ctx;
+  if (!dbUser) return;
+
+  const hasStarterProperty = await userHasProperty(
+    dbUser.telegram_id,
+    STARTER_PROPERTY_INDEX,
+  );
+
+  if (!hasStarterProperty) {
+    await buyProperty({
+      userId: dbUser.telegram_id,
+      propertyIndex: STARTER_PROPERTY_INDEX,
+      level: DEFAULT_PROPERTY_LEVEL,
+      cost: asMonopolyCoins(0),
+    });
+  }
+
+  const welcomeMsg = hasStarterProperty
+    ? buildWelcomeExistingUserMessage(language)
+    : getText(language, "welcome_new_user");
+
+  await ctx.reply(welcomeMsg, {
+    parse_mode: "Markdown",
+    reply_markup: getMainMenuKeyboard(language, ctx.isAdmin),
+  });
+}
 
 export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
   bot.action(CALLBACK_PATTERNS.LANGUAGE, async (ctx: BotContext) => {
@@ -95,27 +130,8 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       await ctx.answerCbQuery();
       await ctx.reply(getText(langValue, "language_selected"));
 
-      const hasStarterProperty = await userHasProperty(
-        dbUser.telegram_id,
-        STARTER_PROPERTY_INDEX,
-      );
+      await completeUserOnboarding(ctx, langValue);
 
-      if (!hasStarterProperty) {
-        await buyProperty({
-          userId: dbUser.telegram_id,
-          propertyIndex: STARTER_PROPERTY_INDEX,
-          level: DEFAULT_PROPERTY_LEVEL,
-          cost: asMonopolyCoins(0),
-        });
-      }
-
-      const welcomeMsg = hasStarterProperty
-        ? buildWelcomeExistingUserMessage(langValue)
-        : getText(langValue, "welcome_new_user");
-      await ctx.reply(welcomeMsg, {
-        parse_mode: "Markdown",
-        reply_markup: getMainMenuKeyboard(langValue, ctx.isAdmin),
-      });
       await ctx.deleteMessage();
     } catch (err) {
       error("Error updating language", {
@@ -166,27 +182,8 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
       await ctx.reply(getText(dbUser.language, "terms_accepted"));
       await ctx.reply(getText(dbUser.language, "language_selected"));
 
-      const hasStarterProperty = await userHasProperty(
-        dbUser.telegram_id,
-        STARTER_PROPERTY_INDEX,
-      );
-
-      if (!hasStarterProperty) {
-        await buyProperty({
-          userId: dbUser.telegram_id,
-          propertyIndex: STARTER_PROPERTY_INDEX,
-          level: DEFAULT_PROPERTY_LEVEL,
-          cost: asMonopolyCoins(0),
-        });
-      }
-
-      const welcomeMsg = hasStarterProperty
-        ? buildWelcomeExistingUserMessage(dbUser.language)
-        : getText(dbUser.language, "welcome_new_user");
-      await ctx.reply(welcomeMsg, {
-        parse_mode: "Markdown",
-        reply_markup: getMainMenuKeyboard(dbUser.language, ctx.isAdmin),
-      });
+      const langValue = dbUser.language ?? "en";
+      await completeUserOnboarding(ctx, langValue);
 
       if (ctx.callbackQuery && "message" in ctx.callbackQuery) {
         await ctx.deleteMessage();
