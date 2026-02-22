@@ -1,52 +1,15 @@
 import { generateEarningsForAllUsers } from "./generate-earnings";
 import { processIpnPayment, checkAllPendingDeposits } from "@/services/deposit";
 import { info, error } from "@/utils/logger";
-import type {
-  NowPaymentsIpnPayload,
-  NowPaymentsStatus,
-} from "@/types/nowpayments";
+import {
+  isObject,
+  isString,
+  isNumber,
+  isNowPaymentsStatus,
+} from "@/utils/nowpayments-validation";
+import type { NowPaymentsIpnPayload } from "@/types/nowpayments";
 import { Telegraf } from "telegraf";
 import config from "@/config";
-
-/**
- * Type guard for checking if a value is a valid object
- */
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-/**
- * Type guard for checking if a value is a valid string
- */
-function isString(value: unknown): value is string {
-  return typeof value === "string";
-}
-
-/**
- * Type guard for checking if a value is a valid number
- */
-function isNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
-}
-
-/**
- * Type guard for checking if a value is a valid NowPaymentsStatus
- */
-function isNowPaymentsStatus(value: unknown): value is NowPaymentsStatus {
-  if (!isString(value)) return false;
-  const validStatuses = [
-    "waiting",
-    "confirming",
-    "confirmed",
-    "sending",
-    "partially_paid",
-    "finished",
-    "failed",
-    "refunded",
-    "expired",
-  ];
-  return validStatuses.includes(value);
-}
 
 /**
  * Validates and returns NowPayments IPN payload

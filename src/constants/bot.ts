@@ -73,12 +73,6 @@ export const WITHDRAWAL_CURRENCIES = [
   "usdt_tron",
   "monero",
 ] as const;
-export const WITHDRAWAL_STATUSES = [
-  "pending",
-  "processed",
-  "cancelled",
-  "refunded",
-] as const;
 
 export const AVAILABLE_CRYPTO_CURRENCIES = [
   { code: "btc", name: "Bitcoin", symbol: "BTC", network: "Bitcoin" },

@@ -4,54 +4,18 @@
 
 import { env } from "@/config/env";
 import { error, info } from "@/utils/logger";
+import {
+  isObject,
+  isString,
+  isNumber,
+  isNowPaymentsStatus,
+} from "@/utils/nowpayments-validation";
 import type {
   NowPaymentsCreatePaymentRequest,
   NowPaymentsCreatePaymentResponse,
   NowPaymentsIpnPayload,
   NowPaymentsPaymentStatus,
 } from "@/types/nowpayments";
-
-/**
- * Type guard for checking if a value is a valid object
- */
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-/**
- * Type guard for checking if a value is a valid string
- */
-function isString(value: unknown): value is string {
-  return typeof value === "string";
-}
-
-/**
- * Type guard for checking if a value is a valid number
- */
-function isNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value);
-}
-
-/**
- * Type guard for checking if a value is a valid NowPaymentsStatus
- */
-function isNowPaymentsStatus(
-  value: unknown,
-): value is import("@/types/nowpayments").NowPaymentsStatus {
-  if (!isString(value)) return false;
-  const validStatuses = [
-    "waiting",
-    "confirming",
-    "confirmed",
-    "sending",
-    "partially_paid",
-    "finished",
-    "failed",
-    "refunded",
-    "expired",
-  ];
-  return validStatuses.includes(value);
-}
 
 /**
  * Validates the payment response from NOWPayments API
@@ -118,6 +82,25 @@ function validatePaymentResponse(
 
 const { NOWPAYMENTS_API_KEY, NOWPAYMENTS_API_URL } = env;
 
+async function parseApiError(
+  response: Response,
+  context: string,
+): Promise<never> {
+  const errorData = await response.json();
+  const errorMessage =
+    typeof errorData === "object" &&
+    errorData !== null &&
+    "message" in errorData &&
+    typeof errorData.message === "string"
+      ? errorData.message
+      : response.statusText;
+  error(`NOWPayments API error ${context}`, {
+    status: response.status,
+    message: errorMessage,
+  });
+  throw new Error(`NOWPayments API error: ${errorMessage}`);
+}
+
 /**
  * Create a new payment with NOWPayments
  */
@@ -142,20 +125,7 @@ export async function createNowPaymentsPayment(
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    const errorMessage =
-      typeof errorData === "object" &&
-      errorData !== null &&
-      "message" in errorData &&
-      typeof errorData.message === "string"
-        ? errorData.message
-        : response.statusText;
-    error("NOWPayments API error", {
-      status: response.status,
-      message: errorMessage,
-      orderId: request.order_id,
-    });
-    throw new Error(`NOWPayments API error: ${errorMessage}`);
+    await parseApiError(response, "creating payment");
   }
 
   const rawData = await response.json();
@@ -238,20 +208,7 @@ export async function getPaymentStatus(
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    const errorMessage =
-      typeof errorData === "object" &&
-      errorData !== null &&
-      "message" in errorData &&
-      typeof errorData.message === "string"
-        ? errorData.message
-        : response.statusText;
-    error("NOWPayments API error fetching payment status", {
-      status: response.status,
-      message: errorMessage,
-      paymentId,
-    });
-    throw new Error(`NOWPayments API error: ${errorMessage}`);
+    await parseApiError(response, "fetching payment status");
   }
 
   const rawData = await response.json();
