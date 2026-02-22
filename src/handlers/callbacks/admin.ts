@@ -32,6 +32,11 @@ import {
   notifyUserWithdrawalProcessed,
   notifyUserWithdrawalCancelled,
 } from "@/utils/withdrawal-notifications";
+import {
+  setAdminState,
+  getAdminState,
+  clearAdminState,
+} from "@/services/admin-state";
 
 const USERS_PAGE_SIZE = 20;
 
@@ -164,10 +169,10 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
         return;
       }
 
-      ctx.adminState = {
+      setAdminState(ctx.dbUser.telegram_id, {
         step: "process_hash",
         withdrawalId,
-      };
+      });
 
       await ctx.answerCbQuery();
       await ctx.editMessageText(
@@ -228,25 +233,19 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
   );
 
   // Handle admin text input (transaction hash)
-  bot.on("text", async (ctx: BotContext, next) => {
-    if (
-      !ctx.adminState ||
-      !hasDbUser(ctx) ||
-      !hasLanguage(ctx) ||
-      !ctx.isAdmin ||
-      !ctx.message
-    ) {
-      return next();
+  bot.on("text", async (ctx) => {
+    if (!hasDbUser(ctx) || !hasLanguage(ctx) || !ctx.isAdmin || !ctx.message) {
+      return;
     }
 
-    const { adminState } = ctx;
+    const adminState = getAdminState(ctx.dbUser.telegram_id);
     const text = "text" in ctx.message ? ctx.message.text : undefined;
 
     if (!text) {
-      return next();
+      return;
     }
 
-    if (adminState.step === "process_hash" && adminState.withdrawalId) {
+    if (adminState?.step === "process_hash" && adminState.withdrawalId) {
       const { withdrawalId } = adminState;
       const processResult = await processWithdrawal({
         withdrawalId,
@@ -254,7 +253,7 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
         transactionHash: text,
       });
 
-      ctx.adminState = undefined;
+      clearAdminState(ctx.dbUser.telegram_id);
 
       if (processResult.success) {
         await ctx.reply(

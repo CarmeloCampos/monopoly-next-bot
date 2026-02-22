@@ -30,6 +30,7 @@ import { handleMinigames, handleBetAmount } from "./minigames-menu";
 import { isAwaitingBet } from "@/services/minigame-state";
 import { isInWithdrawalFlow } from "@/services/withdrawal-state";
 import { isInDepositFlow } from "@/services/deposit-state";
+import { isInAdminFlow } from "@/services/admin-state";
 import { getReferralStats } from "@/services/referral";
 import { showAdminPanel } from "@/utils/admin-helpers";
 import { getDepositMenuKeyboard } from "@/keyboards/deposit";
@@ -109,6 +110,11 @@ function registerMenuHandlers(bot: Telegraf<BotContext>): void {
 
     // Skip if in deposit flow - let deposit handler handle it
     if (isInDepositFlow(dbUser.telegram_id)) {
+      return next();
+    }
+
+    // Skip if in admin flow - let admin handler handle it
+    if (isInAdminFlow(dbUser.telegram_id)) {
       return next();
     }
 
