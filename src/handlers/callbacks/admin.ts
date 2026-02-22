@@ -233,16 +233,16 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
   );
 
   // Handle admin text input (transaction hash)
-  bot.on("text", async (ctx) => {
+  bot.on("text", async (ctx, next) => {
     if (!hasDbUser(ctx) || !hasLanguage(ctx) || !ctx.isAdmin || !ctx.message) {
-      return;
+      return next();
     }
 
     const adminState = getAdminState(ctx.dbUser.telegram_id);
     const text = "text" in ctx.message ? ctx.message.text : undefined;
 
     if (!text) {
-      return;
+      return next();
     }
 
     if (adminState?.step === "process_hash" && adminState.withdrawalId) {
@@ -285,6 +285,8 @@ export const registerAdminCallbacks = (bot: Telegraf<BotContext>): void => {
       } else {
         await ctx.reply(processResult.error ?? "Error");
       }
+    } else {
+      return next();
     }
   });
 
