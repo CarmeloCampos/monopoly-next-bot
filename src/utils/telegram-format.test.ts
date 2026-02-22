@@ -36,4 +36,11 @@ describe("formatTelegramText", () => {
     const result = formatTelegramText("Hello {name}!", { other: "value" });
     expect(result).toBe("Hello {name}!");
   });
+
+  it("should not escape parentheses in replacement values", () => {
+    const result = formatTelegramText("Currency: {currency}", {
+      currency: "USDT (TRON)",
+    });
+    expect(result).toBe("Currency: USDT (TRON)");
+  });
 });

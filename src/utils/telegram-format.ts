@@ -5,12 +5,14 @@
  * For Markdown legacy, only these characters need escaping:
  * - `_` *italic*
  * - `*` *bold*
- * - `[` `]` `(` `)` [links](url)
  * - `` ` `` `code`
+ * - `[` `]` (only when part of links)
  * - `\` escape character
+ *
+ * NOTE: `()` do NOT need escaping in Telegram Markdown legacy.
  */
 
-const MARKDOWN_LEGACY_ESCAPE_REGEX = new RegExp("([_*\\[\\]\\(\\)\\\\`])", "g");
+const MARKDOWN_LEGACY_ESCAPE_REGEX = new RegExp("([_*\\[\\]\\\\`])", "g");
 
 function escapeTelegramMarkdown(text: string): string {
   return text.replace(MARKDOWN_LEGACY_ESCAPE_REGEX, "\\$1");
