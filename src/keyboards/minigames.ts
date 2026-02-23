@@ -1,7 +1,7 @@
 import type { InlineKeyboardMarkup } from "telegraf/types";
 import type { Language, MaybeOptional } from "@/types";
 import { getText } from "@/i18n";
-import { BET_ADJUSTMENTS } from "@/constants/minigames";
+import { BET_ADJUSTMENTS, BET_MULTIPLIERS } from "@/constants/minigames";
 
 /**
  * Generates the minigame selection keyboard
@@ -92,10 +92,27 @@ export function getQuickPlayKeyboard(
     };
   });
 
+  const multiplierButtons = BET_MULTIPLIERS.map((mult) => {
+    let label: string;
+    let callbackData: string;
+    if (mult === 0.5) {
+      label = "÷2";
+      callbackData = "bet_multiply_0.5";
+    } else {
+      label = `×${mult}`;
+      callbackData = `bet_multiply_${mult}`;
+    }
+    return {
+      text: label,
+      callback_data: callbackData,
+    };
+  });
+
   return {
     inline_keyboard: [
+      adjustButtons,
+      multiplierButtons,
       [
-        ...adjustButtons.slice(0, 2),
         {
           text: getText(language, "minigame_current_bet").replace(
             "{amount}",
@@ -103,7 +120,6 @@ export function getQuickPlayKeyboard(
           ),
           callback_data: "bet_adjust_0",
         },
-        ...adjustButtons.slice(2),
       ],
       [
         {

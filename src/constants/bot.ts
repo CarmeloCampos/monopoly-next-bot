@@ -52,6 +52,7 @@ export const CALLBACK_PATTERNS = {
   MINIGAME_SELECT: /^minigame_(dice|darts|basketball|football|bowling|slots)$/,
   MINIGAME_DICE_PICK: /^dice_pick_([1-6])$/,
   MINIGAME_BET_ADJUST: /^bet_adjust_(-?\d+)$/,
+  MINIGAME_BET_MULTIPLY: /^bet_multiply_(0\.5|2|4|6)$/,
   WITHDRAWAL_CURRENCY: /^withdrawal_currency_(bitcoin|usdt_tron|monero)$/,
   WITHDRAWAL_HISTORY: /^withdrawal_history_(\d+)$/,
   WITHDRAWAL_ADMIN_VIEW: /^withdrawal_admin_view_(\d+)$/,

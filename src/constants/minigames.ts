@@ -81,19 +81,19 @@ export const MINIGAME_MULTIPLIERS: Record<MinigameType, MinigameMultiplier[]> =
     dice: [
       {
         winThreshold: undefined,
-        multiplier: 6,
+        multiplier: 5,
         descriptionKey: "minigame_dice_multiplier",
       },
     ],
     darts: [
       {
         winThreshold: [6],
-        multiplier: 5,
+        multiplier: 4,
         descriptionKey: "minigame_darts_center",
       },
       {
         winThreshold: [5],
-        multiplier: 2,
+        multiplier: 1,
         descriptionKey: "minigame_darts_second",
       },
     ],
@@ -106,32 +106,32 @@ export const MINIGAME_MULTIPLIERS: Record<MinigameType, MinigameMultiplier[]> =
     ],
     football: [
       {
-        winThreshold: [3, 4, 5],
-        multiplier: 5,
+        winThreshold: [4, 5],
+        multiplier: 2,
         descriptionKey: "minigame_football_goal",
       },
     ],
     bowling: [
       {
         winThreshold: [6],
-        multiplier: 6,
+        multiplier: 4,
         descriptionKey: "minigame_bowling_strike",
       },
       {
         winThreshold: [5],
-        multiplier: 2,
+        multiplier: 1,
         descriptionKey: "minigame_bowling_spare",
       },
     ],
     slots: [
       {
         winThreshold: [64],
-        multiplier: 100,
+        multiplier: 20,
         descriptionKey: "minigame_slots_jackpot",
       },
       {
         winThreshold: [1, 8, 15, 22, 29, 36, 43, 50, 57],
-        multiplier: 10,
+        multiplier: 4,
         descriptionKey: "minigame_slots_triple",
       },
     ],
@@ -145,3 +145,5 @@ export const BET_LIMITS = {
 export const ANIMATION_DELAY_MS = 3000 as const;
 
 export const BET_ADJUSTMENTS = [-10, -5, 5, 10] as const;
+
+export const BET_MULTIPLIERS = [0.5, 2, 4, 6] as const;

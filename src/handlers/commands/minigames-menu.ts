@@ -276,13 +276,6 @@ async function processGameResult(
   } else {
     await ctx.reply(getText(ctx.dbUser.language, "minigame_result_lose"));
   }
-
-  const balanceMessage = getText(
-    ctx.dbUser.language,
-    "minigame_balance",
-  ).replace("{balance}", String(ctx.dbUser.balance + result.winnings));
-
-  await ctx.reply(balanceMessage);
 }
 
 /**
@@ -413,6 +406,40 @@ export async function handleBetAdjust(
       ),
     );
     return;
+  }
+
+  updateMinigameState(dbUser.telegram_id, {
+    betAmount: newBet,
+  });
+
+  await ctx.answerCbQuery();
+  await ctx.editMessageReplyMarkup(
+    getQuickPlayKeyboard(dbUser.language, newBet),
+  );
+}
+
+/**
+ * Handles bet multiplier requests from the quick play keyboard
+ * @param ctx - Bot context with language
+ * @param multiplier - Multiplier to apply to the current bet (0.5, 2, 4, 6)
+ */
+export async function handleBetMultiply(
+  ctx: BotContextWithLanguage,
+  multiplier: number,
+): Promise<void> {
+  const { dbUser } = ctx;
+  const gameState = getMinigameState(dbUser.telegram_id);
+
+  if (!gameState || gameState.phase !== "ready_to_play") {
+    await ctx.answerCbQuery("❌ No tienes un juego activo");
+    return;
+  }
+
+  const currentBet = gameState.betAmount ?? BET_LIMITS.min;
+  let newBet = Math.floor(currentBet * multiplier);
+
+  if (newBet < BET_LIMITS.min) {
+    newBet = BET_LIMITS.min;
   }
 
   updateMinigameState(dbUser.telegram_id, {

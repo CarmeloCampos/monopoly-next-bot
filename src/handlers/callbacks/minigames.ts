@@ -11,6 +11,7 @@ import {
   handleDiceNumberPick,
   handleMinigameCancel,
   handleBetAdjust,
+  handleBetMultiply,
   handleMinigameExit,
 } from "../commands/minigames-menu";
 
@@ -104,6 +105,37 @@ export const registerMinigameCallbacks = (bot: Telegraf<BotContext>): void => {
 
     await handleBetAdjust(ctx, adjustment);
   });
+
+  bot.action(
+    CALLBACK_PATTERNS.MINIGAME_BET_MULTIPLY,
+    async (ctx: BotContext) => {
+      if (!hasDbUser(ctx)) {
+        await answerUserNotFound(ctx);
+        return;
+      }
+
+      if (!hasLanguage(ctx)) return;
+
+      const result = extractCallbackMatch(
+        ctx,
+        CALLBACK_PATTERNS.MINIGAME_BET_MULTIPLY,
+      );
+      if (!result) {
+        await answerInvalidCallback(ctx);
+        return;
+      }
+
+      const [, multiplierStr] = result.match;
+      if (!multiplierStr) {
+        await answerInvalidCallback(ctx);
+        return;
+      }
+
+      const multiplier = Number.parseFloat(multiplierStr);
+
+      await handleBetMultiply(ctx, multiplier);
+    },
+  );
 
   bot.action(CALLBACK_DATA.MINIGAME_EXIT, async (ctx: BotContext) => {
     if (!hasDbUser(ctx)) {
