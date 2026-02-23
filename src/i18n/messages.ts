@@ -77,7 +77,7 @@ export function buildReferralDashboardMessage(
         String(stats.referralsByLevel[level]),
       )}`;
     })
-    .join("\n\n");
+    .join("\n");
 
   const bonusInfo = getText(language, "referral_bonus_info");
   const codeText = getText(language, "menu_referral_code").replace(
@@ -100,39 +100,27 @@ export function buildReferralDashboardMessage(
     const noReferrals = getText(language, "referral_no_referrals");
     return `${title}
 
-
 ${codeText}
-
 
 ${noReferrals}
 
-
 ${bonusInfo}
-
 
 ${lastUpdated}`;
   }
 
   return `${title}
 
-
 ${statsSection}
-
 ${statsTotal}
-
 ${statsEarnings}
 
-
 ${levelsSection}
-
 ${levelLines}
-
 
 ${codeText}
 
-
 ${bonusInfo}
-
 
 ${lastUpdated}`;
 }
