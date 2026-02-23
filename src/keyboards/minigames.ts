@@ -15,7 +15,6 @@ export function getMinigamesKeyboard(
     "dice",
     "darts",
     "basketball",
-    "football",
     "bowling",
     "slots",
   ] as const;

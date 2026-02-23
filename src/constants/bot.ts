@@ -49,7 +49,7 @@ export const CALLBACK_PATTERNS = {
   SERVICE_NAV: /^service_nav_(\d+)$/,
   BOARD_BUY_PROPERTY: /^board_buy_property_(\d+)$/,
   BOARD_BUY_SERVICE: /^board_buy_service_(\d+)$/,
-  MINIGAME_SELECT: /^minigame_(dice|darts|basketball|football|bowling|slots)$/,
+  MINIGAME_SELECT: /^minigame_(dice|darts|basketball|bowling|slots)$/,
   MINIGAME_DICE_PICK: /^dice_pick_([1-6])$/,
   MINIGAME_BET_ADJUST: /^bet_adjust_(-?\d+)$/,
   MINIGAME_BET_MULTIPLY: /^bet_multiply_(0\.5|2|4|6)$/,

@@ -4,11 +4,10 @@ export type MinigameType =
   | "dice"
   | "darts"
   | "basketball"
-  | "football"
   | "bowling"
   | "slots";
 
-export type DiceEmoji = "🎲" | "🎯" | "🏀" | "⚽" | "🎳" | "🎰";
+export type DiceEmoji = "🎲" | "🎯" | "🏀" | "🎳" | "🎰";
 
 interface MinigameConfig {
   emoji: DiceEmoji;
@@ -47,14 +46,6 @@ export const MINIGAMES: Record<MinigameType, MinigameConfig> = {
     type: "basketball",
     nameKey: "minigame_basketball",
     infoKey: "minigame_basketball_info",
-    minValue: 1,
-    maxValue: 5,
-  },
-  football: {
-    emoji: "⚽",
-    type: "football",
-    nameKey: "minigame_football",
-    infoKey: "minigame_football_info",
     minValue: 1,
     maxValue: 5,
   },
@@ -102,13 +93,6 @@ export const MINIGAME_MULTIPLIERS: Record<MinigameType, MinigameMultiplier[]> =
         winThreshold: [4, 5],
         multiplier: 2,
         descriptionKey: "minigame_basketball_score",
-      },
-    ],
-    football: [
-      {
-        winThreshold: [4, 5],
-        multiplier: 2,
-        descriptionKey: "minigame_football_goal",
       },
     ],
     bowling: [
