@@ -72,7 +72,7 @@ const locales: Locales = {
     referral_level_5: "└ Уровень 5: {count}",
     referral_no_referrals: "У вас пока нет рефералов",
     referral_bonus_info:
-      "💡 Заработок по уровням: L1: 100 MC | L2: 75 MC | L3: 50 MC | L4: 25 MC | L5: 10 MC",
+      "💡 Заработок по уровням:\nL1: 100 MC\nL2: 75 MC\nL3: 50 MC\nL4: 25 MC\nL5: 10 MC",
     referral_last_updated: "🕐 Обновлено: {time}",
     referral_btn_share: "🔗 Поделиться",
     referral_btn_history: "📜 История",
@@ -429,7 +429,7 @@ const locales: Locales = {
     referral_level_5: "└ Level 5: {count}",
     referral_no_referrals: "You have no referrals yet",
     referral_bonus_info:
-      "💡 Earnings per level: L1: 100 MC | L2: 75 MC | L3: 50 MC | L4: 25 MC | L5: 10 MC",
+      "💡 Earnings per level:\nL1: 100 MC\nL2: 75 MC\nL3: 50 MC\nL4: 25 MC\nL5: 10 MC",
     referral_last_updated: "🕐 Updated: {time}",
     referral_btn_share: "🔗 Share",
     referral_btn_history: "📜 History",
@@ -787,7 +787,7 @@ const locales: Locales = {
     referral_level_5: "└ Nivel 5: {count}",
     referral_no_referrals: "Aún no tienes referidos",
     referral_bonus_info:
-      "💡 Ganancias por nivel: L1: 100 MC | L2: 75 MC | L3: 50 MC | L4: 25 MC | L5: 10 MC",
+      "💡 Ganancias por nivel:\nL1: 100 MC\nL2: 75 MC\nL3: 50 MC\nL4: 25 MC\nL5: 10 MC",
     referral_last_updated: "🕐 Actualizado: {time}",
     referral_btn_share: "🔗 Compartir",
     referral_btn_history: "📜 Historial",
@@ -1154,7 +1154,7 @@ const locales: Locales = {
     referral_level_5: "└ Nível 5: {count}",
     referral_no_referrals: "Você ainda não tem indicações",
     referral_bonus_info:
-      "💡 Ganhos por nível: L1: 100 MC | L2: 75 MC | L3: 50 MC | L4: 25 MC | L5: 10 MC",
+      "💡 Ganhos por nível:\nL1: 100 MC\nL2: 75 MC\nL3: 50 MC\nL4: 25 MC\nL5: 10 MC",
     referral_last_updated: "🕐 Atualizado: {time}",
     referral_btn_share: "🔗 Compartilhar",
     referral_btn_history: "📜 Histórico",
