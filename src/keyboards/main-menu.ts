@@ -82,13 +82,26 @@ export function getLanguageKeyboard(): InlineKeyboardMarkup {
 
 export function getSettingsKeyboard(
   language: MaybeOptional<Language>,
+  rentReminderEnabled = true,
 ): InlineKeyboardMarkup {
+  const reminderEmoji = rentReminderEnabled ? "✅" : "❌";
+  const reminderText = getText(language, "settings_rent_reminder").replace(
+    "{status}",
+    reminderEmoji,
+  );
+
   return {
     inline_keyboard: [
       [
         {
           text: getText(language, "settings_language"),
           callback_data: "settings_language",
+        },
+      ],
+      [
+        {
+          text: reminderText,
+          callback_data: "settings_rent_reminder_toggle",
         },
       ],
       [

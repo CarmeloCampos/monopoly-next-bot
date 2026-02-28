@@ -36,12 +36,16 @@ const locales: Locales = {
     menu_settings: "⚙️ Настройки",
     menu_main: "🏠 Главное меню",
     settings_language: "🌐 Изменить язык",
+    settings_rent_reminder: "🔔 Напоминание о ренте {status}",
+    settings_rent_reminder_toggled: "🔔 Напоминание о ренте: {status}",
     settings_support: "💬 Поддержка",
     settings_channels: "📢 Каналы",
     channel_official: "Официальный канал",
     channel_community: "Сообщество",
     channel_news: "Новости",
     btn_back: "◀️ Назад",
+    rent_reminder_message:
+      "💰 У вас есть {amount} MC невостребованной ренты!\n\nНажмите, чтобы открыть свойства и забрать деньги.",
     welcome_new_user:
       "🎉 Добро пожаловать в {botName}!\n\nВы получили свою первую недвижимость: *Стартовая Квартира*\n\nНачните строить свою империю!",
     referral_bonus_received:
@@ -134,6 +138,8 @@ const locales: Locales = {
     property_accumulated: "💵 Накоплено: {amount} MC",
     property_claim_button: "💰 Получить Ренту",
     property_claim_success: "✅ Вы получили {amount} MC!",
+    property_claim_all_button: "💰 Забрать всё ({amount} MC)",
+    property_claim_all_success: "✅ Вы забрали {amount} MC с {count} объектов!",
     property_no_properties: "📭 У вас пока нет недвижимости",
     property_last_updated: "🕐 Обновлено: {time}",
     property_hours_ago: "{hours} ч. назад",
@@ -394,12 +400,16 @@ const locales: Locales = {
     menu_settings: "⚙️ Settings",
     menu_main: "🏠 Main Menu",
     settings_language: "🌐 Change Language",
+    settings_rent_reminder: "🔔 Rent Reminder {status}",
+    settings_rent_reminder_toggled: "🔔 Rent Reminder: {status}",
     settings_support: "💬 Support",
     settings_channels: "📢 Channels",
     channel_official: "Official Channel",
     channel_community: "Community",
     channel_news: "News",
     btn_back: "◀️ Back",
+    rent_reminder_message:
+      "💰 You have {amount} MC in unclaimed rent!\n\nTap to open your properties and collect your earnings.",
     welcome_new_user:
       "🎉 Welcome to {botName}!\n\nYou received your first property: *Startup Apartment*\n\nStart building your empire!",
     referral_bonus_received:
@@ -491,6 +501,9 @@ const locales: Locales = {
     property_accumulated: "💵 Accumulated: {amount} MC",
     property_claim_button: "💰 Claim Rent",
     property_claim_success: "✅ You claimed {amount} MC!",
+    property_claim_all_button: "💰 Claim All ({amount} MC)",
+    property_claim_all_success:
+      "✅ You claimed {amount} MC from {count} properties!",
     property_no_properties: "📭 You have no properties yet",
     property_last_updated: "🕐 Updated: {time}",
     property_hours_ago: "{hours}h ago",
@@ -751,12 +764,16 @@ const locales: Locales = {
     menu_settings: "⚙️ Configuración",
     menu_main: "🏠 Menú Principal",
     settings_language: "🌐 Cambiar Idioma",
+    settings_rent_reminder: "🔔 Recordatorio de renta {status}",
+    settings_rent_reminder_toggled: "🔔 Recordatorio de renta: {status}",
     settings_support: "💬 Soporte",
     settings_channels: "📢 Canales",
     channel_official: "Canal Oficial",
     channel_community: "Comunidad",
     channel_news: "Noticias",
     btn_back: "◀️ Volver",
+    rent_reminder_message:
+      "💰 ¡Tienes {amount} MC en renta sin reclamar!\n\nToca para abrir tus propiedades y cobrar tus ganancias.",
     welcome_new_user:
       "🎉 ¡Bienvenido a {botName}!\n\nHas recibido tu primera propiedad: *Apartamento Emprender*\n\n¡Empieza a construir tu imperio!",
     referral_bonus_received:
@@ -855,6 +872,9 @@ const locales: Locales = {
     property_accumulated: "💵 Acumulado: {amount} MC",
     property_claim_button: "💰 Reclamar Renta",
     property_claim_success: "✅ ¡Has reclamado {amount} MC!",
+    property_claim_all_button: "💰 Reclamar todo ({amount} MC)",
+    property_claim_all_success:
+      "✅ ¡Has reclamado {amount} MC de {count} propiedades!",
     property_no_properties: "📭 Aún no tienes propiedades",
     property_last_updated: "🕐 Actualizado: {time}",
     property_hours_ago: "hace {hours}h",
@@ -1118,12 +1138,16 @@ const locales: Locales = {
     menu_settings: "⚙️ Configurações",
     menu_main: "🏠 Menu Principal",
     settings_language: "🌐 Mudar Idioma",
+    settings_rent_reminder: "🔔 Lembrete de aluguel {status}",
+    settings_rent_reminder_toggled: "🔔 Lembrete de aluguel: {status}",
     settings_support: "💬 Suporte",
     settings_channels: "📢 Canais",
     channel_official: "Canal Oficial",
     channel_community: "Comunidade",
     channel_news: "Notícias",
     btn_back: "◀️ Voltar",
+    rent_reminder_message:
+      "💰 Você tem {amount} MC em aluguel não resgatado!\n\nToque para abrir suas propriedades e coletar seus ganhos.",
     welcome_new_user:
       "🎉 Bem-vindo ao {botName}!\n\nVocê recebeu sua primeira propriedade: *Apartamento Empreender*\n\nComece a construir seu império!",
     referral_bonus_received:
@@ -1222,6 +1246,9 @@ const locales: Locales = {
     property_accumulated: "💵 Acumulado: {amount} MC",
     property_claim_button: "💰 Resgatar Renda",
     property_claim_success: "✅ Você resgatou {amount} MC!",
+    property_claim_all_button: "💰 Resgatar tudo ({amount} MC)",
+    property_claim_all_success:
+      "✅ Você resgatou {amount} MC de {count} propriedades!",
     property_no_properties: "📭 Você ainda não tem propriedades",
     property_last_updated: "🕐 Atualizado: {time}",
     property_hours_ago: "{hours}h atrás",
