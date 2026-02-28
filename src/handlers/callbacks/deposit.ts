@@ -13,7 +13,11 @@ import {
   getDepositStatusDisplay,
   getCryptoSelectionKeyboard,
 } from "@/keyboards/deposit";
-import { CALLBACK_DATA, CALLBACK_PATTERNS } from "@/constants/bot";
+import {
+  CALLBACK_DATA,
+  CALLBACK_PATTERNS,
+  AVAILABLE_CRYPTO_CURRENCIES,
+} from "@/constants/bot";
 import {
   createDeposit,
   getUserDeposits,
@@ -122,16 +126,19 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       await ctx.answerCbQuery();
 
       // Show crypto selection keyboard with all available currencies
-      await ctx.reply(
-        getText(ctx.dbUser.language, "deposit_select_crypto").replace(
-          "{amount_usd}",
-          String(amountUsd),
-        ),
+      const cryptoCount = AVAILABLE_CRYPTO_CURRENCIES.length;
+      const cryptoMessage = formatTelegramText(
+        getText(ctx.dbUser.language, "deposit_select_crypto"),
         {
-          parse_mode: "Markdown",
-          reply_markup: getCryptoSelectionKeyboard(ctx.dbUser.language),
+          amount_usd: String(amountUsd),
+          count: String(cryptoCount),
         },
       );
+
+      await ctx.reply(cryptoMessage, {
+        parse_mode: "Markdown",
+        reply_markup: getCryptoSelectionKeyboard(ctx.dbUser.language),
+      });
     },
   );
 
