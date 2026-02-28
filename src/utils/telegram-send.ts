@@ -1,15 +1,14 @@
 import type { Telegram } from "telegraf";
 import { error } from "@/utils/logger";
 
-interface ExtraOptions {
-  [key: string]: unknown;
-}
+type TelegramSender = Pick<Telegram, "sendMessage">;
+type SendMessageOptions = Parameters<Telegram["sendMessage"]>[2];
 
 export async function sendMarkdownSafe(
-  telegram: Telegram,
+  telegram: TelegramSender,
   chatId: number,
   text: string,
-  extra?: ExtraOptions,
+  extra?: SendMessageOptions,
 ): Promise<void> {
   try {
     await telegram.sendMessage(chatId, text, {

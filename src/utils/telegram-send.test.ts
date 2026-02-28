@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "bun:test";
 import type { Telegram } from "telegraf";
 import { sendMarkdownSafe } from "./telegram-send";
 
+type TelegramSender = Pick<Telegram, "sendMessage">;
+
 describe("sendMarkdownSafe", () => {
-  let mockTelegram: Telegram & {
+  let mockTelegram: TelegramSender & {
     sendMessage: ReturnType<typeof vi.fn>;
   };
 
@@ -11,8 +13,6 @@ describe("sendMarkdownSafe", () => {
     vi.clearAllMocks();
     mockTelegram = {
       sendMessage: vi.fn(),
-    } as unknown as Telegram & {
-      sendMessage: ReturnType<typeof vi.fn>;
     };
   });
 
