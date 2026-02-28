@@ -2,6 +2,8 @@
  * Types for NOWPayments API integration
  */
 
+import type { MaybeNull } from "@/types/branded";
+
 /**
  * NOWPayments API payment status values
  */
@@ -87,6 +89,6 @@ export interface NowPaymentsPaymentStatus {
   address: string;
   order_id: string;
   order_description: string;
-  success_url: string | null;
+  success_url: MaybeNull<string>;
   status: NowPaymentsStatus;
 }

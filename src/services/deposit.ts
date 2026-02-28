@@ -16,6 +16,7 @@ import {
   type TelegramId,
   type MonopolyCoins,
   type DepositStatus,
+  type MaybeNull,
   isLanguage,
 } from "@/types";
 import { asDepositId, asMonopolyCoins } from "@/types/utils";
@@ -55,7 +56,7 @@ function generateOrderId(userId: TelegramId): string {
  */
 function mapPaymentStatusToDepositStatus(
   paymentStatus: NowPaymentsIpnPayload["payment_status"],
-): DepositStatus | null {
+): MaybeNull<DepositStatus> {
   if (paymentStatus === "finished" || paymentStatus === "confirmed") {
     return "paid";
   }

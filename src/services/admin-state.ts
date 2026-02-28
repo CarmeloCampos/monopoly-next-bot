@@ -2,7 +2,7 @@
  * Admin state management for tracking admin action flows
  */
 
-import type { TelegramId, WithdrawalId } from "@/types";
+import type { MaybeUndefined, TelegramId, WithdrawalId } from "@/types";
 
 export interface AdminState {
   step: "process_hash" | "cancel_reason";
@@ -15,7 +15,7 @@ export function setAdminState(userId: TelegramId, state: AdminState): void {
   adminStates.set(userId, state);
 }
 
-export function getAdminState(userId: TelegramId): AdminState | undefined {
+export function getAdminState(userId: TelegramId): MaybeUndefined<AdminState> {
   return adminStates.get(userId);
 }
 

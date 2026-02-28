@@ -8,6 +8,7 @@ import type {
   WithdrawalStatus,
   WithdrawalId,
   SelectWithdrawal,
+  MaybeNull,
 } from "@/types";
 import { asMonopolyCoins, asWithdrawalId } from "@/types/utils";
 import { env } from "@/config/env";
@@ -179,7 +180,7 @@ export async function getUserWithdrawals(
 
 export async function getWithdrawalById(
   withdrawalId: WithdrawalId,
-): Promise<SelectWithdrawal | null> {
+): Promise<MaybeNull<SelectWithdrawal>> {
   try {
     const result = await db.query.withdrawals.findFirst({
       where: eq(withdrawals.id, withdrawalId),
@@ -202,7 +203,7 @@ export async function getWithdrawalById(
 
 async function getPendingWithdrawalOrError(
   withdrawalId: WithdrawalId,
-): Promise<{ withdrawal: SelectWithdrawal | null; error?: string }> {
+): Promise<{ withdrawal: MaybeNull<SelectWithdrawal>; error?: string }> {
   const withdrawal = await getWithdrawalById(withdrawalId);
 
   if (!withdrawal) {

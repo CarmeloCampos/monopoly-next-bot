@@ -129,7 +129,7 @@ export async function getAllUsers(
 
 export async function getUserById(
   userId: TelegramId,
-): Promise<SelectUser | null> {
+): Promise<MaybeNull<SelectUser>> {
   try {
     const user = await db.query.users.findFirst({
       where: eq(users.telegram_id, userId),

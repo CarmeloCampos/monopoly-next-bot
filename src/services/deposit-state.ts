@@ -2,7 +2,7 @@
  * Deposit state management for tracking user deposit flow
  */
 
-import type { TelegramId } from "@/types";
+import type { MaybeUndefined, TelegramId } from "@/types";
 import type { DepositState } from "@/types/deposit";
 
 // In-memory state storage (temporary, per-request only)
@@ -18,7 +18,9 @@ export function setDepositState(userId: TelegramId, state: DepositState): void {
 /**
  * Get deposit state for a user
  */
-export function getDepositState(userId: TelegramId): DepositState | undefined {
+export function getDepositState(
+  userId: TelegramId,
+): MaybeUndefined<DepositState> {
   return depositStates.get(userId);
 }
 
