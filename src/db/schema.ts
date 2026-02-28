@@ -31,6 +31,12 @@ export const users = sqliteTable(
     referral_code: text("referral_code").notNull().unique(),
     language: text("language").$type<Language>(),
     terms_accepted_at: integer("terms_accepted_at", { mode: "timestamp" }),
+    rent_reminder_enabled: integer("rent_reminder_enabled", { mode: "boolean" })
+      .notNull()
+      .default(true),
+    last_rent_reminder_at: integer("last_rent_reminder_at", {
+      mode: "timestamp",
+    }),
     created_at: integer("created_at", { mode: "timestamp" }).notNull(),
     updated_at: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
