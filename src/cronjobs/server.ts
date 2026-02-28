@@ -1,6 +1,6 @@
 import { generateEarningsForAllUsers } from "./generate-earnings";
 import { processIpnPayment, checkAllPendingDeposits } from "@/services/deposit";
-import { info, error } from "@/utils/logger";
+import { info, error, warn } from "@/utils/logger";
 import {
   isObject,
   isString,
@@ -10,6 +10,11 @@ import {
 import type { NowPaymentsIpnPayload } from "@/types/nowpayments";
 import { Telegraf } from "telegraf";
 import config from "@/config";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { getText } from "@/i18n";
+import { DEFAULT_LANGUAGE } from "@/constants";
 
 /**
  * Validates and returns NowPayments IPN payload
@@ -77,6 +82,77 @@ function validateIpnPayload(payload: unknown): NowPaymentsIpnPayload {
 const CRON_SECRET = process.env["CRON_SECRET"] || "default-secret";
 const CRON_PORT = Number.parseInt(process.env["CRON_PORT"] || "3001", 10);
 
+async function sendRentReminders(telegram: Telegraf["telegram"]): Promise<{
+  sent: number;
+  failed: number;
+  skipped: number;
+}> {
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const allUsers = await db.select().from(users);
+
+  let sent = 0;
+  let failed = 0;
+  let skipped = 0;
+
+  for (const user of allUsers) {
+    if (user.rent_reminder_enabled !== true) {
+      skipped++;
+      continue;
+    }
+
+    if (
+      user.last_rent_reminder_at &&
+      user.last_rent_reminder_at.getTime() > twentyFourHoursAgo.getTime()
+    ) {
+      skipped++;
+      continue;
+    }
+
+    const userProps = await db.query.userProperties.findMany({
+      where: (fields, { eq }) => eq(fields.user_id, user.telegram_id),
+    });
+
+    const totalAccumulated = userProps.reduce(
+      (sum, p) => sum + p.accumulated_unclaimed,
+      0,
+    );
+
+    if (totalAccumulated <= 0) {
+      skipped++;
+      continue;
+    }
+
+    try {
+      const language = user.language ?? DEFAULT_LANGUAGE;
+      const message = getText(language, "rent_reminder_message").replace(
+        "{amount}",
+        totalAccumulated.toFixed(2),
+      );
+
+      await telegram.sendMessage(user.telegram_id, message, {
+        parse_mode: "Markdown",
+      });
+
+      await db
+        .update(users)
+        .set({ last_rent_reminder_at: now })
+        .where(eq(users.telegram_id, user.telegram_id));
+
+      sent++;
+    } catch (err) {
+      warn("Failed to send rent reminder", {
+        userId: user.telegram_id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      failed++;
+    }
+  }
+
+  return { sent, failed, skipped };
+}
+
 Bun.serve({
   port: CRON_PORT,
   async fetch(req) {
@@ -122,6 +198,37 @@ Bun.serve({
         .catch((err) => error("Error generating earnings", { error: err }));
 
       return new Response("OK", { status: 200 });
+    }
+
+    // Send rent reminders endpoint
+    if (pathname === "/send-rent-reminders") {
+      const authHeader = req.headers.get("Authorization");
+      if (authHeader !== `Bearer ${CRON_SECRET}`) {
+        error("Unauthorized rent reminder request", {
+          authHeaderReceived: authHeader ? "exists" : "none",
+        });
+        return new Response("Unauthorized", { status: 401 });
+      }
+
+      info("Starting rent reminders cronjob");
+
+      try {
+        const bot = new Telegraf(config.botToken);
+        const result = await sendRentReminders(bot.telegram);
+        info("Rent reminders completed", result);
+        return new Response(JSON.stringify({ success: true, ...result }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err) {
+        error("Error in rent reminders cronjob", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+        return new Response(
+          JSON.stringify({ success: false, error: "internal_error" }),
+          { status: 500, headers: { "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // Check payment statuses endpoint (for cronjob)

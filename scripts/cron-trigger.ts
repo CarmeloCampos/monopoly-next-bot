@@ -13,13 +13,6 @@ if (!BASE_URL) {
   process.exit(1);
 }
 
-if (!BASE_URL) {
-  console.error(
-    "NOWPAYMENTS_IPN_URL (or WEBHOOK_URL) environment variable is required",
-  );
-  process.exit(1);
-}
-
 async function triggerEndpoint(path: string): Promise<void> {
   const url = `${BASE_URL}${path}`;
   console.log(`Triggering ${url}...`);
@@ -56,6 +49,7 @@ async function main(): Promise<void> {
   console.log("---");
 
   await triggerEndpoint("/generate-earnings");
+  await triggerEndpoint("/send-rent-reminders");
   await triggerEndpoint("/check-payment-statuses");
 
   console.log("---");
