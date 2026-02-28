@@ -126,9 +126,6 @@ export function registerUpgradeCallbacks(bot: Telegraf<BotContext>): void {
       return;
     }
 
-    // Show processing state
-    await ctx.answerCbQuery(getText(ctx.dbUser.language, "processing_upgrade"));
-
     const upgradeResult = await upgradeProperty({
       userId: ctx.dbUser.telegram_id,
       propertyIndex,
@@ -156,31 +153,31 @@ export function registerUpgradeCallbacks(bot: Telegraf<BotContext>): void {
     }
 
     const property = getPropertyByIndex(propertyIndex);
+    let successMessage: string;
+
     if (property) {
       const propertyName = getText(ctx.dbUser.language, property.nameKey);
       const upgradedProperty =
         currentIndex >= 0 ? properties[currentIndex] : undefined;
       const newLevel = upgradedProperty ? upgradedProperty.level : 0;
-      const msg = formatTelegramText(
+      successMessage = formatTelegramText(
         getText(ctx.dbUser.language, "property_upgrade_success"),
         {
           property: propertyName,
           level: String(newLevel),
         },
       );
-      await ctx.answerCbQuery(msg);
     } else {
-      await ctx.answerCbQuery(
-        formatTelegramText(
-          getText(ctx.dbUser.language, "property_upgrade_success"),
-          {
-            property: "Property",
-            level: "2",
-          },
-        ),
+      successMessage = formatTelegramText(
+        getText(ctx.dbUser.language, "property_upgrade_success"),
+        {
+          property: "Property",
+          level: "2",
+        },
       );
     }
 
+    await ctx.answerCbQuery(successMessage);
     await sendPropertyCard({
       ctx,
       propertyIndex: currentIndex >= 0 ? currentIndex : 0,

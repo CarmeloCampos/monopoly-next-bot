@@ -281,11 +281,6 @@ export const registerWithdrawalCallbacks = (
       return;
     }
 
-    // Show processing state
-    await ctx.answerCbQuery(
-      getText(ctx.dbUser.language, "processing_withdrawal"),
-    );
-
     const result = await createWithdrawal({
       userId: ctx.dbUser.telegram_id,
       amount,
@@ -300,16 +295,16 @@ export const registerWithdrawalCallbacks = (
         result.withdrawal.currency,
       );
 
-      await ctx.answerCbQuery();
-      await ctx.editMessageText(
-        formatTelegramText(
-          getText(ctx.dbUser.language, "withdrawal_created_success"),
-          {
-            amount: String(result.withdrawal.amount),
-            currency: currencyDisplay,
-          },
-        ),
+      const successMessage = formatTelegramText(
+        getText(ctx.dbUser.language, "withdrawal_created_success"),
+        {
+          amount: String(result.withdrawal.amount),
+          currency: currencyDisplay,
+        },
       );
+
+      await ctx.answerCbQuery();
+      await ctx.editMessageText(successMessage);
 
       info("Withdrawal created", {
         withdrawalId: result.withdrawal.id,
