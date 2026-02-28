@@ -206,8 +206,9 @@ async function handleReferral(ctx: BotContextWithLanguage): Promise<void> {
 }
 
 async function handleSettings(ctx: BotContextWithLanguage): Promise<void> {
+  const reminderEnabled = ctx.dbUser.rent_reminder_enabled ?? true;
   await ctx.reply(getText(ctx.dbUser.language, "menu_settings"), {
-    reply_markup: getSettingsKeyboard(ctx.dbUser.language),
+    reply_markup: getSettingsKeyboard(ctx.dbUser.language, reminderEnabled),
   });
 }
 

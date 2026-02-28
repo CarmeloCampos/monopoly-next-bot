@@ -115,6 +115,11 @@ export async function sendPropertyCard(
     colorMinLevel: colorProgress.minLevel,
   };
 
+  const totalAccumulated = properties.reduce(
+    (sum, p) => sum + p.accumulated_unclaimed,
+    0,
+  );
+
   const detailMessage = buildPropertyDetailMessage(
     property,
     propertyInfo,
@@ -129,6 +134,7 @@ export async function sendPropertyCard(
     dbUser.language,
     property,
     colorProgress.owned,
+    totalAccumulated,
   );
 
   await displayMediaCard({
