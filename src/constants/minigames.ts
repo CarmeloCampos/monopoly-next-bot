@@ -1,4 +1,4 @@
-import type { MonopolyCoins } from "@/types/utils";
+import { asMonopolyCoins, type MonopolyCoins } from "@/types/utils";
 
 export type MinigameType =
   | "dice"
@@ -122,7 +122,7 @@ export const MINIGAME_MULTIPLIERS: Record<MinigameType, MinigameMultiplier[]> =
   } as const;
 
 export const BET_LIMITS = {
-  min: 1 as MonopolyCoins,
+  min: asMonopolyCoins(1),
   max: Infinity,
 } as const satisfies { min: MonopolyCoins; max: number };
 

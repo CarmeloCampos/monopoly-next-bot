@@ -239,7 +239,7 @@ export async function getPaymentStatus(
  * Required for proper IPN signature verification
  */
 function sortObjectKeys(obj: unknown): unknown {
-  if (obj === null || typeof obj !== "object") {
+  if (!isObject(obj)) {
     return obj;
   }
 
@@ -247,13 +247,11 @@ function sortObjectKeys(obj: unknown): unknown {
     return obj.map(sortObjectKeys);
   }
 
-  // Create a properly typed object from the unknown object
-  const typedObj = obj as Record<string, unknown>;
   const sorted: Record<string, unknown> = {};
-  const keys = Object.keys(typedObj).sort();
+  const keys = Object.keys(obj).sort();
 
   for (const key of keys) {
-    sorted[key] = sortObjectKeys(typedObj[key]);
+    sorted[key] = sortObjectKeys(obj[key]);
   }
 
   return sorted;

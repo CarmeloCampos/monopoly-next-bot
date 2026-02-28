@@ -17,7 +17,16 @@ export function calculateGameResult(
 ): GameResult {
   const multipliers = MINIGAME_MULTIPLIERS[gameType];
 
-  const diceMultiplier = MINIGAME_MULTIPLIERS.dice[0]!;
+  const [diceMultiplier] = MINIGAME_MULTIPLIERS.dice;
+  if (!diceMultiplier) {
+    return {
+      won: false,
+      multiplier: 0,
+      winnings: asMonopolyCoins(0),
+      descriptionKey: "",
+      resultValue: diceValue,
+    };
+  }
 
   if (gameType === "dice" && pickedNumber !== undefined) {
     if (diceValue === pickedNumber) {
