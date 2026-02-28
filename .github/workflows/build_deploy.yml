@@ -12,15 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
 
-      - name: Make envfile
-        uses: SpicyPizza/create-envfile@v2.0
-        with:
-          envkey_TURSO_DATABASE_URL: ${{ vars.TURSO_DATABASE_URL }}
-          envkey_TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          envkey_BOT_TOKEN: true
-          envkey_NOWPAYMENTS_API_KEY: true
-          envkey_NOWPAYMENTS_IPN_SECRET: true
-          envkey_NOWPAYMENTS_IPN_URL: "https://api.example.com"
+      - name: copy envfile
+        run: cp .env.example .env
 
       - name: Install dependencies
         run: bun install
