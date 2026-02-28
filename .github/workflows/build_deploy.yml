@@ -32,3 +32,6 @@ jobs:
 
       - name: Migrate database
         run: bun run db:migrate
+        env:
+          TURSO_DATABASE_URL: ${{ vars.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
