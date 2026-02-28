@@ -29,7 +29,10 @@ import {
   buyProperty,
   userHasProperty,
   claimPropertyEarnings,
+  claimAllPropertyEarnings,
   getUserProperties,
+  type ClaimPropertyResult,
+  type ClaimAllPropertyResult,
 } from "@/services/property";
 import { getPropertyByIndex } from "@/constants/properties";
 import {
@@ -234,15 +237,55 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
     await ctx.reply(getText(ctx.dbUser.language, "settings_support_message"));
   });
 
+  bot.action(
+    CALLBACK_DATA.SETTINGS_RENT_REMINDER_TOGGLE,
+    async (ctx: BotContext) => {
+      if (!hasDbUser(ctx)) {
+        await answerUserNotFound(ctx);
+        return;
+      }
+
+      if (!hasLanguage(ctx)) return;
+
+      const { dbUser } = ctx;
+      const currentEnabled = dbUser.rent_reminder_enabled ?? true;
+      const newEnabled = !currentEnabled;
+
+      await db
+        .update(users)
+        .set({
+          rent_reminder_enabled: newEnabled,
+          updated_at: new Date(),
+        })
+        .where(eq(users.telegram_id, dbUser.telegram_id));
+
+      dbUser.rent_reminder_enabled = newEnabled;
+
+      const statusText = newEnabled ? "on" : "off";
+      const confirmMessage = getText(
+        dbUser.language,
+        "settings_rent_reminder_toggled",
+      ).replace("{status}", statusText);
+
+      await ctx.answerCbQuery(confirmMessage);
+
+      await ctx.editMessageText(getText(dbUser.language, "menu_settings"), {
+        reply_markup: getSettingsKeyboard(dbUser.language, newEnabled),
+      });
+    },
+  );
+
   bot.action(CALLBACK_DATA.SETTINGS_BACK, async (ctx: BotContext) => {
     if (!hasDbUser(ctx)) {
       await answerUserNotFound(ctx);
       return;
     }
 
+    const reminderEnabled = ctx.dbUser.rent_reminder_enabled ?? true;
+
     await ctx.answerCbQuery();
     await ctx.editMessageText(getText(ctx.dbUser.language, "menu_settings"), {
-      reply_markup: getSettingsKeyboard(ctx.dbUser.language),
+      reply_markup: getSettingsKeyboard(ctx.dbUser.language, reminderEnabled),
     });
   });
 
@@ -273,6 +316,7 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
 
     const index = Number.parseInt(navIndexStr, 10);
 
+    await ctx.answerCbQuery();
     await sendPropertyCard({
       ctx,
       propertyIndex: index,
@@ -308,24 +352,92 @@ export const registerCallbacks = (bot: Telegraf<BotContext>): void => {
 
     const { dbUser } = ctx;
 
-    // Show processing state
-    await ctx.answerCbQuery(getText(dbUser.language, "processing_claim"));
-
-    const earnings = await claimPropertyEarnings({
+    const claimResult: ClaimPropertyResult = await claimPropertyEarnings({
       userId: dbUser.telegram_id,
       propertyIndex: parsedIndex,
-      ctx,
     });
 
-    if (earnings !== null) {
-      await ctx.answerCbQuery(
-        getText(dbUser.language, "property_claim_success").replace(
-          "{amount}",
-          String(earnings),
-        ),
+    if (claimResult.success) {
+      const successMessage = getText(
+        dbUser.language,
+        "property_claim_success",
+      ).replace("{amount}", String(claimResult.amount));
+      await ctx.answerCbQuery(successMessage);
+
+      const userProperties = await getUserProperties(dbUser.telegram_id);
+      const propertyPosition = userProperties.findIndex(
+        (p) => p.property_index === parsedIndex,
       );
+
+      await sendPropertyCard({
+        ctx,
+        propertyIndex: propertyPosition >= 0 ? propertyPosition : 0,
+        isNavigation: true,
+      });
     } else {
-      await ctx.answerCbQuery();
+      const errorMessage =
+        claimResult.code === "not_found"
+          ? getText(dbUser.language, "error_property_not_found")
+          : getText(dbUser.language, "error_no_earnings_to_claim");
+      await ctx.answerCbQuery(errorMessage);
+    }
+  });
+
+  bot.action(CALLBACK_PATTERNS.PROPERTY_CLAIM_ALL, async (ctx: BotContext) => {
+    if (!hasDbUser(ctx)) {
+      await answerUserNotFound(ctx);
+      return;
+    }
+
+    if (!hasLanguage(ctx)) return;
+
+    const result = extractCallbackMatch(
+      ctx,
+      CALLBACK_PATTERNS.PROPERTY_CLAIM_ALL,
+    );
+    if (!result) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const [, currentIndexStr] = result.match;
+    if (!currentIndexStr) {
+      await answerInvalidCallback(ctx);
+      return;
+    }
+
+    const currentIndex = Number.parseInt(currentIndexStr, 10);
+
+    const { dbUser } = ctx;
+
+    const claimResult: ClaimAllPropertyResult = await claimAllPropertyEarnings(
+      dbUser.telegram_id,
+    );
+
+    if (claimResult.success) {
+      const successMessage = getText(
+        dbUser.language,
+        "property_claim_all_success",
+      )
+        .replace("{amount}", String(claimResult.amount))
+        .replace("{count}", String(claimResult.claimedCount));
+      await ctx.answerCbQuery(successMessage);
+
+      const userProperties = await getUserProperties(dbUser.telegram_id);
+      const safeIndex =
+        currentIndex >= 0 && currentIndex < userProperties.length
+          ? currentIndex
+          : 0;
+
+      await sendPropertyCard({
+        ctx,
+        propertyIndex: safeIndex,
+        isNavigation: true,
+      });
+    } else {
+      await ctx.answerCbQuery(
+        getText(dbUser.language, "error_no_earnings_to_claim"),
+      );
     }
   });
 

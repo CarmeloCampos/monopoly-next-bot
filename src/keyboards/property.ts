@@ -17,6 +17,7 @@ export function getPropertyNavigationKeyboard(
   language: Language,
   propertyData: UserPropertyData,
   colorPropertyCount = 1,
+  totalAccumulated = 0,
 ): InlineKeyboardMarkup {
   const keyboard: InlineKeyboardMarkup["inline_keyboard"] = [];
 
@@ -46,6 +47,19 @@ export function getPropertyNavigationKeyboard(
       callback_data: `property_claim_${propertyIndex}`,
     },
   ]);
+
+  if (totalProperties > 1 && totalAccumulated > 0) {
+    const claimAllText = getText(language, "property_claim_all_button").replace(
+      "{amount}",
+      totalAccumulated.toFixed(2),
+    );
+    keyboard.push([
+      {
+        text: claimAllText,
+        callback_data: `property_claim_all_${currentIndex}`,
+      },
+    ]);
+  }
 
   // Add button to view properties of same color only if user has more than 1 property of this color
   if (isPropertyIndex(propertyIndex) && colorPropertyCount > 1) {

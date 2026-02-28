@@ -7,13 +7,11 @@ import { checkAndDeductBalance } from "@/utils/transaction";
 import {
   type TelegramId,
   type MonopolyCoins,
-  type MaybeNull,
   type BuyResult,
   asMonopolyCoins,
   type UserPropertyData,
   isPropertyIndex,
   isPropertyLevel,
-  type BotContextWithLanguage,
 } from "@/types";
 import {
   getPropertyByIndex,
@@ -21,7 +19,6 @@ import {
   type PropertyLevel,
   type PropertyIndex,
 } from "@/constants/properties";
-import { getText } from "@/i18n";
 import { calculateTotalBoost } from "@/services/boost";
 
 interface BuyPropertyParams {
@@ -163,14 +160,16 @@ async function calculatePropertyEarnings(
 interface ClaimPropertyParams {
   userId: TelegramId;
   propertyIndex: PropertyIndex;
-  ctx: BotContextWithLanguage;
 }
+
+export type ClaimPropertyResult =
+  | { success: true; amount: MonopolyCoins }
+  | { success: false; code: "not_found" | "no_earnings" };
 
 export async function claimPropertyEarnings(
   params: ClaimPropertyParams,
-): Promise<MaybeNull<MonopolyCoins>> {
-  const { userId, propertyIndex, ctx } = params;
-  const { language } = ctx.dbUser;
+): Promise<ClaimPropertyResult> {
+  const { userId, propertyIndex } = params;
 
   const property = await db.query.userProperties.findFirst({
     where: (fields, { eq, and }) =>
@@ -178,15 +177,13 @@ export async function claimPropertyEarnings(
   });
 
   if (!property) {
-    await ctx.reply(getText(language, "error_property_not_found"));
-    return null;
+    return { success: false, code: "not_found" };
   }
 
   const totalEarnings = await calculatePropertyEarnings(userId, property);
 
   if (totalEarnings <= 0) {
-    await ctx.reply(getText(language, "error_no_earnings_to_claim"));
-    return null;
+    return { success: false, code: "no_earnings" };
   }
 
   const now = new Date();
@@ -223,5 +220,88 @@ export async function claimPropertyEarnings(
     amount: totalEarnings,
   });
 
-  return totalEarnings;
+  return { success: true, amount: totalEarnings };
+}
+
+export type ClaimAllPropertyResult =
+  | { success: true; amount: MonopolyCoins; claimedCount: number }
+  | { success: false; code: "no_earnings" };
+
+export async function claimAllPropertyEarnings(
+  userId: TelegramId,
+): Promise<ClaimAllPropertyResult> {
+  const userPropertiesData = await db.query.userProperties.findMany({
+    where: (fields, { eq }) => eq(fields.user_id, userId),
+  });
+
+  if (userPropertiesData.length === 0) {
+    return { success: false, code: "no_earnings" };
+  }
+
+  const earningsByProperty: Array<{
+    property: (typeof userPropertiesData)[number];
+    earnings: MonopolyCoins;
+  }> = [];
+
+  for (const property of userPropertiesData) {
+    if (!isPropertyIndex(property.property_index)) continue;
+    if (!isPropertyLevel(property.level)) continue;
+
+    const earnings = await calculatePropertyEarnings(userId, property);
+    if (earnings > 0) {
+      earningsByProperty.push({ property, earnings });
+    }
+  }
+
+  if (earningsByProperty.length === 0) {
+    return { success: false, code: "no_earnings" };
+  }
+
+  const now = new Date();
+  let totalAmount = asMonopolyCoins(0);
+  for (const { earnings } of earningsByProperty) {
+    totalAmount = asMonopolyCoins(totalAmount + earnings);
+  }
+
+  await db.transaction(async (tx) => {
+    for (const { property } of earningsByProperty) {
+      await tx
+        .update(userProperties)
+        .set({
+          accumulated_unclaimed: asMonopolyCoins(0),
+          last_generated_at: now,
+          last_claimed_at: now,
+          updated_at: now,
+        })
+        .where(eq(userProperties.id, property.id));
+    }
+
+    await tx
+      .update(users)
+      .set({
+        balance: sql`balance + ${totalAmount}`,
+        updated_at: now,
+      })
+      .where(eq(users.telegram_id, userId));
+
+    await tx.insert(transactions).values({
+      user_id: userId,
+      type: "earning",
+      amount: totalAmount,
+      description: `Claim All: ${earningsByProperty.length} properties`,
+      created_at: now,
+    });
+  });
+
+  info("All property earnings claimed", {
+    userId,
+    amount: totalAmount,
+    claimedCount: earningsByProperty.length,
+  });
+
+  return {
+    success: true,
+    amount: totalAmount,
+    claimedCount: earningsByProperty.length,
+  };
 }
