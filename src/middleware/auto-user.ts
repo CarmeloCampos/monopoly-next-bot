@@ -8,6 +8,7 @@ import {
   type TelegramId,
   type Language,
   type MaybeOptional,
+  type MaybeUndefined,
 } from "@/types";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -17,6 +18,33 @@ import { info } from "@/utils/logger";
 import { processReferral } from "@/services/referral";
 import { DEFAULT_LANGUAGE, CALLBACK_PATTERNS } from "@/constants";
 import { sendReferralNotification } from "@/utils/notifications";
+import { eq } from "drizzle-orm";
+
+function detectLanguageFromTelegram(
+  languageCode: MaybeUndefined<string>,
+): Language {
+  if (!languageCode) {
+    return DEFAULT_LANGUAGE;
+  }
+
+  const lang = languageCode as string;
+  const parts = lang.toLowerCase().split(/[-_]/);
+  const normalizedLang = parts[0] ?? "";
+
+  if (isLanguage(normalizedLang)) {
+    return normalizedLang;
+  }
+
+  const langMap: Record<string, Language> = {
+    ru: "ru",
+    en: "en",
+    es: "es",
+    pt: "pt",
+  };
+
+  const mapped = langMap[normalizedLang];
+  return mapped ?? DEFAULT_LANGUAGE;
+}
 
 export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
   const { from } = ctx;
@@ -28,11 +56,26 @@ export const autoUserMiddleware: Middleware<BotContext> = async (ctx, next) => {
     const user = await findUserByTelegramId(telegramId);
     if (user) {
       ctx.dbUser = user;
+
+      if (!user.language) {
+        const detectedLang = detectLanguageFromTelegram(from.language_code);
+        await db
+          .update(users)
+          .set({ language: detectedLang, updated_at: new Date() })
+          .where(eq(users.telegram_id, telegramId));
+        ctx.dbUser.language = detectedLang;
+        info("Language backfilled for existing user", {
+          telegramId,
+          language: detectedLang,
+        });
+      }
+
       return next();
     }
 
     const referralCode = extractReferralCode(ctx);
-    const newUser = await createUser(from);
+    const detectedLang = detectLanguageFromTelegram(from.language_code);
+    const newUser = await createUser(from, detectedLang);
     if (!newUser) return next();
 
     ctx.dbUser = newUser;
@@ -85,6 +128,7 @@ async function findUserByTelegramId(
 
 async function createUser(
   from: NonNullable<BotContext["from"]>,
+  language: Language,
 ): Promise<MaybeOptional<SelectUser>> {
   const now = new Date();
 
@@ -95,7 +139,7 @@ async function createUser(
     last_name: from.last_name,
     balance: asMonopolyCoins(0),
     referral_code: generateReferralCode(),
-    language: null,
+    language,
     created_at: now,
     updated_at: now,
   };
