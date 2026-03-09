@@ -32,7 +32,7 @@ export const CHANNEL_URLS = {
   news: env.CHANNEL_NEWS_URL,
 } as const;
 
-export const DEFAULT_LANGUAGE: Language = "en";
+export const DEFAULT_LANGUAGE: Language = "es";
 
 // Bot configuration from environment variables
 export const BOT_CONFIG = {
