@@ -80,10 +80,15 @@ export const registerDepositCallbacks = (bot: Telegraf<BotContext>): void => {
       return;
     }
 
+    await ctx.answerCbQuery();
+
+    await ctx.reply(getText(ctx.dbUser.language, "deposit_terms_notice"), {
+      parse_mode: "Markdown",
+    });
+
     setDepositState(ctx.dbUser.telegram_id, { step: "amount" });
 
-    await ctx.answerCbQuery();
-    await ctx.editMessageText(
+    await ctx.reply(
       getText(ctx.dbUser.language, "deposit_enter_amount").replace(
         "{min_amount}",
         String(MINIMUM_DEPOSIT_USD),

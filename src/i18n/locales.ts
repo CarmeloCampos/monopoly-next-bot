@@ -364,6 +364,9 @@ const locales: Locales = {
       "❌ *Слишком маленькая сумма*\n\nЭта криптовалюта имеет минимальный лимит для данной суммы депозита.\n\nПожалуйста, выберите другую криптовалюту или увеличьте сумму депозита.",
     deposit_crypto_estimate_error:
       "❌ *Курс недоступен*\n\nНе удалось получить курс обмена для этой криптовалюты.\n\nПожалуйста, выберите другую криптовалюту или попробуйте позже.",
+    // Deposit Terms Notice
+    deposit_terms_notice:
+      "📜 *Важно*\n\nПеред внесением депозита, пожалуйста, ознакомьтесь с нашими [Условиями использования]({terms_url}).\n\nПродолжая депозит, вы соглашаетесь с нашими условиями.",
     // Terms & Conditions
     terms_title: "📜 Условия использования",
     terms_message:
@@ -729,6 +732,9 @@ const locales: Locales = {
       "❌ *Amount Too Low*\n\nThis cryptocurrency has a minimum limit for this deposit amount.\n\nPlease choose another cryptocurrency or increase your deposit amount.",
     deposit_crypto_estimate_error:
       "❌ *Rate Unavailable*\n\nCould not get exchange rate for this cryptocurrency.\n\nPlease choose another cryptocurrency or try again later.",
+    // Deposit Terms Notice
+    deposit_terms_notice:
+      "📜 *Important*\n\nBefore making a deposit, please review our [Terms of Use]({terms_url}).\n\nBy proceeding with the deposit, you agree to our terms and conditions.",
     // Terms & Conditions
     terms_title: "📜 Terms of Use",
     terms_message:
@@ -1103,6 +1109,9 @@ const locales: Locales = {
       "❌ *Monto muy bajo*\n\nEsta criptomoneda tiene un límite mínimo para este monto de depósito.\n\nPor favor, elige otra criptomoneda o aumenta el monto del depósito.",
     deposit_crypto_estimate_error:
       "❌ *Tasa no disponible*\n\nNo se pudo obtener la tasa de cambio para esta criptomoneda.\n\nPor favor, elige otra criptomoneda o inténtalo de nuevo más tarde.",
+    // Deposit Terms Notice
+    deposit_terms_notice:
+      "📜 *Importante*\n\nAntes de realizar un depósito, por favor revisa nuestros [Términos de Uso]({terms_url}).\n\nAl proceder con el depósito, aceptas nuestros términos y condiciones.",
     // Terms & Conditions
     terms_title: "📜 Términos de Uso",
     terms_message:
@@ -1477,6 +1486,9 @@ const locales: Locales = {
       "❌ *Valor muito baixo*\n\nEsta criptomoeda tem um limite mínimo para este valor de depósito.\n\nPor favor, escolha outra criptomoeda ou aumente o valor do depósito.",
     deposit_crypto_estimate_error:
       "❌ *Taxa indisponível*\n\nNão foi possível obter a taxa de câmbio para esta criptomoeda.\n\nPor favor, escolha outra criptomoeda ou tente novamente mais tarde.",
+    // Deposit Terms Notice
+    deposit_terms_notice:
+      "📜 *Importante*\n\nAntes de fazer um depósito, por favor, revise nossos [Termos de Uso]({terms_url}).\n\nAo prosseguir com o depósito, você aceita nossos termos e condições.",
     // Terms & Conditions
     terms_title: "📜 Termos de Uso",
     terms_message:
