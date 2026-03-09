@@ -21,8 +21,11 @@ import {
   getReferralDashboardKeyboard,
   getBalanceSubmenuKeyboard,
 } from "@/keyboards";
-import { userHasProperty } from "@/services/property";
-import { STARTER_PROPERTY_INDEX } from "@/constants/game";
+import { userHasProperty, buyProperty } from "@/services/property";
+import {
+  STARTER_PROPERTY_INDEX,
+  DEFAULT_PROPERTY_LEVEL,
+} from "@/constants/game";
 import { sendPropertyCard } from "@/handlers/shared/property-display";
 import { sendServiceCard } from "@/handlers/shared/service-display";
 import { handleBoard, handleRollDice, handleViewCurrent } from "./board-menu";
@@ -35,6 +38,7 @@ import { getReferralStats } from "@/services/referral";
 import { showAdminPanel } from "@/utils/admin-helpers";
 import { getDepositMenuKeyboard } from "@/keyboards/deposit";
 import { env } from "@/config/env";
+import { asMonopolyCoins } from "@/types/utils";
 
 export const registerCommands = (bot: Telegraf<BotContext>): void => {
   bot.command("start", async (ctx: BotContext): Promise<void> => {
@@ -55,10 +59,16 @@ export const registerCommands = (bot: Telegraf<BotContext>): void => {
 
     let startMessage: string;
 
-    if (hasStarterProperty) {
-      startMessage = buildWelcomeExistingUserMessage(dbUser.language);
-    } else {
+    if (!hasStarterProperty) {
+      await buyProperty({
+        userId: dbUser.telegram_id,
+        propertyIndex: STARTER_PROPERTY_INDEX,
+        level: DEFAULT_PROPERTY_LEVEL,
+        cost: asMonopolyCoins(0),
+      });
       startMessage = getText(dbUser.language, "welcome_new_user");
+    } else {
+      startMessage = buildWelcomeExistingUserMessage(dbUser.language);
     }
 
     if (referralBonusReceived) {
